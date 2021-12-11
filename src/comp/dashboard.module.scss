@@ -1,0 +1,47 @@
+.container {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  .sidebar {
+    background: #2f3545;
+    color: white;
+    position: relative;
+    &.collaped {
+      ul {
+        overflow: hidden;
+        width: 0;
+      }
+      .collapseBtn {
+        right: -1.5rem;
+        svg {
+          transform: rotate(180deg);
+        }
+      }
+    }
+    ul {
+      display: grid;
+      li {
+        &.active {
+          a {
+            border-left-color: rgb(3, 145, 224);
+          }
+        }
+        a {
+          display: block;
+          border-left: 3px solid #2f3545;
+          padding: 0.5rem 1rem;
+          border-bottom: 1px solid #262933;
+        }
+      }
+    }
+    .collapseBtn {
+      color: white;
+      background-color: #2f3545;
+      position: absolute;
+      right: -1rem;
+      font-size: 1.5rem;
+      padding: 0.5rem 0rem;
+      border-radius: 0 5px 5px 0;
+    }
+  }
+}

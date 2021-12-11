@@ -1,0 +1,18 @@
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: inherit;
+  color: inherit;
+}
+
+button {
+  display: grid;
+  &.clear {
+    border: none;
+    background: none;
+    outline: none;
+    cursor: pointer;
+  }
+}
