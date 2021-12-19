@@ -1,0 +1,87 @@
+.container {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  .sidebar {
+    background: #2f3545;
+    color: white;
+    position: relative;
+    &.collaped {
+      ul {
+        overflow: hidden;
+        width: 0;
+      }
+      .collapseBtn {
+        svg {
+          transform: rotate(180deg);
+        }
+      }
+    }
+    .links {
+      display: grid;
+      font-size: 12pt;
+      width: 240px;
+      .sidebarItem {
+        padding-right: 10px;
+        &:hover {
+          background: #252a3d;
+        }
+        &.active {
+          & > a {
+            border-left-color: #0897c3;
+            font-weight: 600;
+          }
+        }
+        a {
+          display: block;
+          border-left: 3px solid #2f3545;
+          padding: 0.5rem 6px;
+        }
+        border-bottom: 1px solid #292f43;
+      }
+    }
+    .collapseBtn {
+      color: white;
+      background-color: #2f3545;
+      position: absolute;
+      right: -1rem;
+      font-size: 1.5rem;
+      padding: 0.5rem 0rem;
+      border-radius: 0 5px 5px 0;
+    }
+    .accordion {
+      &.open {
+        background: #252a3d;
+        .accordionLabel {
+          svg {
+            display: grid;
+            transform: rotate(90deg) !important;
+          }
+        }
+        .submenu {
+          max-width: 205px;
+          margin: auto;
+          margin-right: 0;
+          a {
+            border: none;
+          }
+          .active {
+            a {
+              color: #0897c3;
+              font-weight: 600;
+            }
+          }
+        }
+      }
+      .accordionLabel {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+  }
+  main {
+    padding: 10px 15px;
+    padding-bottom: 20px;
+  }
+}

@@ -8,11 +8,70 @@ a {
 }
 
 button {
-  display: grid;
+  display: flex;
   &.clear {
     border: none;
     background: none;
     outline: none;
     cursor: pointer;
   }
+  &.btn {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    background: #499c17;
+    border: none;
+    color: #fff;
+    border-radius: 2px;
+    padding: 6px;
+    &:hover {
+      background: #3e8e0d;
+    }
+    &:active {
+      background: #2e7900;
+    }
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+}
+
+#portal {
+  position: fixed;
+  height: max-content;
+  width: max-content;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  margin: auto;
+  & > * {
+    grid-column: 1/2;
+    grid-row: 1/2;
+  }
+}
+
+.modalBackdrop {
+  height: 100vh;
+  width: 100vw;
+  background: rgba(0, 0, 0, 0.7);
+  pointer-events: all;
+}
+.modal {
+  pointer-events: all;
+  z-index: 10;
+  background: white;
+  max-height: calc(100vh - 2rem);
+  & ~ .modalBackdrop {
+    z-index: 10;
+    & ~ .modal {
+      z-index: 10;
+    }
+  }
+  position: relative;
+  border-radius: 0.7rem;
+  display: grid;
+  overflow: auto;
 }

@@ -2,70 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaInfoCircle } from "react-icons/fa";
 import { BiChevronsDown, BiSearch } from "react-icons/bi";
+import { Input, SwitchInput, Radio } from "./elements";
 import s from "./comp.module.scss";
-
-const Input = ({ label, defaultValue, onChange, type, icon }) => {
-  const [value, setValue] = useState(defaultValue || "");
-  return (
-    <section className={s.input}>
-      <label>{label}</label>
-      <input
-        placeholder="Enter"
-        type={type || "text"}
-        value={defaultValue}
-        onChange={(e) => {
-          setValue(e.target.value);
-          onChange?.(value);
-        }}
-      />
-      {icon && icon}
-    </section>
-  );
-};
-const Radio = ({ options, onChange }) => {
-  const [value, setValue] = useState("");
-  return (
-    <section className={s.radio}>
-      {options.map(({ label, value: v, hint, disabled }) => (
-        <label key={v} className={disabled ? s.disabled : ""}>
-          <input
-            className="label"
-            type="radio"
-            checked={v === value}
-            onChange={() => {
-              setValue(v);
-              onChange?.(v);
-            }}
-          />
-          {label}
-          {hint && <span className={s.hint}>{hint}</span>}
-        </label>
-      ))}
-    </section>
-  );
-};
-const SwitchInput = ({ label, defaultValue, onChange, onLabel, offLabel }) => {
-  const [value, setValue] = useState(defaultValue || false);
-  return (
-    <div className={s.switchInput}>
-      <label>{label}</label>
-      <div className={s.btns}>
-        <span
-          className={`${value ? s.active : ""} ${s.on}`}
-          onClick={() => setValue(true)}
-        >
-          {onLabel || "Yes"}
-        </span>
-        <span
-          className={`${!value ? s.active : ""} ${s.off}`}
-          onClick={() => setValue(false)}
-        >
-          {offLabel || "No"}
-        </span>
-      </div>
-    </div>
-  );
-};
 
 function Lookup() {
   return (
@@ -238,15 +176,17 @@ function Lookup() {
     </div>
   );
 }
-const Box = ({ label, children, className }) => {
+export const Box = ({ label, children, className, collapsable }) => {
   const [open, setOpen] = useState(true);
   return (
     <div className={s.box}>
       <div className={s.head}>
         <h4>{label}</h4>
-        <button className="clear">
-          <BiChevronsDown />
-        </button>
+        {collapsable && (
+          <button className="clear">
+            <BiChevronsDown />
+          </button>
+        )}
       </div>
       {open && <>{children}</>}
     </div>
