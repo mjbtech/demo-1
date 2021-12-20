@@ -24,6 +24,12 @@ button {
     color: #fff;
     border-radius: 2px;
     padding: 6px;
+    font-size: 1rem;
+    text-align: center;
+    justify-content: center;
+    &.w-100 {
+      width: clamp(10px, 100%, 100px);
+    }
     &:hover {
       background: #3e8e0d;
     }
@@ -32,6 +38,23 @@ button {
     }
     &:disabled {
       opacity: 0.5;
+    }
+    &.secondary {
+      background: white;
+      color: #20306b;
+      border: 1px solid #20306b;
+      padding: 5px;
+      &:hover {
+        background: #3849a4;
+        color: white;
+      }
+      &:active {
+        background: #283683;
+        color: white;
+      }
+      &:disabled {
+        opacity: 0.5;
+      }
     }
   }
 }

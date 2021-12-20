@@ -5,6 +5,10 @@ import { BsChevronRight } from "react-icons/bs";
 import IncidentReport from "./incidentReport";
 import OtherPages from "./otherPages";
 import Categories from "./categories";
+import PersonAffected from "./personAffected";
+import TwoFieldMaster from "./twoFieldMaster";
+import ContributingFactor from "./contributingFactor";
+import Rca from "./rca";
 import s from "./dashboard.module.scss";
 
 const Accordion = ({ label, basePath, items, className }) => {
@@ -94,6 +98,10 @@ function Dashboard() {
               },
               { label: <>Sentinel Event</>, path: "sentinelEvent" },
               { label: <>User master</>, path: "userMaster" },
+              { label: <>Person affected</>, path: "personAffected" },
+              { label: <>Two Field Master</>, path: "twoFieldMaster" },
+              { label: <>Contributing Factor</>, path: "contributingFactor" },
+              { label: <>RCA Master</>, path: "rca" },
             ]}
           />
         </ul>
@@ -105,6 +113,13 @@ function Dashboard() {
             path="/masters/categoryAndSubCategory"
             element={<Categories />}
           />
+          <Route path="/masters/personAffected" element={<PersonAffected />} />
+          <Route path="/masters/twoFieldMaster" element={<TwoFieldMaster />} />
+          <Route
+            path="/masters/contributingFactor"
+            element={<ContributingFactor />}
+          />
+          <Route path="/masters/rca" element={<Rca />} />
           <Route path="/:other" element={<OtherPages />} />
           <Route path="/*" element={<IncidentReport />} />
         </Routes>

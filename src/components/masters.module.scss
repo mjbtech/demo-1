@@ -1,0 +1,200 @@
+.container {
+  display: grid;
+  grid-gap: 1rem;
+  header {
+    h3 {
+      padding: 0 8px;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .selectCategory {
+      background: #d7dff4;
+      text-align: center;
+      border-radius: 5px;
+      border: 1px solid #bfc8e0;
+      padding: 6px;
+      .star {
+        color: red;
+      }
+      label {
+        font-size: 14px;
+      }
+      select {
+        outline: none;
+        min-width: 10rem;
+      }
+    }
+  }
+  .content {
+    display: grid;
+    grid-gap: 1.5rem;
+    grid-template-columns: clamp(20rem, 25rem, 25rem) minmax(50rem, 1fr);
+    .category,
+    .subCategory {
+      .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+      }
+    }
+    .subCategory {
+      table {
+        tbody,
+        thead {
+          tr {
+            grid-template-columns: 6rem 1fr 1fr 5rem 6rem 3rem 3.3rem;
+            grid-gap: 1rem;
+            input[type="checkbox"] {
+              min-width: 20px;
+              min-height: 20px;
+            }
+          }
+        }
+      }
+      .input {
+        align-items: center;
+        grid-gap: 6px;
+        display: flex;
+      }
+    }
+    .category {
+      table {
+        tbody {
+          tr {
+            color: #3450a3;
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+    .addBtn {
+      color: #3450a3;
+      align-items: center;
+      grid-gap: 4px;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+    .personAffected {
+      tr {
+        td:last-child {
+          margin: auto;
+          margin-right: 0;
+        }
+      }
+    }
+    .personAffected,
+    .personAffectedDetail,
+    .masters,
+    .mastersDetails,
+    .contributingFactor,
+    .contributingFactorDetail {
+      .head {
+        max-width: 25rem;
+        section {
+          display: flex;
+          label {
+            white-space: nowrap;
+          }
+          align-items: center;
+          grid-gap: 0.5rem;
+        }
+        margin-bottom: 0.5rem;
+      }
+      .inlineForm {
+        width: 100%;
+        form {
+          display: flex;
+          grid-gap: 0.5rem;
+          section {
+            flex: 1;
+          }
+        }
+      }
+    }
+    .personAffectedDetail {
+      tr {
+        grid-template-columns: clamp(5rem, 50%, 20rem) 1fr !important;
+        th,
+        td {
+          &:last-child {
+            text-align: left;
+          }
+        }
+      }
+    }
+    .mastersDetails {
+      tr {
+        grid-template-columns: clamp(5rem, 50%, 20rem) 4rem 1fr !important;
+        th,
+        td {
+          &:last-child {
+            text-align: left;
+            margin: auto;
+            margin-left: 0;
+          }
+        }
+      }
+    }
+    .contributingFactor {
+      tr {
+        grid-template-columns: 1fr max-content;
+      }
+    }
+    .contributingFactorDetail {
+      tr {
+        grid-template-columns: clamp(5rem, 50%, 20rem) 4rem 1fr !important;
+        th,
+        td {
+          &:last-child {
+            text-align: left;
+            margin: auto;
+            margin-left: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.categoryForm {
+  padding: 15px;
+  display: grid;
+  grid-gap: 1rem;
+  .inputs {
+    display: flex;
+    grid-gap: 0.5rem;
+  }
+}
+.annotationTemplate {
+  grid-column: 1/-1;
+  h4 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .form {
+    display: flex;
+    grid-gap: 0.5rem;
+    flex-wrap: wrap;
+    border: 1px solid rgb(186, 194, 199);
+    padding: 6px;
+    margin-bottom: 0.5rem;
+    .chip {
+      display: flex;
+      align-items: center;
+      grid-gap: 0.3rem;
+      border: 1px solid rgb(186, 194, 199);
+      background: rgb(246, 246, 246);
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-size: 14px;
+      button {
+        font-size: 18px;
+        color: red !important;
+      }
+    }
+  }
+  .save {
+    margin: auto;
+  }
+}

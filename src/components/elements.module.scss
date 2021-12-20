@@ -5,8 +5,10 @@
     font-size: 0.8rem;
     font-weight: 500;
     margin-bottom: 0.2rem;
+    white-space: nowrap;
   }
   input {
+    width: 100%;
     border: 1px solid #b7b7b7;
     padding: 5px;
     outline: none;
@@ -134,6 +136,7 @@
     font-size: 12pt;
     color: #363843;
     padding: 4px 8px;
+    grid-gap: 0.5rem;
   }
   thead {
     background: #647299;

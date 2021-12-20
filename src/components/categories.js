@@ -6,7 +6,7 @@ import { Box } from "./incidentReport";
 import { TiTick } from "react-icons/ti";
 import { Input, Table, TableActions, Toggle } from "./elements";
 import { Modal } from "./modal";
-import s from "./categories.module.scss";
+import s from "./masters.module.scss";
 
 export default function Categories() {
   const [category, setCategory] = useState("one");
