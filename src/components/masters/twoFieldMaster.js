@@ -2,11 +2,11 @@ import { useState } from "react";
 import { FaInfoCircle, FaPlus, FaRegTrashAlt } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
-import { Box } from "./incidentReport";
+import { Box } from "../incidentReport";
 import { TiTick } from "react-icons/ti";
 import { IoIosClose } from "react-icons/io";
-import { Input, Table, TableActions, Toggle } from "./elements";
-import { Modal } from "./modal";
+import { Input, Table, TableActions, Toggle } from "../elements";
+import { Modal } from "../modal";
 import s from "./masters.module.scss";
 
 export default function Categories() {
@@ -38,11 +38,11 @@ export default function Categories() {
   return (
     <div className={s.container}>
       <header>
-        <h3>CONTRIBUTING FACTOR</h3>
+        <h3>TWO FIELD MASTERS</h3>
       </header>
       <div className={s.content}>
-        <Box label="CATEGORY">
-          <div className={s.contributingFactor}>
+        <Box label="MASTERS LIST">
+          <div className={s.masters}>
             <div className={s.head}>
               <Input placeholder="Quick Search" icon={<BiSearch />} />
             </div>
@@ -55,21 +55,25 @@ export default function Categories() {
               {categories.map((category, i) => (
                 <tr key={i}>
                   <td>{category.name}</td>
-                  <td>
-                    <Toggle defaultValue={category.status} />
-                  </td>
+                  <td></td>
                 </tr>
               ))}
             </Table>
           </div>
         </Box>
         {category && (
-          <Box label="CATEGORY DETAILS">
-            <div className={s.contributingFactorDetail}>
+          <Box label="MASTER DETAILS">
+            <div className={s.mastersDetails}>
               <div className={s.head}>
-                <Input label="Category Name" />
+                <Input label="Selected Master" />
               </div>
-              <Table columns={[{ label: "Description" }, { label: "Action" }]}>
+              <Table
+                columns={[
+                  { label: "Description" },
+                  { label: "Status" },
+                  { label: "Action" },
+                ]}
+              >
                 <tr className={s.filterForm}>
                   <td>
                     <Input
@@ -80,6 +84,9 @@ export default function Categories() {
                     />
                   </td>
                   <td>
+                    <Toggle defaultValue={false} />
+                  </td>
+                  <td>
                     <button className="btn secondary">
                       <TiTick />
                     </button>
@@ -88,17 +95,15 @@ export default function Categories() {
                 {subCategories.map((category, i) => (
                   <tr key={i}>
                     <td>{category.name}</td>
+                    <td>
+                      <Toggle defaultValue={category.status} />
+                    </td>
                     <TableActions
                       actions={[
                         {
                           icon: <BsPencilFill />,
                           label: "Edit",
                           callBack: () => console.log("edit", category.code),
-                        },
-                        {
-                          icon: <FaRegTrashAlt />,
-                          label: "Delete",
-                          callBack: () => console.log("delete", category.code),
                         },
                       ]}
                     />

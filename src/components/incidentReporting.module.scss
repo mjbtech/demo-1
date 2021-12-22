@@ -3,6 +3,7 @@ main {
   overflow: auto;
 }
 .container {
+  max-width: 85rem;
   display: grid;
   grid-gap: 1rem;
   header {
@@ -62,12 +63,23 @@ main {
   }
   .boxContent {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     grid-gap: 1rem;
     grid-column-gap: 2rem;
     &.typeOfIncident {
       grid-template-columns: 1fr;
     }
+  }
+  .placeholder {
+    background: rgb(238, 238, 238);
+    text-align: center;
+    height: 5rem;
+    display: grid;
+    place-items: center;
+    font-style: italic;
+    color: rgb(113, 113, 113);
+    border-radius: 4px;
+    border: 1px dashed rgb(189, 189, 189);
   }
   .typeOfIncident {
     display: grid;
@@ -104,6 +116,91 @@ main {
           background: #f3f3f3;
         }
       }
+    }
+  }
+  .incidentDescription {
+    .description {
+      margin-bottom: 1rem;
+    }
+    .departments {
+      display: flex;
+      grid-gap: 0.5rem;
+      flex-wrap: wrap;
+      .search {
+        display: flex;
+        align-items: center;
+        grid-gap: 0.5rem;
+      }
+    }
+  }
+  .contributingFactor {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    grid-gap: 1rem 2rem;
+    .placeholder,
+    .preventabilityWrapper,
+    .actionWrapper,
+    .fieldWrapper,
+    .btns {
+      grid-column: 1/-1;
+    }
+    .preventability {
+      tr {
+        td,
+        th {
+          &:last-child {
+            text-align: left;
+          }
+        }
+      }
+    }
+    h4 {
+      font-weight: 600;
+    }
+    .actionTaken,
+    .witnesses,
+    .notified {
+      .inlineForm {
+        grid-column: 1/-1;
+        form {
+          grid-gap: 0.5rem;
+          align-items: flex-start;
+          display: grid;
+        }
+      }
+    }
+    .actionTaken {
+      tr,
+      form {
+        grid-template-columns: 0.6fr 0.25fr 0.25fr min-content;
+      }
+      .inlineForm {
+        textarea {
+          height: 10px !important;
+        }
+      }
+    }
+    .witnesses {
+      tr,
+      form {
+        grid-template-columns: 0.5fr 0.5fr min-content;
+      }
+    }
+    .notified {
+      tr,
+      form {
+        grid-template-columns: 1fr 1fr 1fr min-content;
+      }
+    }
+    .fieldWrapper {
+      display: grid;
+      grid-gap: 1rem 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    .btns {
+      display: flex;
+      grid-gap: 0.5rem;
+      justify-content: center;
     }
   }
 }

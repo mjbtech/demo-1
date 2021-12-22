@@ -4,11 +4,7 @@ import { BiChevronLeft } from "react-icons/bi";
 import { BsChevronRight } from "react-icons/bs";
 import IncidentReport from "./incidentReport";
 import OtherPages from "./otherPages";
-import Categories from "./categories";
-import PersonAffected from "./personAffected";
-import TwoFieldMaster from "./twoFieldMaster";
-import ContributingFactor from "./contributingFactor";
-import Rca from "./rca";
+import Masters from "./masters/index.js";
 import s from "./dashboard.module.scss";
 
 const Accordion = ({ label, basePath, items, className }) => {
@@ -19,7 +15,7 @@ const Accordion = ({ label, basePath, items, className }) => {
         location.pathname.startsWith(basePath) ? s.open : ""
       } ${className || ""}`}
     >
-      <Link className={s.accordionLabel} to="/masters">
+      <Link className={s.accordionLabel} to={`/masters/${items[0]?.path}`}>
         {label} <BsChevronRight />
       </Link>
       {location.pathname.startsWith(basePath) && (
@@ -98,6 +94,7 @@ function Dashboard() {
               },
               { label: <>Sentinel Event</>, path: "sentinelEvent" },
               { label: <>User master</>, path: "userMaster" },
+              { label: <>Risk Assessment</>, path: "riskAssessment" },
               { label: <>Person affected</>, path: "personAffected" },
               { label: <>Two Field Master</>, path: "twoFieldMaster" },
               { label: <>Contributing Factor</>, path: "contributingFactor" },
@@ -109,17 +106,7 @@ function Dashboard() {
       <main>
         <Routes>
           <Route path="/incident-report" element={<IncidentReport />} />
-          <Route
-            path="/masters/categoryAndSubCategory"
-            element={<Categories />}
-          />
-          <Route path="/masters/personAffected" element={<PersonAffected />} />
-          <Route path="/masters/twoFieldMaster" element={<TwoFieldMaster />} />
-          <Route
-            path="/masters/contributingFactor"
-            element={<ContributingFactor />}
-          />
-          <Route path="/masters/rca" element={<Rca />} />
+          <Route path="/masters/*" index element={<Masters />} />
           <Route path="/:other" element={<OtherPages />} />
           <Route path="/*" element={<IncidentReport />} />
         </Routes>

@@ -2,11 +2,11 @@ import { useState } from "react";
 import { FaInfoCircle, FaPlus, FaRegTrashAlt } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
-import { Box } from "./incidentReport";
+import { Box } from "../incidentReport";
 import { TiTick } from "react-icons/ti";
 import { IoIosClose } from "react-icons/io";
-import { Input, Table, TableActions, Toggle } from "./elements";
-import { Modal } from "./modal";
+import { Input, Table, TableActions, Toggle } from "../elements";
+import { Modal } from "../modal";
 import s from "./masters.module.scss";
 
 export default function Categories() {

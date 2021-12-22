@@ -1,11 +1,45 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaInfoCircle } from "react-icons/fa";
+import { FaInfoCircle, FaRegTrashAlt } from "react-icons/fa";
 import { BiChevronsDown, BiSearch } from "react-icons/bi";
-import { Input, SwitchInput, Radio } from "./elements";
-import s from "./comp.module.scss";
+import { AiOutlinePlus } from "react-icons/ai";
+import { BsPencilFill } from "react-icons/bs";
+import {
+  Input,
+  FileInput,
+  Textarea,
+  SwitchInput,
+  Radio,
+  Chip,
+  Table,
+  TableActions,
+} from "./elements";
+import s from "./incidentReporting.module.scss";
 
 function Lookup() {
+  const [departments, setDepartments] = useState(["Pharmacy", "Nursing"]);
+  const [preventability, setPreventability] = useState("Not assessed");
+  const [actionsTaken, setActionsTaken] = useState([
+    {
+      action:
+        "Patient monitored for hour, vitals were stable and informed physician",
+      actionTakenBy: {
+        name: "Robert",
+        id: "asdfasddd",
+      },
+      date: "2021-12-21T10:17:12.514Z",
+    },
+  ]);
+  const [witnesses, setWitnesses] = useState([
+    { name: "Jossi", department: "Nursing" },
+  ]);
+  const [notified, setNotified] = useState([
+    {
+      name: "Heilena",
+      department: "Nursing",
+      date: "2021-12-21T10:17:12.514Z",
+    },
+  ]);
   return (
     <div className={s.container}>
       <header>
@@ -16,7 +50,7 @@ function Lookup() {
         </span>
       </header>
       <div className={s.content}>
-        <Box label="INCIDENT DETAILS">
+        <Box label="INCIDENT DETAILS" collapsable={true}>
           <div className={s.boxContent}>
             <Input label="Incident Date & Time" type="datetime-local" />
             <Input label="Location of incident" icon={<BiSearch />} />
@@ -34,7 +68,7 @@ function Lookup() {
             <Input label="Complient ID" />
           </div>
         </Box>
-        <Box label="Type of Incident">
+        <Box label="TYPE OF INCIDENT" collapsable={true}>
           <div className={s.typeOfIncident}>
             <Radio
               options={[
@@ -172,6 +206,208 @@ function Lookup() {
             </table>
           </div>
         </Box>
+        <Box label="INCIDENT CATEGORY" collapsable={true}>
+          <div className={s.placeholder}>Placeholder</div>
+        </Box>
+        <Box label="PERSON AFFECTED" collapsable={true}>
+          <div className={s.placeholder}>Placeholder</div>
+        </Box>
+        <Box label="INCIDENT DESCRIPTION" collapsable={true}>
+          <div className={s.incidentDescription}>
+            <Textarea label="Incident Description" className={s.description} />
+            <section className={s.departments}>
+              <Input
+                label="Department Involved"
+                defaultValue={""}
+                icon={<BiSearch />}
+                className={s.search}
+              />
+              {departments.map((department) => (
+                <Chip key={department} label={department} />
+              ))}
+            </section>
+          </div>
+        </Box>
+        <Box label="CONTRIBUTING FACTORS" collapsable={true}>
+          <div className={s.contributingFactor}>
+            <div className={s.placeholder}>Placeholder</div>
+            <div className={s.preventabilityWrapper}>
+              <Table
+                className={s.preventability}
+                columns={[{ label: "Preventability of incident" }]}
+              >
+                {[
+                  { label: "Likely could have been prevented" },
+                  { label: "Likely could not have been prevented" },
+                  { label: "Not assessed" },
+                ].map((item) => (
+                  <tr key={item.label}>
+                    <td>
+                      <input
+                        id={"preventability" + item.label}
+                        type="radio"
+                        checked={preventability === item.label}
+                        onChange={(e) => setPreventability(item.label)}
+                      />{" "}
+                      <label htmlFor={"preventability" + item.label}>
+                        {item.label}
+                      </label>
+                    </td>
+                  </tr>
+                ))}
+              </Table>
+            </div>
+            <div className={s.actionWrapper}>
+              <h4>Immediate Action taken</h4>
+              <Table
+                columns={[
+                  { label: "Action taken" },
+                  { label: "Action Taken By" },
+                  { label: "Date & Time" },
+                  { label: "Action" },
+                ]}
+                className={s.actionTaken}
+              >
+                <tr>
+                  <td className={s.inlineForm}>
+                    <form>
+                      <Textarea placeholder="Enter" />
+                      <Input placeholder="Enter" icon={<BiSearch />} />
+                      <Input type="datetime-local" />
+                      <button className="btn secondary">
+                        <AiOutlinePlus />
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {actionsTaken.map((action, i) => (
+                  <tr key={i}>
+                    <td>{action.action}</td>
+                    <td>{action.actionTakenBy.name}</td>
+                    <td>{action.date}</td>
+                    <TableActions
+                      actions={[
+                        {
+                          icon: <BsPencilFill />,
+                          label: "Edit",
+                          callBack: () => console.log("edit", action.code),
+                        },
+                        {
+                          icon: <FaRegTrashAlt />,
+                          label: "Delete",
+                          callBack: () => console.log("delete", action.code),
+                        },
+                      ]}
+                    />
+                  </tr>
+                ))}
+              </Table>
+            </div>
+            <div>
+              <h4>Incident witnessed by</h4>
+              <Table
+                className={s.witnesses}
+                columns={[
+                  { label: "Name" },
+                  { label: "Departemnt" },
+                  { label: "Action" },
+                ]}
+              >
+                <tr>
+                  <td className={s.inlineForm}>
+                    <form>
+                      <Input placeholder="Search" icon={<BiSearch />} />
+                      <Input placeholder="Enter" icon={<BiSearch />} />
+                      <button className="btn secondary">
+                        <AiOutlinePlus />
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {witnesses.map((witness, i) => (
+                  <tr key={i}>
+                    <td>{witness.name}</td>
+                    <td>{witness.department}</td>
+                    <TableActions
+                      actions={[
+                        {
+                          icon: <BsPencilFill />,
+                          label: "Edit",
+                          callBack: () => console.log("edit", witness.code),
+                        },
+                        {
+                          icon: <FaRegTrashAlt />,
+                          label: "Delete",
+                          callBack: () => console.log("delete", witness.code),
+                        },
+                      ]}
+                    />
+                  </tr>
+                ))}
+              </Table>
+            </div>
+            <div>
+              <h4>Incident notified to</h4>
+              <Table
+                className={s.notified}
+                columns={[
+                  { label: "Name" },
+                  { label: "Departemnt" },
+                  { label: "Date & Time" },
+                  { label: "Action" },
+                ]}
+              >
+                <tr>
+                  <td className={s.inlineForm}>
+                    <form>
+                      <Input placeholder="Search" icon={<BiSearch />} />
+                      <Input placeholder="Enter" icon={<BiSearch />} />
+                      <Input type="datetime-local" placeholder="Enter" />
+                      <button className="btn secondary">
+                        <AiOutlinePlus />
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {notified.map((person, i) => (
+                  <tr key={i}>
+                    <td>{person.name}</td>
+                    <td>{person.department}</td>
+                    <td>{person.date}</td>
+                    <TableActions
+                      actions={[
+                        {
+                          icon: <BsPencilFill />,
+                          label: "Edit",
+                          callBack: () => console.log("edit", person.code),
+                        },
+                        {
+                          icon: <FaRegTrashAlt />,
+                          label: "Delete",
+                          callBack: () => console.log("delete", person.code),
+                        },
+                      ]}
+                    />
+                  </tr>
+                ))}
+              </Table>
+            </div>
+            <div className={s.fieldWrapper}>
+              <FileInput label="Upload" />
+              <Input label="Incident Reported by" readOnly={true} />
+              <Input label="Department" readOnly={true} />
+              <Input
+                label="Head of the department"
+                placeholder="Enter"
+                icon={<BiSearch />}
+              />
+            </div>
+            <div className={s.btns}>
+              <button className="btn secondary w-100">Save</button>
+              <button className="btn w-100">Submit</button>
+            </div>
+          </div>
+        </Box>
       </div>
     </div>
   );
@@ -183,7 +419,12 @@ export const Box = ({ label, children, className, collapsable }) => {
       <div className={s.head}>
         <h4>{label}</h4>
         {collapsable && (
-          <button className="clear">
+          <button
+            style
+            className="clear"
+            style={open ? { transform: `rotate(180deg)` } : {}}
+            onClick={() => setOpen(!open)}
+          >
             <BiChevronsDown />
           </button>
         )}

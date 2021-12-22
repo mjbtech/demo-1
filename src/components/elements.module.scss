@@ -3,14 +3,15 @@
   position: relative;
   label {
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 0.2rem;
     white-space: nowrap;
   }
-  input {
+  input,
+  textarea {
     width: 100%;
     border: 1px solid #b7b7b7;
-    padding: 5px;
+    padding: 6.5px;
     outline: none;
     border-radius: 4px;
     min-width: 4rem;
@@ -18,14 +19,56 @@
       border-color: #3450a3;
     }
     &[type="datetime-local"] {
-      padding: 0.4rem 0.5rem;
+      padding: 4px 6px;
     }
+  }
+  textarea {
+    resize: vertical;
+    min-height: 3rem;
   }
   svg {
     position: absolute;
-    bottom: 0.35rem;
+    bottom: 7px;
     margin: auto;
     right: 0.3rem;
+  }
+}
+.fileInput {
+  .label {
+    margin-bottom: 0.2rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+    span {
+      text-decoration: underline;
+      color: #3450a3;
+    }
+  }
+  .inputField {
+    border-radius: 4px;
+    border: 1px solid #b7b7b7;
+    label {
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 1fr max-content;
+      align-items: center;
+      font-size: 13.5px;
+      .fileNames {
+        padding: 0 6px;
+        color: #747474;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .btn {
+        border-radius: 0 3px 3px 0;
+        padding: 5px 8px;
+        background: #3450a3;
+        color: white;
+      }
+    }
   }
 }
 .switchInput {
@@ -44,7 +87,7 @@
     span {
       font-size: 0.9rem;
       display: inline-block;
-      padding: 0.5rem 1.5rem;
+      padding: 6px 20px;
       background-color: rgb(231, 245, 254);
     }
     .active {
@@ -124,6 +167,80 @@
       margin-left: auto;
       margin-right: 0 !important;
     }
+  }
+}
+.combobox {
+  position: relative;
+  cursor: pointer;
+  & > input {
+    cursor: pointer;
+    width: 100%;
+    border: 1px solid #b7b7b7;
+    padding: 6.5px;
+    border-radius: 4px;
+    outline: none;
+  }
+  .btn {
+    position: absolute;
+    bottom: 6px;
+    background: white;
+    right: 6px;
+  }
+  &.open {
+    & > input {
+      border-radius: 4px 4px 0 0;
+    }
+    .btn {
+      transform: rotate(180deg);
+    }
+  }
+  .options {
+    border-radius: 0 0 4px 4px;
+    border: 1px solid #b7b7b7;
+    text-align: left;
+    position: absolute;
+    top: 30px;
+    background: white;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+    li {
+      font-size: 14px;
+      position: relative;
+      input {
+        cursor: pointer;
+      }
+      padding: 8px;
+      &:not(:last-child) {
+        &::after {
+          content: "";
+          display: block;
+          position: absolute;
+          background: #e8e8e8;
+          height: 1px;
+          width: 90%;
+          bottom: 0;
+        }
+      }
+      &.selected {
+        background: #e8e8e8;
+      }
+    }
+  }
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  grid-gap: 0.3rem;
+  border: 1px solid rgb(186, 194, 199);
+  background: rgb(246, 246, 246);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 14px;
+  width: max-content;
+  button {
+    font-size: 18px;
+    color: red !important;
   }
 }
 
