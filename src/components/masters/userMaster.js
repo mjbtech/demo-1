@@ -9,7 +9,7 @@ import { Input, Combobox, Table, TableActions, Toggle } from "../elements";
 import { Modal } from "../modal";
 import s from "./masters.module.scss";
 
-export default function Categories() {
+export default function UserMaster() {
   const [users, setUsers] = useState([
     {
       name: "Location one",

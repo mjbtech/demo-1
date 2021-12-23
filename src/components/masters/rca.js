@@ -108,7 +108,9 @@ export default function Categories() {
             </div>
           </Box>
         )}
-        <InjuryAnnotation />
+        <div className={s.btns}>
+          <button className="btn w-100">Save</button>
+        </div>
       </div>
     </div>
   );
@@ -131,16 +133,5 @@ const CategoryForm = ({ edit, onChange }) => {
         <TiTick />
       </button>
     </form>
-  );
-};
-const InjuryAnnotation = () => {
-  const [templates, setTemplates] = useState([
-    { name: "Legs" },
-    { name: "Front and back" },
-  ]);
-  return (
-    <div className={s.annotationTemplate}>
-      <button className={`btn w-100 ${s.save}`}>Save</button>
-    </div>
   );
 };

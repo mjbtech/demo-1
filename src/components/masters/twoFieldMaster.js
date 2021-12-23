@@ -9,7 +9,7 @@ import { Input, Table, TableActions, Toggle } from "../elements";
 import { Modal } from "../modal";
 import s from "./masters.module.scss";
 
-export default function Categories() {
+export default function TwoFieldMaster() {
   const [category, setCategory] = useState("one");
   const [categories, setCategories] = useState([
     { name: "Patient", status: true },
@@ -42,14 +42,14 @@ export default function Categories() {
       </header>
       <div className={s.content}>
         <Box label="MASTERS LIST">
-          <div className={s.masters}>
+          <div className={s.twoFieldMaster}>
             <div className={s.head}>
               <Input placeholder="Quick Search" icon={<BiSearch />} />
             </div>
             <Table columns={[{ label: "Master Name" }, { label: "Action" }]}>
               <tr>
                 <td className={s.inlineForm}>
-                  <CategoryForm />
+                  <TowFiledForm />
                 </td>
               </tr>
               {categories.map((category, i) => (
@@ -63,7 +63,7 @@ export default function Categories() {
         </Box>
         {category && (
           <Box label="MASTER DETAILS">
-            <div className={s.mastersDetails}>
+            <div className={s.twoFieldMasterDetail}>
               <div className={s.head}>
                 <Input label="Selected Master" />
               </div>
@@ -74,22 +74,9 @@ export default function Categories() {
                   { label: "Action" },
                 ]}
               >
-                <tr className={s.filterForm}>
-                  <td>
-                    <Input
-                      required={true}
-                      defaultValue={""}
-                      placeholder="Enter"
-                      onChange={(e) => {}}
-                    />
-                  </td>
-                  <td>
-                    <Toggle defaultValue={false} />
-                  </td>
-                  <td>
-                    <button className="btn secondary">
-                      <TiTick />
-                    </button>
+                <tr>
+                  <td className={s.inlineForm}>
+                    <TwoFieldMasterForm />
                   </td>
                 </tr>
                 {subCategories.map((category, i) => (
@@ -113,12 +100,14 @@ export default function Categories() {
             </div>
           </Box>
         )}
-        <InjuryAnnotation />
+        <div className={s.btns}>
+          <button className="btn w-100">Save</button>
+        </div>
       </div>
     </div>
   );
 }
-const CategoryForm = ({ edit, onChange }) => {
+const TowFiledForm = ({ edit, onChange }) => {
   const [categoryName, setCategoryName] = useState(edit?.name || "");
   return (
     <form
@@ -138,14 +127,19 @@ const CategoryForm = ({ edit, onChange }) => {
     </form>
   );
 };
-const InjuryAnnotation = () => {
-  const [templates, setTemplates] = useState([
-    { name: "Legs" },
-    { name: "Front and back" },
-  ]);
+const TwoFieldMasterForm = ({ edit, onChange }) => {
   return (
-    <div className={s.annotationTemplate}>
-      <button className={`btn w-100 ${s.save}`}>Save</button>
-    </div>
+    <form>
+      <Input
+        required={true}
+        defaultValue={""}
+        placeholder="Enter"
+        onChange={(e) => {}}
+      />
+      <Toggle defaultValue={false} />
+      <button className="btn secondary">
+        <TiTick />
+      </button>
+    </form>
   );
 };

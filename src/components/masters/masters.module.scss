@@ -57,14 +57,6 @@
       font-weight: 600;
       text-decoration: underline;
     }
-    .personAffected {
-      tr {
-        td:last-child {
-          margin: auto;
-          margin-right: 0;
-        }
-      }
-    }
     .category,
     .subCategory,
     .masters,
@@ -73,6 +65,8 @@
     .personAffected,
     .contributingFactor,
     .personAffectedDetail,
+    .twoFieldMaster,
+    .twoFieldMasterDetail,
     .contributingFactorDetail {
       .head {
         max-width: 25rem;
@@ -99,6 +93,19 @@
         }
       }
     }
+    .personAffected {
+      tr {
+        td:last-child {
+          margin: auto;
+          margin-right: 0;
+        }
+      }
+      .inlineForm {
+        form {
+          grid-template-columns: 1fr max-content;
+        }
+      }
+    }
     .personAffectedDetail {
       tr {
         grid-template-columns: clamp(5rem, 50%, 20rem) 1fr !important;
@@ -107,6 +114,12 @@
           &:last-child {
             text-align: left;
           }
+        }
+      }
+      .inlineForm {
+        max-width: 23rem;
+        form {
+          grid-template-columns: 1fr max-content;
         }
       }
     }
@@ -123,8 +136,24 @@
         }
       }
     }
+    .twoFieldMaster {
+      .inlineForm {
+        form {
+          grid-template-columns: 1fr max-content;
+        }
+      }
+    }
+    .twoFieldMasterDetail {
+      tr,
+      .inlineForm form {
+        grid-template-columns: clamp(10rem, 72%, 20rem) 3rem 3rem !important;
+      }
+    }
     .contributingFactor {
       tr {
+        grid-template-columns: 1fr max-content;
+      }
+      .inlineForm form {
         grid-template-columns: 1fr max-content;
       }
     }
@@ -139,6 +168,9 @@
             margin-left: 0;
           }
         }
+      }
+      .inlineForm form {
+        grid-template-columns: 1fr max-content;
       }
     }
   }
@@ -220,6 +252,7 @@
     }
   }
   .btns {
+    grid-column: 1/-1;
     display: flex;
     grid-gap: 0.5rem;
     justify-content: center;
