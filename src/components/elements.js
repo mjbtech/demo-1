@@ -191,62 +191,69 @@ export const Combobox = ({
   return (
     <section
       className={`${s.combobox} ${className || ""} ${open ? s.open : ""}`}
-      onClick={() => setOpen(true)}
-      ref={container}
     >
       {label && <label>{label}</label>}
-      <input
-        value={
-          selected.length > 3
-            ? `${selected.length} items selected`
-            : selected?.reduce((p, a) => p + a + ", ", "")
-        }
-        placeholder={placeholder || "Select one"}
-        readOnly={true}
-      />
-      <span className={s.btn}>
-        <FaSortDown />
-      </span>
-      {open && (
-        <ul className={s.options}>
-          {options.map((option, i) => (
-            <li
-              key={i}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelected((prev) => {
-                  const _selected = selected.find((item) => item === option);
-                  if (_selected) {
-                    return prev.filter((item) => item !== option);
+      <div className={s.field} onClick={() => setOpen(true)} ref={container}>
+        <input
+          value={
+            selected.length > 3
+              ? `${selected.length} items selected`
+              : selected?.reduce(
+                  (p, a, i, arr) =>
+                    `${p} ${a}${i < arr.length - 1 ? ", " : ""}`,
+                  ""
+                )
+          }
+          placeholder={placeholder || "Select one"}
+          readOnly={true}
+        />
+        <span className={s.btn}>
+          <FaSortDown />
+        </span>
+        {open && (
+          <ul className={s.options}>
+            {options.map((option, i) => (
+              <li
+                key={i}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelected((prev) => {
+                    const _selected = selected.find((item) => item === option);
+                    if (_selected) {
+                      return prev.filter((item) => item !== option);
+                    }
+                    if (multiple) {
+                      return [
+                        ...prev.filter((item) => item !== option),
+                        option,
+                      ];
+                    } else {
+                      return [option];
+                    }
+                  });
+                  if (!multiple) {
+                    setOpen(false);
                   }
-                  if (multiple) {
-                    return [...prev.filter((item) => item !== option), option];
-                  } else {
-                    return [option];
-                  }
-                });
-                if (!multiple) {
-                  setOpen(false);
+                }}
+                className={
+                  selected.find((item) => item === option) || false
+                    ? s.selected
+                    : ""
                 }
-              }}
-              className={
-                selected.find((item) => item === option) || false
-                  ? s.selected
-                  : ""
-              }
-            >
-              {multiple && (
-                <input
-                  type="checkbox"
-                  checked={selected.find((item) => item === option) || false}
-                  readOnly={true}
-                />
-              )}{" "}
-              {option}
-            </li>
-          ))}
-        </ul>
-      )}
+              >
+                {multiple && (
+                  <input
+                    type="checkbox"
+                    checked={selected.find((item) => item === option) || false}
+                    readOnly={true}
+                  />
+                )}{" "}
+                {option}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 };

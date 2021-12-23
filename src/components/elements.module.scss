@@ -170,59 +170,73 @@
   }
 }
 .combobox {
-  position: relative;
   cursor: pointer;
-  & > input {
-    cursor: pointer;
-    width: 100%;
-    border: 1px solid #b7b7b7;
-    padding: 6.5px;
-    border-radius: 4px;
-    outline: none;
-  }
-  .btn {
-    position: absolute;
-    bottom: 6px;
-    background: white;
-    right: 6px;
+  & > label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
   }
   &.open {
-    & > input {
-      border-radius: 4px 4px 0 0;
-    }
-    .btn {
-      transform: rotate(180deg);
+    .field {
+      & > input {
+        border-radius: 4px 4px 0 0;
+      }
+      .btn {
+        transform: rotate(180deg);
+      }
     }
   }
-  .options {
-    border-radius: 0 0 4px 4px;
-    border: 1px solid #b7b7b7;
-    text-align: left;
-    position: absolute;
-    top: 30px;
-    background: white;
-    width: 100%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
-    li {
-      font-size: 14px;
-      position: relative;
-      input {
-        cursor: pointer;
-      }
-      padding: 8px;
-      &:not(:last-child) {
-        &::after {
-          content: "";
-          display: block;
-          position: absolute;
-          background: #e8e8e8;
-          height: 1px;
-          width: 90%;
-          bottom: 0;
+  .field {
+    position: relative;
+    & > input {
+      cursor: pointer;
+      width: 100%;
+      border: 1px solid #b7b7b7;
+      padding: 6.5px;
+      padding-right: 1.6rem;
+      border-radius: 4px;
+      outline: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .btn {
+      position: absolute;
+      bottom: 6px;
+      background: white;
+      right: 6px;
+    }
+    .options {
+      z-index: 9999999999999;
+      border-radius: 0 0 4px 4px;
+      border: 1px solid #b7b7b7;
+      text-align: left;
+      position: absolute;
+      top: 30px;
+      background: white;
+      width: 100%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+      li {
+        font-size: 14px;
+        position: relative;
+        input {
+          cursor: pointer;
         }
-      }
-      &.selected {
-        background: #e8e8e8;
+        padding: 8px;
+        &:not(:last-child) {
+          &::after {
+            content: "";
+            display: block;
+            position: absolute;
+            background: #e8e8e8;
+            height: 1px;
+            width: 90%;
+            bottom: 0;
+          }
+        }
+        &.selected {
+          background: #e8e8e8;
+        }
       }
     }
   }

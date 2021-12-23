@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaInfoCircle, FaRegTrashAlt } from "react-icons/fa";
+import { FaInfoCircle, FaRegTrashAlt, FaPlus } from "react-icons/fa";
 import { BiChevronsDown, BiSearch } from "react-icons/bi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsPencilFill } from "react-icons/bs";
 import {
   Input,
+  Combobox,
   FileInput,
   Textarea,
   SwitchInput,
@@ -207,7 +208,27 @@ function Lookup() {
           </div>
         </Box>
         <Box label="INCIDENT CATEGORY" collapsable={true}>
-          <div className={s.placeholder}>Placeholder</div>
+          <div className={s.incidentCategory}>
+            <div className={s.form}>
+              <Combobox
+                label="Incident Category"
+                placeholder="Select"
+                options={["Medical error", "Technical error"]}
+              />
+              <Combobox
+                label="Incident Sub-category"
+                placeholder="Select"
+                options={[
+                  "Wrong Medication administered",
+                  "Incident Sub-category 2",
+                ]}
+              />
+              <button className="btn secondary">
+                <FaPlus /> Add Template
+              </button>
+            </div>
+            <div className={s.placeholder}>Placeholder</div>
+          </div>
         </Box>
         <Box label="PERSON AFFECTED" collapsable={true}>
           <div className={s.placeholder}>Placeholder</div>

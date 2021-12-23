@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Locations from "./location";
+import Department from "./department";
 import Categories from "./categories";
 import PersonAffected from "./personAffected";
 import UserMaster from "./userMaster";
@@ -12,6 +13,7 @@ export default function Masters() {
   return (
     <Routes>
       <Route path="/location" element={<Locations />} />
+      <Route path="/department" element={<Department />} />
       <Route path="/categoryAndSubCategory" element={<Categories />} />
       <Route path="/userMaster" element={<UserMaster />} />
       <Route path="/riskAssessment" element={<RiskAssessments />} />

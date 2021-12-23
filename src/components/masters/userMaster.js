@@ -85,7 +85,22 @@ export default function Categories() {
               <td>{user.contact}</td>
               <td>{user.email}</td>
               <td>{user.department}</td>
-              <td>{user.role}</td>
+              <td>
+                {user.role[0]}
+                {user.role.length > 1 && (
+                  <>
+                    {" "}
+                    <span className={s.moreRoles}>
+                      +{user.role.length - 1}{" "}
+                      <ul className={s.allRoles}>
+                        {user.role.map((role) => (
+                          <li key={role}>{role}</li>
+                        ))}
+                      </ul>
+                    </span>
+                  </>
+                )}
+              </td>
               <TableActions
                 actions={[
                   {
@@ -130,7 +145,6 @@ const UserForm = ({ edit, onChange }) => {
         defaultValue={name}
         placeholder="Enter"
         onChange={(e) => setName(e.target.value)}
-        icon={<BiSearch />}
       />
       <Combobox
         required={true}

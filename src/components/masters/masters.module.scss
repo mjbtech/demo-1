@@ -6,24 +6,6 @@
       padding: 0 8px;
       font-weight: 500;
     }
-    .selectCategory {
-      margin-top: 0.5rem;
-      background: #d7dff4;
-      text-align: center;
-      border-radius: 5px;
-      border: 1px solid #bfc8e0;
-      padding: 6px;
-      .star {
-        color: red;
-      }
-      label {
-        font-size: 14px;
-      }
-      select {
-        outline: none;
-        min-width: 10rem;
-      }
-    }
   }
   .content {
     display: grid;
@@ -43,7 +25,6 @@
         tbody,
         thead {
           tr {
-            grid-template-columns: 6rem 1fr 1fr 5rem 6rem 3rem 3.3rem;
             grid-gap: 1rem;
             input[type="checkbox"] {
               min-width: 20px;
@@ -52,10 +33,9 @@
           }
         }
       }
-      .input {
-        align-items: center;
-        grid-gap: 6px;
-        display: flex;
+      form,
+      tr {
+        grid-template-columns: 6rem 1fr 1fr 5rem 6rem 3rem 3.3rem;
       }
     }
     .category {
@@ -63,7 +43,9 @@
         tbody {
           tr {
             color: #3450a3;
-            text-decoration: underline;
+            form {
+              grid-template-columns: 1fr max-content;
+            }
           }
         }
       }
@@ -83,6 +65,8 @@
         }
       }
     }
+    .category,
+    .subCategory,
     .masters,
     .mastersDetails,
     .locations,
@@ -103,11 +87,12 @@
         margin-bottom: 0.5rem;
       }
       .inlineForm {
+        grid-column: 1/-1;
         width: 100%;
         form {
-          display: flex;
+          display: grid;
           align-items: center;
-          grid-gap: 0.5rem;
+          grid-gap: 1rem;
           section {
             flex: 1;
           }
@@ -177,6 +162,50 @@
     tr,
     form {
       grid-template-columns: 12rem 8rem 10rem 8rem 10rem 15rem 10rem 10rem 3rem;
+    }
+    tr {
+      .moreRoles {
+        font-size: 14px;
+        background: #3c5ec8;
+        color: white;
+        height: 1.4rem;
+        width: 1.4rem;
+        display: inline-block;
+        text-align: center;
+        border-radius: 50%;
+        cursor: pointer;
+        position: relative;
+        .allRoles {
+          text-align: left;
+          display: none;
+          position: absolute;
+          background: white;
+          color: black;
+          width: max-content;
+          padding: 6px;
+          right: -0.8rem;
+          top: 1.75rem;
+          filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.52));
+          border-radius: 4px;
+          &::before {
+            content: "";
+            display: block;
+            width: 0;
+            height: 0;
+            border: 0.5rem solid transparent;
+            border-top: 0;
+            border-bottom: 0.7rem solid white;
+            position: absolute;
+            right: 1rem;
+            top: -0.7rem;
+          }
+        }
+        &:hover {
+          .allRoles {
+            display: inline-block;
+          }
+        }
+      }
     }
   }
   .ram {

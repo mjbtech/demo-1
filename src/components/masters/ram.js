@@ -31,7 +31,7 @@ export default function Categories() {
   return (
     <div className={s.container}>
       <header>
-        <h3>USER MASTER</h3>
+        <h3>RISK ASSESSMENT MASTER</h3>
       </header>
       <div className={s.ram}>
         <Table

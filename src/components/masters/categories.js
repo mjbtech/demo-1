@@ -55,29 +55,21 @@ export default function Categories() {
   return (
     <div className={s.container}>
       <header>
-        <h3>REPORT AN INCIDENT</h3>
-        <div className={s.selectCategory}>
-          <label>
-            <span className={s.star}>*</span>Select Category{" "}
-            <select value={category} onChange={() => {}}>
-              <option value="Cat1">Category 1</option>
-              <option value="Cat2">Category 2</option>
-              <option value="Cat3">Category 3</option>
-            </select>
-          </label>
-        </div>
+        <h3>CATEGORY & SUB CATEGORY MASTER</h3>
       </header>
       <div className={s.content}>
         <Box label="CATEGORY DETAILS">
           <div className={s.category}>
             <div className={s.head}>
               <Input placeholder="Quick Search" icon={<BiSearch />} />
-              <button
-                className={`clear ${s.addBtn}`}
-                onClick={() => setAddCategory(true)}
-              >
-                <FaPlus /> Add New Category
-              </button>
+              {
+                //   <button
+                //   className={`clear ${s.addBtn}`}
+                //   onClick={() => setAddCategory(true)}
+                // >
+                //   <FaPlus /> Add New Category
+                // </button>
+              }
             </div>
             <Table
               columns={[
@@ -86,6 +78,9 @@ export default function Categories() {
                 { label: "Action" },
               ]}
             >
+              <tr className={s.filterForm}>
+                <CategoryForm />
+              </tr>
               {categories.map((category, i) => (
                 <tr key={i}>
                   <td>{category.code}</td>
@@ -115,12 +110,14 @@ export default function Categories() {
               <div className={s.head}>
                 <Input className={s.input} label="Category Name" />
                 <Input className={s.input} label="Category Code" />
-                <button
-                  className={`clear ${s.addBtn}`}
-                  onClick={() => setAddSubCategory(true)}
-                >
-                  <FaPlus /> Add New Sub Category
-                </button>
+                {
+                  //   <button
+                  //   className={`clear ${s.addBtn}`}
+                  //   onClick={() => setAddSubCategory(true)}
+                  // >
+                  //   <FaPlus /> Add New Sub Category
+                  // </button>
+                }
               </div>
               <Table
                 columns={[
@@ -134,24 +131,7 @@ export default function Categories() {
                 ]}
               >
                 <tr className={s.filterForm}>
-                  <td>
-                    <Input placeholder="Enter" icon={<BiSearch />} />
-                  </td>
-                  <td>
-                    <Input placeholder="Enter" icon={<BiSearch />} />
-                  </td>
-                  <td>
-                    <Input placeholder="Enter" icon={<BiSearch />} />
-                  </td>
-                  <td>
-                    <input type="checkbox" />
-                  </td>
-                  <td>
-                    <input type="checkbox" />
-                  </td>
-                  <td>
-                    <Toggle default={true} />
-                  </td>
+                  <SubCategoryForm />
                 </tr>
                 {subCategories.map((category, i) => (
                   <tr key={i}>
@@ -184,27 +164,58 @@ export default function Categories() {
           </Box>
         )}
       </div>
-      <Modal open={addCategory} onBackdropClick={() => setAddCategory(false)}>
-        <CategoryForm
-          onSuccess={(category) => {
-            setAddCategory(false);
-          }}
-        />
-      </Modal>
-      <Modal
-        open={addSubCategory}
-        onBackdropClick={() => setAddSubCategory(false)}
-      >
-        <SubCategoryForm
-          onSuccess={(category) => {
-            setAddSubCategory(false);
-          }}
-        />
-      </Modal>
+      {
+        //   <Modal open={addCategory} onBackdropClick={() => setAddCategory(false)}>
+        //   <CategoryForm
+        //     onSuccess={(category) => {
+        //       setAddCategory(false);
+        //     }}
+        //   />
+        // </Modal>
+        // <Modal
+        //   open={addSubCategory}
+        //   onBackdropClick={() => setAddSubCategory(false)}
+        // >
+        //   <SubCategoryForm
+        //     onSuccess={(category) => {
+        //       setAddSubCategory(false);
+        //     }}
+        //   />
+        // </Modal>
+      }
     </div>
   );
 }
 const CategoryForm = ({ edit, onChange }) => {
+  return (
+    <td className={s.inlineForm}>
+      <form>
+        <Input placeholder="Enter" />
+        <button className="btn secondary">
+          <FaPlus />
+        </button>
+      </form>
+    </td>
+  );
+};
+const SubCategoryForm = ({ edit, onChange }) => {
+  return (
+    <td className={s.inlineForm}>
+      <form>
+        <Input placeholder="Enter" />
+        <Input placeholder="Enter" icon={<BiSearch />} />
+        <Input placeholder="Enter" icon={<BiSearch />} />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <Toggle default={true} />
+        <button className="btn secondary">
+          <FaPlus />
+        </button>
+      </form>
+    </td>
+  );
+};
+const CategoryForm_pop = ({ edit, onChange }) => {
   const [categoryName, setCategoryName] = useState(edit?.name || "");
   return (
     <form
@@ -228,7 +239,7 @@ const CategoryForm = ({ edit, onChange }) => {
     </form>
   );
 };
-const SubCategoryForm = ({ edit, onChange }) => {
+const SubCategoryForm_pop = ({ edit, onChange }) => {
   const [categoryName, setCategoryName] = useState(edit?.name || "");
   return (
     <form

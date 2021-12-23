@@ -92,7 +92,6 @@ function Dashboard() {
                 label: <>Category & Sub Category</>,
                 path: "categoryAndSubCategory",
               },
-              { label: <>Sentinel Event</>, path: "sentinelEvent" },
               { label: <>User master</>, path: "userMaster" },
               { label: <>Risk Assessment</>, path: "riskAssessment" },
               { label: <>Person affected</>, path: "personAffected" },
