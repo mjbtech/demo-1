@@ -4,7 +4,8 @@ import { BiChevronLeft } from "react-icons/bi";
 import { BsChevronRight } from "react-icons/bs";
 import IncidentReport from "./incidentReport";
 import OtherPages from "./otherPages";
-import Masters from "./masters/index.js";
+import Masters from "./masters/index";
+import IrConfig from "./irConfig/index";
 import s from "./dashboard.module.scss";
 
 const Accordion = ({ label, basePath, items, className }) => {
@@ -15,7 +16,7 @@ const Accordion = ({ label, basePath, items, className }) => {
         location.pathname.startsWith(basePath) ? s.open : ""
       } ${className || ""}`}
     >
-      <Link className={s.accordionLabel} to={`/masters/${items[0]?.path}`}>
+      <Link className={s.accordionLabel} to={`${basePath}/${items[0]?.path}`}>
         {label} <BsChevronRight />
       </Link>
       {location.pathname.startsWith(basePath) && (
@@ -80,6 +81,18 @@ function Dashboard() {
             <Link to="/reports">Reports</Link>
           </li>
           <Accordion
+            label="IR Configuration"
+            basePath="/irConfiguration"
+            className={`${s.sidebarItem} ${
+              location.pathname.startsWith("/irConfiguration") ? s.active : ""
+            }`}
+            items={[
+              { label: <>Main Configuration</>, path: "mainConfig" },
+              { label: <>User Permission</>, path: "userPermission" },
+              { label: <>IR Data analytics</>, path: "irDataAnalytics" },
+            ]}
+          />
+          <Accordion
             label="Masters"
             basePath="/masters"
             className={`${s.sidebarItem} ${
@@ -105,6 +118,7 @@ function Dashboard() {
       <main>
         <Routes>
           <Route path="/incident-report" element={<IncidentReport />} />
+          <Route path="/irConfiguration/*" element={<IrConfig />} />
           <Route path="/masters/*" index element={<Masters />} />
           <Route path="/:other" element={<OtherPages />} />
           <Route path="/*" element={<IncidentReport />} />

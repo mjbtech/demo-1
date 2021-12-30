@@ -5,7 +5,14 @@ import { BiSearch } from "react-icons/bi";
 import { Box } from "../incidentReport";
 import { TiTick } from "react-icons/ti";
 import { IoIosClose } from "react-icons/io";
-import { Input, Combobox, Table, TableActions, Toggle } from "../elements";
+import {
+  Form,
+  Input,
+  Combobox,
+  Table,
+  TableActions,
+  Toggle,
+} from "../elements";
 import { Modal } from "../modal";
 import s from "./masters.module.scss";
 
@@ -93,45 +100,46 @@ const LocationForm = ({ edit, onChange }) => {
   const [color, setColor] = useState(edit?.color || "");
   const [status, setStatus] = useState(edit?.status || "");
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
+    <Form
+      defaultValues={edit}
+      onSubmit={(data) => {
+        console.log(data);
       }}
     >
       <Combobox
         required={true}
+        name="likelihood"
         placeholder="Select"
         options={["Likely", "Unlikely"]}
-        onChange={(e) => setLikelihood(e.target.value)}
       />
       <Combobox
         required={true}
         placeholder="Select"
+        name="severity"
         options={["Major", "Minor"]}
-        onChange={(e) => setSeverity(e.target.value)}
       />
       <Combobox
         required={true}
+        name="riskScore"
         placeholder="Select"
         options={["Score 1", "Score 2", "Score 3"]}
-        onChange={(e) => setRiskScore(e.target.value)}
       />
       <Combobox
         required={true}
+        name="riskStatus"
         placeholder="Select"
         options={["High", "Medium", "Low"]}
-        onChange={(e) => setRiskStatus(e.target.value)}
       />
       <Combobox
         required={true}
+        name="color"
         placeholder="Select"
         options={["green", "yellow", "red"]}
-        onChange={(e) => setColor(e.target.value)}
       />
-      <Toggle defaultValue={status === "active"} />
+      <Toggle name="status" />
       <button className="btn secondary">
         <FaPlus />
       </button>
-    </form>
+    </Form>
   );
 };

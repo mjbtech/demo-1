@@ -1,0 +1,251 @@
+@import "../variables";
+
+.container {
+  display: grid;
+  grid-gap: 1rem;
+  header {
+    h3 {
+      padding: 0 8px;
+      font-weight: 500;
+    }
+  }
+  .reportScreen {
+    tr {
+      grid-template-columns: clamp(10rem, 50%, 25rem) 7rem 1fr;
+      td,
+      th {
+        &:last-child {
+          text-align: left;
+        }
+      }
+    }
+  }
+  .typeOfIncident {
+    tr {
+      grid-template-columns: 10rem 1fr 15rem 5rem 15rem 4rem;
+      .definition {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+    margin-bottom: 1rem;
+  }
+  .infoForm {
+    display: flex;
+    grid-gap: 2rem;
+    flex-wrap: wrap;
+    section {
+      display: flex;
+      grid-gap: 1rem;
+      align-items: center;
+    }
+  }
+  .btns {
+    grid-column: 1/-1;
+    display: flex;
+    grid-gap: 0.5rem;
+    justify-content: center;
+  }
+  .inlineForm {
+    grid-column: 1/-1;
+    width: 100%;
+    form {
+      display: grid;
+      align-items: center;
+      grid-gap: 1rem;
+      section {
+        flex: 1;
+      }
+    }
+  }
+  .sentinelNotificationHead {
+    display: flex;
+    justify-content: space-between;
+    .notificationOptions {
+      display: flex;
+      justify-content: space-between;
+      grid-gap: 0.5rem;
+      input {
+        margin-right: 0.3rem;
+      }
+    }
+  }
+  .sentinelNotification {
+    tr,
+    .inlineForm form {
+      grid-template-columns: 0.25fr 0.25fr 0.25fr 0.25fr 0.25fr 3rem;
+    }
+    margin-bottom: 1rem;
+  }
+  .sentinelNotificationContent {
+    padding: 6px;
+    border: 1px solid #bfbfbf;
+    display: grid;
+    grid-gap: 0.35rem;
+    h4 {
+      margin-top: -1.1rem;
+      background: white;
+      width: max-content;
+      padding: 0 6px;
+      color: #3450a3;
+    }
+    .checkboxes {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(250px, 1fr));
+      grid-gap: 0.2rem 2rem;
+      input[type="checkbox"] {
+        margin-right: 0.3rem;
+      }
+    }
+  }
+  .hodApproval {
+    input[type="checkbox"] {
+      margin-right: 0.3rem;
+    }
+    tr {
+      td {
+        text-align: left !important;
+      }
+    }
+  }
+  .dashboardDataElement {
+    display: grid;
+    grid-template-columns: 0.55fr 0.45fr;
+    grid-gap: 1rem 2rem;
+    input[type="checkbox"] {
+      margin-right: 0.3rem;
+    }
+    tr {
+      td,
+      th {
+        &:last-child {
+          text-align: left !important;
+        }
+      }
+    }
+    table {
+      margin-bottom: 1rem;
+    }
+    .enableIR {
+      grid-gap: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+  }
+  .incidentClosure {
+    & > p {
+      color: #3450a3;
+      font-size: 14px;
+    }
+    .checkboxes {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(250px, 1fr));
+      grid-gap: 0.2rem 2rem;
+      input[type="checkbox"] {
+        margin-right: 0.3rem;
+      }
+      margin-bottom: 0.5rem;
+      margin-left: 1.5rem;
+    }
+    .capaClosure {
+      display: flex;
+      grid-gap: 1rem 2rem;
+      & > section {
+        grid-gap: 0.5rem;
+        align-items: center;
+        display: flex;
+      }
+    }
+  }
+  .acceptableTat {
+    & > p {
+      color: #3450a3;
+      font-size: 14px;
+    }
+    .tatMonitoring {
+      margin-left: 1.5rem;
+      display: flex;
+      align-items: center;
+      grid-gap: 1rem;
+      margin-bottom: 1rem;
+      & > section,
+      & > section label {
+        grid-gap: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+      }
+      .start label svg {
+        color: $green;
+      }
+      .stop label svg {
+        color: $red;
+      }
+    }
+    .tatDays {
+      margin-left: 1.5rem;
+      .numberOfDays {
+        input {
+          width: 4rem;
+        }
+      }
+      .days {
+        grid-gap: 2rem;
+        display: flex;
+      }
+    }
+  }
+  .irInvestigationDetail {
+    .section_1,
+    .section_3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(250px, 1fr));
+      grid-gap: 1rem 2rem;
+      & > section {
+        align-items: center;
+        grid-gap: 0.5rem;
+        display: flex;
+        label {
+          color: $primary-color;
+          font-weight: 600;
+          font-size: 14px;
+        }
+      }
+    }
+    .section_2 {
+      margin: 0.5rem auto;
+      margin-left: 1.5rem;
+      & > label {
+        font-size: 14px;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+      .checkboxes {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(250px, 1fr));
+        grid-gap: 0.5rem 2rem;
+        input[type="checkbox"] {
+          margin-right: 0.3rem;
+        }
+        .duration {
+          display: flex;
+          align-items: center;
+          grid-gap: 0.5rem;
+        }
+      }
+    }
+  }
+  .userPermission {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 1rem 2rem;
+    max-width: 75rem;
+    tr {
+      td,
+      th {
+        text-align: left !important;
+      }
+    }
+  }
+}

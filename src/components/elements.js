@@ -1,31 +1,57 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { IoIosClose } from "react-icons/io";
 import { FaUpload, FaSortDown } from "react-icons/fa";
+import { useForm } from "react-hook-form";
 import s from "./elements.module.scss";
 
+export const Form = ({ defaultValues, children, onSubmit }) => {
+  const { handleSubmit, register, watch, setValue, getValues } = useForm({
+    defaultValues,
+  });
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {React.Children.map(children, (child) => {
+        return child.props.name
+          ? React.createElement(child.type, {
+              ...child.props,
+              register: register,
+              watch: watch,
+              key: child.props.name,
+              getValues: getValues,
+              setValue: setValue,
+            })
+          : child;
+      })}
+    </form>
+  );
+};
+
 export const Input = ({
+  register = () => {},
   label,
+  name,
   placeholder,
-  defaultValue,
   onChange,
   type,
   icon,
   className,
   required,
+  readOnly,
+  min,
+  max,
 }) => {
-  const [value, setValue] = useState(defaultValue || "");
   return (
     <section className={`${s.input} ${className || ""}`}>
       {label && <label>{label}</label>}
       <input
+        {...register(name || label)}
+        name={name || label}
         placeholder={placeholder || "Enter"}
         type={type || "text"}
-        value={defaultValue}
         required={required}
-        onChange={(e) => {
-          setValue(e.target.value);
-          onChange?.(e);
-        }}
+        min={min}
+        max={max}
+        readOnly={readOnly}
       />
       {icon && icon}
     </section>
@@ -38,7 +64,7 @@ export const FileInput = ({ label, required, multiple, onChange }) => {
     onChange?.(files);
   }, [files]);
   return (
-    <section className={s.fileInput}>
+    <section data-testid="fileInput" className={s.fileInput}>
       <div className={s.label}>
         <label>{label}</label>
         <span className={s.fileCount}>{files.length} files selected</span>
@@ -124,6 +150,53 @@ export const Radio = ({ options, onChange }) => {
     </section>
   );
 };
+export const CustomRadio = ({
+  register,
+  name,
+  watch,
+  label,
+  options,
+  setValue,
+  multiple,
+  onChange,
+  required,
+}) => {
+  const [selected, setSelected] = useState(watch?.(name) || []);
+  useEffect(() => {
+    setValue?.(name, selected);
+  }, [selected]);
+  return (
+    <section className={s.customRadio}>
+      {label && <label>{label}</label>}
+      <input {...register?.(name)} required={required} />
+      <div className={s.options}>
+        {options.map(({ label, value: v, disabled }) => (
+          <span
+            onClick={() => {
+              setSelected((prev) => {
+                const _selected = selected.find((item) => item === v);
+                if (_selected) {
+                  return prev.filter((item) => item !== v);
+                }
+                if (multiple) {
+                  return [...prev.filter((item) => item !== v), v];
+                } else {
+                  return [v];
+                }
+              });
+            }}
+            key={v}
+            className={`${s.option} ${
+              watch?.(name).includes(v) ? s.selected : ""
+            } ${disabled ? s.disabled : ""}`}
+          >
+            {label}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+};
 export const SwitchInput = ({
   label,
   defaultValue,
@@ -133,7 +206,7 @@ export const SwitchInput = ({
 }) => {
   const [value, setValue] = useState(defaultValue || false);
   return (
-    <div className={s.switchInput}>
+    <div data-testid="switchInput" className={s.switchInput}>
       <label>{label}</label>
       <div className={s.btns}>
         <span
@@ -152,36 +225,54 @@ export const SwitchInput = ({
     </div>
   );
 };
-export const Toggle = ({ defaultValue, onChange }) => {
-  const [value, setValue] = useState(defaultValue || false);
+export const Toggle = ({
+  register = () => {},
+  getValues,
+  watch,
+  name,
+  onChange,
+}) => {
+  const id = useRef(Math.random().toString(36).substr(-8));
+  const watching = watch?.([name]);
   return (
-    <div
-      className={`${s.toggle} ${value ? s.on : ""}`}
-      onClick={() => {
-        setValue(!value);
-        onChange?.(!value);
+    <section
+      className={`${s.toggle} ${watching && watching[0] ? s.on : ""}`}
+      onClick={(e) => {
+        e.target.querySelector("label")?.click();
       }}
     >
-      <span className={s.ball} />
-    </div>
+      <input
+        type="checkbox"
+        {...register(name)}
+        style={{ display: "none" }}
+        name={name}
+        id={id.current}
+      />
+      <label className={s.ball} htmlFor={id.current} />
+    </section>
   );
 };
 export const Combobox = ({
   label,
+  name,
+  register,
+  watch,
+  setValue,
   placeholder,
   required,
   options,
-  onChange,
-  preSelected,
   multiple,
   className,
 }) => {
   const container = useRef();
-  const [selected, setSelected] = useState(preSelected || []);
+  const [selected, setSelected] = useState(watch?.(name) || []);
   const [open, setOpen] = useState(false);
   useEffect(() => {
+    setValue?.(name, selected);
+  }, [selected]);
+  useEffect(() => {
     const handler = (e) => {
-      if (!e.path.includes(container.current)) {
+      if (e.path && !e.path.includes(container.current)) {
         setOpen(false);
       }
     };
@@ -190,28 +281,35 @@ export const Combobox = ({
   }, []);
   return (
     <section
+      data-testid="combobox-container"
       className={`${s.combobox} ${className || ""} ${open ? s.open : ""}`}
     >
-      {label && <label>{label}</label>}
+      {label && <label data-testid="combobox-label">{label}</label>}
       <div className={s.field} onClick={() => setOpen(true)} ref={container}>
+        <p
+          className={`${s.displayValue} ${
+            !selected.join("") ? s.placeholder : ""
+          }`}
+        >
+          {(selected.length > 3
+            ? `${selected.length} items selected`
+            : selected?.reduce(
+                (p, a, i, arr) => `${p} ${a}${i < arr.length - 1 ? ", " : ""}`,
+                ""
+              )) ||
+            placeholder ||
+            "Select one"}
+        </p>
         <input
-          value={
-            selected.length > 3
-              ? `${selected.length} items selected`
-              : selected?.reduce(
-                  (p, a, i, arr) =>
-                    `${p} ${a}${i < arr.length - 1 ? ", " : ""}`,
-                  ""
-                )
-          }
-          placeholder={placeholder || "Select one"}
-          readOnly={true}
+          data-testid="combobox-input"
+          {...register?.(name)}
+          required={required}
         />
-        <span className={s.btn}>
+        <span data-testid="combobox-btn" className={s.btn}>
           <FaSortDown />
         </span>
         {open && (
-          <ul className={s.options}>
+          <ul className={s.options} data-testid="combobox-options">
             {options.map((option, i) => (
               <li
                 key={i}
@@ -240,6 +338,7 @@ export const Combobox = ({
                     ? s.selected
                     : ""
                 }
+                data-testid={`combobox-${option}`}
               >
                 {multiple && (
                   <input
@@ -254,6 +353,15 @@ export const Combobox = ({
           </ul>
         )}
       </div>
+    </section>
+  );
+};
+export const Checkbox = ({ register, name, label, required }) => {
+  const id = useRef(Math.random().toString(36).substr(-8));
+  return (
+    <section className={s.checkbox}>
+      <input {...register(name)} id={id} required={required} type="checkbox" />
+      {label && <label htmlFor={label}>{label}</label>}
     </section>
   );
 };

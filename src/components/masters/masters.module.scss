@@ -35,7 +35,7 @@
       }
       form,
       tr {
-        grid-template-columns: 6rem 1fr 1fr 5rem 6rem 3rem 3.3rem;
+        grid-template-columns: 1fr 1fr 5rem 6rem 3rem 3.3rem;
       }
     }
     .category {
@@ -45,6 +45,13 @@
             color: #3450a3;
             form {
               grid-template-columns: 1fr max-content;
+              .btns {
+                grid-column: 2/3;
+              }
+            }
+            .catName {
+              text-decoration: underline;
+              cursor: pointer;
             }
           }
         }

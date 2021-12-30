@@ -5,7 +5,14 @@ import { BiSearch } from "react-icons/bi";
 import { Box } from "../incidentReport";
 import { TiTick } from "react-icons/ti";
 import { IoIosClose } from "react-icons/io";
-import { Input, Combobox, Table, TableActions, Toggle } from "../elements";
+import {
+  Form,
+  Input,
+  Combobox,
+  Table,
+  TableActions,
+  Toggle,
+} from "../elements";
 import { Modal } from "../modal";
 import s from "./masters.module.scss";
 
@@ -126,69 +133,37 @@ export default function UserMaster() {
   );
 }
 const UserForm = ({ edit, onChange }) => {
-  const [name, setName] = useState(edit?.name || "");
-  const [gender, setGender] = useState(edit?.gender || "");
-  const [dob, setDob] = useState(edit?.dob || "");
-  const [employeeId, setEmployeeId] = useState(edit?.employeeId || "");
-  const [contact, setContact] = useState(edit?.contact || "");
-  const [email, setEmail] = useState(edit?.email || "");
-  const [department, setDepartment] = useState(edit?.department || "");
-  const [role, setRole] = useState(edit?.role || []);
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
+    <Form
+      defaultValues={edit}
+      onSubmit={(data) => {
+        console.log(data);
       }}
     >
-      <Input
-        required={true}
-        defaultValue={name}
-        placeholder="Enter"
-        onChange={(e) => setName(e.target.value)}
-      />
+      <Input required={true} name="name" placeholder="Enter" />
       <Combobox
         required={true}
+        name="gender"
         options={["Male", "Female", "Other"]}
-        onChange={(e) => setGender(e.target.value)}
       />
-      <Input
-        required={true}
-        defaultValue={dob}
-        placeholder="Enter"
-        onChange={(e) => setDob(e.target.value)}
-      />
-      <Input
-        required={true}
-        defaultValue={employeeId}
-        placeholder="Enter"
-        onChange={(e) => setEmployeeId(e.target.value)}
-      />
-      <Input
-        required={true}
-        defaultValue={contact}
-        placeholder="Enter"
-        onChange={(e) => setContact(e.target.value)}
-      />
-      <Input
-        required={true}
-        defaultValue={email}
-        placeholder="Enter"
-        onChange={(e) => setEmail(e.target.value)}
-      />
+      <Input required={true} name="dob" placeholder="Enter" />
+      <Input required={true} name="employeeId" placeholder="Enter" />
+      <Input required={true} name="contact" placeholder="Enter" />
+      <Input required={true} email="email" placeholder="Enter" />
       <Combobox
         required={true}
+        name="department"
         options={["Department 1", "Department 2", "Department 3"]}
-        onChange={(e) => setDepartment(e.target.value)}
       />
       <Combobox
         required={true}
         placeholder="Select"
+        name="role"
         options={["IR Reporter", "IR Investigative"]}
-        onChange={(e) => setRole(e.target.value)}
       />
       <button className="btn secondary">
         <FaPlus />
       </button>
-    </form>
+    </Form>
   );
 };

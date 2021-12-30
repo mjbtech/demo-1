@@ -5,7 +5,14 @@ import { BiSearch } from "react-icons/bi";
 import { Box } from "../incidentReport";
 import { TiTick } from "react-icons/ti";
 import { IoIosClose } from "react-icons/io";
-import { Input, Combobox, Table, TableActions, Toggle } from "../elements";
+import {
+  Form,
+  Input,
+  Combobox,
+  Table,
+  TableActions,
+  Toggle,
+} from "../elements";
 import { Modal } from "../modal";
 import s from "./masters.module.scss";
 
@@ -80,31 +87,29 @@ export default function Department() {
   );
 }
 const DepartmentForm = ({ edit, onChange }) => {
-  const [code, setCode] = useState(edit?.code || "");
-  const [name, setName] = useState(edit?.name || "");
   const [type, setType] = useState(edit?.type || "");
   const [status, setStatus] = useState(edit?.status || "");
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
+    <Form
+      defaultValues={edit}
+      onSubmit={(data) => {
+        console.log(data);
       }}
     >
       <Input
+        name={"code"}
         required={true}
-        defaultValue={code}
         placeholder="Enter"
-        onChange={(e) => setCode(e.target.value)}
         icon={<BiSearch />}
       />
       <Input
+        name="name"
         required={true}
-        defaultValue={name}
         placeholder="Enter"
-        onChange={(e) => setName(e.target.value)}
         icon={<BiSearch />}
       />
       <Combobox
+        name="type"
         required={true}
         placeholder="Enter"
         multiple={true}
@@ -114,12 +119,11 @@ const DepartmentForm = ({ edit, onChange }) => {
           "Location type three",
           "Location type four",
         ]}
-        onChange={(e) => setType(e.target.value)}
       />
-      <Toggle defaultValue={status} onChange={(value) => setStatus(value)} />
+      <Toggle name="status" />
       <button className="btn secondary">
         <FaPlus />
       </button>
-    </form>
+    </Form>
   );
 };

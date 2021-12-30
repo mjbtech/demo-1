@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaInfoCircle, FaPlus, FaRegTrashAlt } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
@@ -9,14 +9,9 @@ import { Input, Table, Toggle, Chip } from "../elements";
 import { Modal } from "../modal";
 import s from "./masters.module.scss";
 
-export default function Categories() {
+export default function PersonAffected() {
   const [category, setCategory] = useState("one");
-  const [categories, setCategories] = useState([
-    { name: "Patient", status: true },
-    { name: "Staff", status: true },
-    { name: "Visitor", status: false },
-    { name: "Contractor", status: true },
-  ]);
+  const [personAffected, setPersonAffected] = useState([]);
   const [subCategories, setSubCategories] = useState([
     {
       name: "Sub Category One",
@@ -36,6 +31,19 @@ export default function Categories() {
     },
   ]);
   const [selected, setSelected] = useState([]);
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_HOST}/personAffected`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        if (data._embedded?.personAffected) {
+          setPersonAffected(data._embedded.personAffected);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   return (
     <div className={s.container}>
       <header>
@@ -46,12 +54,12 @@ export default function Categories() {
           <Table columns={[{ label: "Category" }, { label: "Action" }]}>
             <tr>
               <td className={s.inlineForm}>
-                <CategoryForm />
+                <PersonForm />
               </td>
             </tr>
-            {categories.map((category, i) => (
+            {personAffected.map((person, i) => (
               <tr key={i}>
-                <td>{category.name}</td>
+                <td>{person.name}</td>
                 <td>
                   <Toggle defaultValue={category.status} />
                 </td>
@@ -59,51 +67,53 @@ export default function Categories() {
             ))}
           </Table>
         </div>
-        {category && (
-          <div className={s.personAffectedDetail}>
-            <div className={s.head}>
-              <Input label="Category" placeholder="Quick Search" />
-            </div>
-            <Table columns={[{ label: "Details" }, { label: "Action" }]}>
-              <tr className={s.filterForm}>
-                <td className={s.inlineForm}>
-                  <CategoryForm />
-                </td>
-              </tr>
-              {subCategories.map((category, i) => (
-                <tr key={i}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={
-                        selected.find((item) => item === category.name) || ""
-                      }
-                      onChange={(e) => {
-                        setSelected((prev) => {
-                          const newSelection = prev.filter(
-                            (item) => item !== category.name
-                          );
-                          if (e.target.checked) {
-                            newSelection.push(category.name);
-                          }
-                          return newSelection;
-                        });
-                      }}
-                    />{" "}
-                    {category.name}
-                  </td>
-                  <td />
-                </tr>
-              ))}
-            </Table>
-          </div>
-        )}
+        {
+          //   category && (
+          //   <div className={s.personAffectedDetail}>
+          //     <div className={s.head}>
+          //       <Input label="Category" placeholder="Quick Search" />
+          //     </div>
+          //     <Table columns={[{ label: "Details" }, { label: "Action" }]}>
+          //       <tr className={s.filterForm}>
+          //         <td className={s.inlineForm}>
+          //           <PersonForm />
+          //         </td>
+          //       </tr>
+          //       {subCategories.map((category, i) => (
+          //         <tr key={i}>
+          //           <td>
+          //             <input
+          //               type="checkbox"
+          //               checked={
+          //                 selected.find((item) => item === category.name) || ""
+          //               }
+          //               onChange={(e) => {
+          //                 setSelected((prev) => {
+          //                   const newSelection = prev.filter(
+          //                     (item) => item !== category.name
+          //                   );
+          //                   if (e.target.checked) {
+          //                     newSelection.push(category.name);
+          //                   }
+          //                   return newSelection;
+          //                 });
+          //               }}
+          //             />{" "}
+          //             {category.name}
+          //           </td>
+          //           <td />
+          //         </tr>
+          //       ))}
+          //     </Table>
+          //   </div>
+          // )
+        }
         <InjuryAnnotation />
       </div>
     </div>
   );
 }
-const CategoryForm = ({ edit, onChange }) => {
+const PersonForm = ({ edit, onChange }) => {
   const [categoryName, setCategoryName] = useState(edit?.name || "");
   return (
     <form
@@ -115,27 +125,6 @@ const CategoryForm = ({ edit, onChange }) => {
         required={true}
         defaultValue={categoryName}
         placeholder="Enter"
-        onChange={(e) => setCategoryName(e.target.value)}
-      />
-      <button className="btn secondary">
-        <TiTick />
-      </button>
-    </form>
-  );
-};
-const SubCategoryForm = ({ edit, onChange }) => {
-  const [categoryName, setCategoryName] = useState(edit?.name || "");
-  return (
-    <form
-      className={s.categoryForm}
-      onSubmit={(e) => {
-        e.preventDefault();
-      }}
-    >
-      <Input
-        required={true}
-        defaultValue={categoryName}
-        placeholder="Sub Category Name"
         onChange={(e) => setCategoryName(e.target.value)}
       />
       <button className="btn secondary">

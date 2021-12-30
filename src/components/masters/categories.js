@@ -1,57 +1,42 @@
-import { useState } from "react";
-import { FaInfoCircle, FaPlus, FaRegTrashAlt } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaInfoCircle, FaPlus, FaCheck, FaRegTrashAlt } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
+import { RiCloseLine } from "react-icons/ri";
+import { IoClose } from "react-icons/io5";
 import { Box } from "../incidentReport";
-import { TiTick } from "react-icons/ti";
-import { Input, Table, TableActions, Toggle } from "../elements";
-import { Modal } from "../modal";
+import {
+  Form,
+  Input,
+  Checkbox,
+  Table,
+  TableActions,
+  Toggle,
+} from "../elements";
+import { useForm } from "react-hook-form";
+import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
 export default function Categories() {
-  const [category, setCategory] = useState("one");
-  const [categories, setCategories] = useState([
-    { code: "code45201", name: "Category One" },
-    { code: "code456541", name: "Category Two" },
-    { code: "code454831", name: "Category Three" },
-    { code: "code412301", name: "Category Four" },
-  ]);
-  const [subCategories, setSubCategories] = useState([
-    {
-      code: "1",
-      name: "Sub Category One",
-      template: "template 1",
-      sentinel: true,
-      reportable: true,
-      status: true,
-    },
-    {
-      code: "1",
-      name: "Sub Category Two",
-      template: "template 2",
-      sentinel: true,
-      reportable: false,
-      status: true,
-    },
-    {
-      code: "1",
-      name: "Sub Category Three",
-      template: "template 3",
-      sentinel: false,
-      reportable: true,
-      status: false,
-    },
-    {
-      code: "1",
-      name: "Sub Category Four",
-      template: "template 4",
-      sentinel: true,
-      reportable: true,
-      status: true,
-    },
-  ]);
+  const [category, setCategory] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
   const [addCategory, setAddCategory] = useState(false);
   const [addSubCategory, setAddSubCategory] = useState(false);
+  const [edit, setEdit] = useState(null);
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_HOST}/category`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        if (data._embedded?.category) {
+          setCategories(data._embedded.category);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   return (
     <div className={s.container}>
       <header>
@@ -62,40 +47,65 @@ export default function Categories() {
           <div className={s.category}>
             <div className={s.head}>
               <Input placeholder="Quick Search" icon={<BiSearch />} />
-              {
-                //   <button
-                //   className={`clear ${s.addBtn}`}
-                //   onClick={() => setAddCategory(true)}
-                // >
-                //   <FaPlus /> Add New Category
-                // </button>
-              }
             </div>
-            <Table
-              columns={[
-                { label: "Code" },
-                { label: "Category Name" },
-                { label: "Action" },
-              ]}
-            >
+            <Table columns={[{ label: "Category Name" }, { label: "Action" }]}>
               <tr className={s.filterForm}>
-                <CategoryForm />
+                <td className={s.inlineForm}>
+                  <CategoryForm
+                    edit={edit}
+                    onSuccess={(newCat) => {
+                      setCategories((prev) => {
+                        return prev.find((c) => c.id === newCat.id)
+                          ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                          : [...prev, newCat];
+                      });
+                      setEdit(null);
+                    }}
+                    clearForm={() => {
+                      setEdit(null);
+                    }}
+                  />
+                </td>
               </tr>
               {categories.map((category, i) => (
                 <tr key={i}>
-                  <td>{category.code}</td>
-                  <td>{category.name}</td>
+                  <td>
+                    <span
+                      className={s.catName}
+                      onClick={() => setCategory(category)}
+                    >
+                      {category.name}
+                    </span>
+                  </td>
                   <TableActions
                     actions={[
                       {
                         icon: <BsPencilFill />,
                         label: "Edit",
-                        callBack: () => console.log("edit", category.code),
+                        callBack: () => setEdit(category),
                       },
                       {
                         icon: <FaRegTrashAlt />,
                         label: "Delete",
-                        callBack: () => console.log("delete", category.code),
+                        callBack: () =>
+                          Prompt({
+                            type: "confirmation",
+                            message: `Are you sure you want to remove ${category.name}?`,
+                            callback: () => {
+                              fetch(
+                                `${process.env.REACT_APP_HOST}/category/${category.id}`,
+                                {
+                                  method: "DELETE",
+                                }
+                              ).then((res) => {
+                                if (res.status === 204) {
+                                  setCategories((prev) =>
+                                    prev.filter((c) => c.id !== category.id)
+                                  );
+                                }
+                              });
+                            },
+                          }),
                       },
                     ]}
                   />
@@ -104,162 +114,162 @@ export default function Categories() {
             </Table>
           </div>
         </Box>
-        {category && (
-          <Box label="SUB CATEGORY DETAILS">
-            <div className={s.subCategory}>
-              <div className={s.head}>
-                <Input className={s.input} label="Category Name" />
-                <Input className={s.input} label="Category Code" />
-                {
-                  //   <button
-                  //   className={`clear ${s.addBtn}`}
-                  //   onClick={() => setAddSubCategory(true)}
-                  // >
-                  //   <FaPlus /> Add New Sub Category
-                  // </button>
-                }
-              </div>
-              <Table
-                columns={[
-                  { label: "Code" },
-                  { label: "Sub Category" },
-                  { label: "Template" },
-                  { label: "Sentinel" },
-                  { label: "Reportable" },
-                  { label: "Status" },
-                  { label: "Action" },
-                ]}
-              >
-                <tr className={s.filterForm}>
-                  <SubCategoryForm />
-                </tr>
-                {subCategories.map((category, i) => (
-                  <tr key={i}>
-                    <td>{category.code}</td>
-                    <td>{category.name}</td>
-                    <td>{category.template}</td>
-                    <td>{category.sentinel ? "Sentinel" : ""}</td>
-                    <td>{category.reportable ? "Reportable" : ""}</td>
-                    <td>
-                      <Toggle defaultValue={category.status} />
-                    </td>
-                    <TableActions
-                      actions={[
-                        {
-                          icon: <BsPencilFill />,
-                          label: "Edit",
-                          callBack: () => console.log("edit", category.code),
-                        },
-                        {
-                          icon: <FaRegTrashAlt />,
-                          label: "Delete",
-                          callBack: () => console.log("delete", category.code),
-                        },
-                      ]}
-                    />
-                  </tr>
-                ))}
-              </Table>
-            </div>
-          </Box>
-        )}
+        {category && <SubCategories category={category} />}
       </div>
-      {
-        //   <Modal open={addCategory} onBackdropClick={() => setAddCategory(false)}>
-        //   <CategoryForm
-        //     onSuccess={(category) => {
-        //       setAddCategory(false);
-        //     }}
-        //   />
-        // </Modal>
-        // <Modal
-        //   open={addSubCategory}
-        //   onBackdropClick={() => setAddSubCategory(false)}
-        // >
-        //   <SubCategoryForm
-        //     onSuccess={(category) => {
-        //       setAddSubCategory(false);
-        //     }}
-        //   />
-        // </Modal>
-      }
     </div>
   );
 }
-const CategoryForm = ({ edit, onChange }) => {
+const SubCategories = ({ category }) => {
+  return (
+    <Box label="SUB CATEGORY DETAILS">
+      <div className={s.subCategory}>
+        <div className={s.head}>
+          <Form defaultValues={{ name: category.name }}>
+            <Input
+              className={s.input}
+              name="name"
+              label="Category Name"
+              readOnly={true}
+            />
+          </Form>
+        </div>
+        <Table
+          columns={[
+            { label: "Sub Category" },
+            { label: "Template" },
+            { label: "Sentinel" },
+            { label: "Reportable" },
+            { label: "Status" },
+            { label: "Action" },
+          ]}
+        >
+          <tr className={s.filterForm}>
+            <SubCategoryForm
+              category={category}
+              onSuccess={(subCategory) => {
+                // setSubCategories((prev) => [...prev, subCategory])
+              }}
+            />
+          </tr>
+          {(category.subCategory || []).map((category, i) => (
+            <tr key={i}>
+              <td>{category.name}</td>
+              <td>{category.template}</td>
+              <td>{category.sentinel ? "Sentinel" : ""}</td>
+              <td>{category.reportable ? "Reportable" : ""}</td>
+              <td>
+                <Toggle defaultValue={category.status} />
+              </td>
+              <TableActions
+                actions={[
+                  {
+                    icon: <BsPencilFill />,
+                    label: "Edit",
+                    callBack: () => console.log("edit", category.code),
+                  },
+                  {
+                    icon: <FaRegTrashAlt />,
+                    label: "Delete",
+                    callBack: () => console.log("delete", category.code),
+                  },
+                ]}
+              />
+            </tr>
+          ))}
+        </Table>
+      </div>
+    </Box>
+  );
+};
+const CategoryForm = ({ edit, onSuccess, clearForm }) => {
+  const { handleSubmit, register, reset } = useForm(edit || {});
+  useEffect(() => {
+    if (edit) {
+      reset(edit);
+    }
+  }, [edit]);
+  return (
+    <form
+      onSubmit={handleSubmit((data) => {
+        const url = `${process.env.REACT_APP_HOST}/category${
+          edit ? `/${edit.id}` : ""
+        }`;
+        fetch(url, {
+          method: edit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.name) {
+              onSuccess(data);
+              reset();
+            }
+          });
+      })}
+    >
+      <Input name="name" register={register} required={true} />
+      <div className={s.btns}>
+        <button className="btn secondary">
+          {edit ? <FaCheck /> : <FaPlus />}
+        </button>
+        {edit && (
+          <button
+            type="button"
+            onClick={() => {
+              reset();
+              clearForm();
+            }}
+            className="btn secondary"
+          >
+            <IoClose />
+          </button>
+        )}
+      </div>
+    </form>
+  );
+};
+const SubCategoryForm = ({ edit, category, onSuccess }) => {
+  const { handleSubmit, register, reset, watch } = useForm(edit);
+  useEffect(() => {}, [watch]);
   return (
     <td className={s.inlineForm}>
-      <form>
-        <Input placeholder="Enter" />
+      <form
+        onSubmit={handleSubmit((data) => {
+          fetch(`${process.env.REACT_APP_HOST}/subCategory`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...data,
+              category: category._links.self.href,
+            }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.name) {
+                onSuccess(data);
+                reset();
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        })}
+      >
+        <Input register={register} name="name" placeholder="Enter" />
+        <Input
+          register={register}
+          name="template"
+          placeholder="Enter"
+          icon={<BiSearch />}
+        />
+        <Checkbox register={register} name="sentinel" />
+        <Checkbox register={register} name="reportable" />
+        <Toggle register={register} name="status" />
         <button className="btn secondary">
           <FaPlus />
         </button>
       </form>
     </td>
-  );
-};
-const SubCategoryForm = ({ edit, onChange }) => {
-  return (
-    <td className={s.inlineForm}>
-      <form>
-        <Input placeholder="Enter" />
-        <Input placeholder="Enter" icon={<BiSearch />} />
-        <Input placeholder="Enter" icon={<BiSearch />} />
-        <input type="checkbox" />
-        <input type="checkbox" />
-        <Toggle default={true} />
-        <button className="btn secondary">
-          <FaPlus />
-        </button>
-      </form>
-    </td>
-  );
-};
-const CategoryForm_pop = ({ edit, onChange }) => {
-  const [categoryName, setCategoryName] = useState(edit?.name || "");
-  return (
-    <form
-      className={s.categoryForm}
-      onSubmit={(e) => {
-        e.preventDefault();
-      }}
-    >
-      <h3>Add Category</h3>
-      <section className={s.inputs}>
-        <Input
-          required={true}
-          defaultValue={categoryName}
-          placeholder="Category Name"
-          onChange={(e) => setCategoryName(e.target.value)}
-        />
-        <button className="btn">
-          <TiTick />
-        </button>
-      </section>
-    </form>
-  );
-};
-const SubCategoryForm_pop = ({ edit, onChange }) => {
-  const [categoryName, setCategoryName] = useState(edit?.name || "");
-  return (
-    <form
-      className={s.categoryForm}
-      onSubmit={(e) => {
-        e.preventDefault();
-      }}
-    >
-      <h3>Add Sub Category</h3>
-      <section className={s.inputs}>
-        <Input
-          required={true}
-          defaultValue={categoryName}
-          placeholder="Sub Category Name"
-          onChange={(e) => setCategoryName(e.target.value)}
-        />
-        <button className="btn">
-          <TiTick />
-        </button>
-      </section>
-    </form>
   );
 };

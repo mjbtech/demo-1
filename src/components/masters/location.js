@@ -5,7 +5,14 @@ import { BiSearch } from "react-icons/bi";
 import { Box } from "../incidentReport";
 import { TiTick } from "react-icons/ti";
 import { IoIosClose } from "react-icons/io";
-import { Input, Combobox, Table, TableActions, Toggle } from "../elements";
+import {
+  Form,
+  Input,
+  Combobox,
+  Table,
+  TableActions,
+  Toggle,
+} from "../elements";
 import { Modal } from "../modal";
 import s from "./masters.module.scss";
 
@@ -44,7 +51,12 @@ export default function Categories() {
         >
           <tr>
             <td className={s.inlineForm}>
-              <LocationForm />
+              <LocationForm
+                edit={{
+                  status: true,
+                  locationType: ["Location type one", "Location type two"],
+                }}
+              />
             </td>
           </tr>
           {locations.map((loc, i) => (
@@ -80,31 +92,28 @@ export default function Categories() {
   );
 }
 const LocationForm = ({ edit, onChange }) => {
-  const [code, setCode] = useState(edit?.code || "");
-  const [name, setName] = useState(edit?.name || "");
   const [type, setType] = useState(edit?.type || "");
-  const [status, setStatus] = useState(edit?.status || "");
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
+    <Form
+      defaultValues={edit}
+      onSubmit={(data) => {
+        console.log(data);
       }}
     >
       <Input
         required={true}
-        defaultValue={code}
+        name="code"
         placeholder="Enter"
-        onChange={(e) => setCode(e.target.value)}
         icon={<BiSearch />}
       />
       <Input
         required={true}
-        defaultValue={name}
+        name="name"
         placeholder="Enter"
-        onChange={(e) => setName(e.target.value)}
         icon={<BiSearch />}
       />
       <Combobox
+        name="locationType"
         required={true}
         placeholder="Enter"
         multiple={true}
@@ -116,10 +125,10 @@ const LocationForm = ({ edit, onChange }) => {
         ]}
         onChange={(e) => setType(e.target.value)}
       />
-      <Toggle defaultValue={status} onChange={(value) => setStatus(value)} />
+      <Toggle name="status" />
       <button className="btn secondary">
         <FaPlus />
       </button>
-    </form>
+    </Form>
   );
 };

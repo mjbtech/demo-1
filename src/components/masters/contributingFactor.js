@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaInfoCircle, FaPlus, FaRegTrashAlt } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
@@ -35,13 +35,26 @@ export default function Categories() {
       status: true,
     },
   ]);
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_HOST}/contributingFactors`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        // if (data._embedded?.category) {
+        //   setCategories(data._embedded.category);
+        // }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   return (
     <div className={s.container}>
       <header>
         <h3>CONTRIBUTING FACTOR</h3>
       </header>
       <div className={s.content}>
-        <Box label="CATEGORY">
+        <Box label="CONTRIBUTING FACTOR">
           <div className={s.contributingFactor}>
             <div className={s.head}>
               <Input placeholder="Quick Search" icon={<BiSearch />} />
@@ -63,51 +76,53 @@ export default function Categories() {
             </Table>
           </div>
         </Box>
-        {category && (
-          <Box label="CATEGORY DETAILS">
-            <div className={s.contributingFactorDetail}>
-              <div className={s.head}>
-                <Input label="Category Name" />
-              </div>
-              <Table columns={[{ label: "Description" }, { label: "Action" }]}>
-                <tr className={s.filterForm}>
-                  <td>
-                    <Input
-                      required={true}
-                      defaultValue={""}
-                      placeholder="Enter"
-                      onChange={(e) => {}}
-                    />
-                  </td>
-                  <td>
-                    <button className="btn secondary">
-                      <TiTick />
-                    </button>
-                  </td>
-                </tr>
-                {subCategories.map((category, i) => (
-                  <tr key={i}>
-                    <td>{category.name}</td>
-                    <TableActions
-                      actions={[
-                        {
-                          icon: <BsPencilFill />,
-                          label: "Edit",
-                          callBack: () => console.log("edit", category.code),
-                        },
-                        {
-                          icon: <FaRegTrashAlt />,
-                          label: "Delete",
-                          callBack: () => console.log("delete", category.code),
-                        },
-                      ]}
-                    />
-                  </tr>
-                ))}
-              </Table>
-            </div>
-          </Box>
-        )}
+        {
+          //   category && (
+          //   <Box label="CATEGORY DETAILS">
+          //     <div className={s.contributingFactorDetail}>
+          //       <div className={s.head}>
+          //         <Input label="Category Name" />
+          //       </div>
+          //       <Table columns={[{ label: "Description" }, { label: "Action" }]}>
+          //         <tr className={s.filterForm}>
+          //           <td>
+          //             <Input
+          //               required={true}
+          //               defaultValue={""}
+          //               placeholder="Enter"
+          //               onChange={(e) => {}}
+          //             />
+          //           </td>
+          //           <td>
+          //             <button className="btn secondary">
+          //               <TiTick />
+          //             </button>
+          //           </td>
+          //         </tr>
+          //         {subCategories.map((category, i) => (
+          //           <tr key={i}>
+          //             <td>{category.name}</td>
+          //             <TableActions
+          //               actions={[
+          //                 {
+          //                   icon: <BsPencilFill />,
+          //                   label: "Edit",
+          //                   callBack: () => console.log("edit", category.code),
+          //                 },
+          //                 {
+          //                   icon: <FaRegTrashAlt />,
+          //                   label: "Delete",
+          //                   callBack: () => console.log("delete", category.code),
+          //                 },
+          //               ]}
+          //             />
+          //           </tr>
+          //         ))}
+          //       </Table>
+          //     </div>
+          //   </Box>
+          // )
+        }
         <InjuryAnnotation />
       </div>
     </div>
