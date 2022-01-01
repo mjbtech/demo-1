@@ -264,7 +264,7 @@ const RcaCauses = ({ rca: { id, name, rcaCauses }, setRcas }) => {
                         message: `Are you sure you want to remove ${rca.name}?`,
                         callback: () => {
                           fetch(
-                            `${process.env.REACT_APP_HOST}/rcaCause/${rca.id}`,
+                            `${process.env.REACT_APP_HOST}/rcaCauses/${rca.id}`,
                             { method: "DELETE" }
                           ).then((res) => {
                             if (res.status === 204) {
