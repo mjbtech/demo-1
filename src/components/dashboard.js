@@ -89,7 +89,7 @@ function Dashboard() {
             items={[
               { label: <>Main Configuration</>, path: "mainConfig" },
               { label: <>User Permission</>, path: "userPermission" },
-              { label: <>IR Data analytics</>, path: "irDataAnalytics" },
+              { label: <>IR Data Analytics</>, path: "irDataAnalytics" },
             ]}
           />
           <Accordion
@@ -105,9 +105,9 @@ function Dashboard() {
                 label: <>Category & Sub Category</>,
                 path: "categoryAndSubCategory",
               },
-              { label: <>User master</>, path: "userMaster" },
+              { label: <>User Master</>, path: "userMaster" },
               { label: <>Risk Assessment</>, path: "riskAssessment" },
-              { label: <>Person affected</>, path: "personAffected" },
+              { label: <>Person Affected</>, path: "personAffected" },
               { label: <>Two Field Master</>, path: "twoFieldMaster" },
               { label: <>Contributing Factor</>, path: "contributingFactor" },
               { label: <>RCA Master</>, path: "rca" },

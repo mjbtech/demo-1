@@ -226,7 +226,7 @@ const PersonAffectedDetail = ({
                       return {
                         ...pa,
                         personAffectedDetails: [
-                          ...pa.personAffectedDetails,
+                          ...(pa.personAffectedDetails || []),
                           personAffectedDetail,
                         ],
                       };

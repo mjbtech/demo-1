@@ -1,44 +1,42 @@
-import { useState } from "react";
-import { FaInfoCircle, FaPlus, FaRegTrashAlt } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaInfoCircle, FaPlus, FaCheck, FaRegTrashAlt } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
+import { RiCloseLine } from "react-icons/ri";
+import { IoClose } from "react-icons/io5";
 import { Box } from "../incidentReport";
-import { TiTick } from "react-icons/ti";
-import { IoIosClose } from "react-icons/io";
-import { Input, Table, TableActions, Toggle } from "../elements";
-import { Modal } from "../modal";
+import {
+  Form,
+  Input,
+  Checkbox,
+  Table,
+  TableActions,
+  Toggle,
+} from "../elements";
+import { useForm } from "react-hook-form";
+import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
-export default function TwoFieldMaster() {
-  const [category, setCategory] = useState("one");
-  const [categories, setCategories] = useState([
-    { name: "Patient", status: true },
-    { name: "Staff", status: true },
-    { name: "Visitor", status: false },
-    { name: "Contractor", status: true },
-  ]);
-  const [subCategories, setSubCategories] = useState([
-    {
-      name: "Sub Category One",
-      status: true,
-    },
-    {
-      name: "Sub Category Two",
-      status: true,
-    },
-    {
-      name: "Sub Category Three",
-      status: false,
-    },
-    {
-      name: "Sub Category Four",
-      status: true,
-    },
-  ]);
+export default function TwoFieldMasters() {
+  const [twoFieldMaster, setTwoFieldMaster] = useState(null);
+  const [twoFieldMasters, setTwoFieldMasters] = useState([]);
+  const [edit, setEdit] = useState(null);
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data._embedded?.twoFieldMaster) {
+          setTwoFieldMasters(data._embedded.twoFieldMaster);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   return (
     <div className={s.container}>
       <header>
-        <h3>TWO FIELD MASTERS</h3>
+        <h3>TWO FIELD MASTER</h3>
       </header>
       <div className={s.content}>
         <Box label="MASTERS LIST">
@@ -46,100 +44,332 @@ export default function TwoFieldMaster() {
             <div className={s.head}>
               <Input placeholder="Quick Search" icon={<BiSearch />} />
             </div>
-            <Table columns={[{ label: "Master Name" }, { label: "Action" }]}>
-              <tr>
+            <Table
+              columns={[{ label: "TwoFieldMaster Name" }, { label: "Action" }]}
+            >
+              <tr className={s.filterForm}>
                 <td className={s.inlineForm}>
-                  <TowFiledForm />
+                  {edit ? (
+                    <TwoFieldMasterForm
+                      key="edit"
+                      edit={edit}
+                      onSuccess={(newCat) => {
+                        setTwoFieldMasters((prev) => {
+                          return prev.find((c) => c.id === newCat.id)
+                            ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                            : [...prev, newCat];
+                        });
+                        setEdit(null);
+                      }}
+                      clearForm={() => {
+                        setEdit(null);
+                      }}
+                    />
+                  ) : (
+                    <TwoFieldMasterForm
+                      key="add"
+                      onSuccess={(newCat) => {
+                        setTwoFieldMasters((prev) => {
+                          return prev.find((c) => c.id === newCat.id)
+                            ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                            : [...prev, newCat];
+                        });
+                      }}
+                    />
+                  )}
                 </td>
               </tr>
-              {categories.map((category, i) => (
+              {twoFieldMasters.map((twoFieldMaster, i) => (
                 <tr key={i}>
-                  <td>{category.name}</td>
-                  <td></td>
+                  <td>
+                    <span
+                      className={s.twoFieldMasterName}
+                      onClick={() => setTwoFieldMaster(twoFieldMaster.id)}
+                    >
+                      {twoFieldMaster.name}
+                    </span>
+                  </td>
+                  <TableActions
+                    actions={[
+                      {
+                        icon: <BsPencilFill />,
+                        label: "Edit",
+                        callBack: () => setEdit(twoFieldMaster),
+                      },
+                      {
+                        icon: <FaRegTrashAlt />,
+                        label: "Delete",
+                        callBack: () =>
+                          Prompt({
+                            type: "confirmation",
+                            message: `Are you sure you want to remove ${twoFieldMaster.name}?`,
+                            callback: () => {
+                              fetch(
+                                `${process.env.REACT_APP_HOST}/twoFieldMaster/${twoFieldMaster.id}`,
+                                {
+                                  method: "DELETE",
+                                }
+                              ).then((res) => {
+                                if (res.status === 204) {
+                                  setTwoFieldMasters((prev) =>
+                                    prev.filter(
+                                      (c) => c.id !== twoFieldMaster.id
+                                    )
+                                  );
+                                } else if (res.status === 409) {
+                                  Prompt({
+                                    type: "error",
+                                    message:
+                                      "Remove children to delete this master.",
+                                  });
+                                }
+                              });
+                            },
+                          }),
+                      },
+                    ]}
+                  />
                 </tr>
               ))}
             </Table>
           </div>
         </Box>
-        {category && (
-          <Box label="MASTER DETAILS">
-            <div className={s.twoFieldMasterDetail}>
-              <div className={s.head}>
-                <Input label="Selected Master" />
-              </div>
-              <Table
-                columns={[
-                  { label: "Description" },
-                  { label: "Status" },
-                  { label: "Action" },
-                ]}
-              >
-                <tr>
-                  <td className={s.inlineForm}>
-                    <TwoFieldMasterForm />
-                  </td>
-                </tr>
-                {subCategories.map((category, i) => (
-                  <tr key={i}>
-                    <td>{category.name}</td>
-                    <td>
-                      <Toggle defaultValue={category.status} />
-                    </td>
-                    <TableActions
-                      actions={[
-                        {
-                          icon: <BsPencilFill />,
-                          label: "Edit",
-                          callBack: () => console.log("edit", category.code),
-                        },
-                      ]}
-                    />
-                  </tr>
-                ))}
-              </Table>
-            </div>
-          </Box>
+        {twoFieldMasters.find((cat) => cat.id === twoFieldMaster) && (
+          <TwoFieldMasterDetails
+            twoFieldMaster={twoFieldMasters.find(
+              (cat) => cat.id === twoFieldMaster
+            )}
+            setTwoFieldMasters={setTwoFieldMasters}
+          />
         )}
-        <div className={s.btns}>
-          <button className="btn w-100">Save</button>
-        </div>
       </div>
     </div>
   );
 }
-const TowFiledForm = ({ edit, onChange }) => {
-  const [categoryName, setCategoryName] = useState(edit?.name || "");
+const TwoFieldMasterForm = ({ edit, onSuccess, clearForm }) => {
+  const { handleSubmit, register, reset } = useForm({ ...edit });
+  useEffect(() => {
+    reset({ ...edit });
+  }, [edit]);
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-      }}
+      onSubmit={handleSubmit((data) => {
+        const url = `${process.env.REACT_APP_HOST}/twoFieldMaster${
+          edit ? `/${edit.id}` : ""
+        }`;
+        fetch(url, {
+          method: edit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.name) {
+              onSuccess(data);
+              reset();
+            }
+          });
+      })}
     >
-      <Input
-        required={true}
-        defaultValue={categoryName}
-        placeholder="Enter"
-        onChange={(e) => setCategoryName(e.target.value)}
-      />
-      <button className="btn secondary">
-        <TiTick />
-      </button>
+      <Input name="name" register={register} required={true} />
+      <div className={s.btns}>
+        <button className="btn secondary">
+          {edit ? <FaCheck /> : <FaPlus />}
+        </button>
+        {edit && (
+          <button
+            type="button"
+            onClick={() => {
+              clearForm();
+            }}
+            className="btn secondary"
+          >
+            <IoClose />
+          </button>
+        )}
+      </div>
     </form>
   );
 };
-const TwoFieldMasterForm = ({ edit, onChange }) => {
+
+const TwoFieldMasterDetails = ({
+  twoFieldMaster: { id, name, twoFieldMasterDetails },
+  setTwoFieldMasters,
+}) => {
+  const [edit, setEdit] = useState(null);
   return (
-    <form>
+    <Box label="MASTER DETAILS">
+      <div className={s.twoFieldMasterDetail}>
+        <div className={s.head}>
+          <span className={s.twoFieldMasterName}>
+            TwoFieldMaster name: <strong>{name}</strong>
+          </span>
+        </div>
+        <Table columns={[{ label: "Cause" }, { label: "Action" }]}>
+          <tr>
+            <td className={s.inlineForm}>
+              {edit ? (
+                <TwoFieldMasterDetailForm
+                  key="edit"
+                  edit={edit}
+                  twoFieldMasterId={id}
+                  onSuccess={(twoFieldMasterDetail) => {
+                    setTwoFieldMasters((prev) =>
+                      prev.map((cat) => {
+                        const newTwoFieldMasterDetails = cat.twoFieldMasterDetails?.find(
+                          (sc) => sc.id === twoFieldMasterDetail.id
+                        )
+                          ? cat.twoFieldMasterDetails?.map((sc) =>
+                              sc.id === twoFieldMasterDetail.id
+                                ? twoFieldMasterDetail
+                                : sc
+                            )
+                          : [
+                              ...(cat.twoFieldMasterDetails || []),
+                              twoFieldMasterDetail,
+                            ];
+                        return cat.id === id
+                          ? {
+                              ...cat,
+                              twoFieldMasterDetails: newTwoFieldMasterDetails,
+                            }
+                          : cat;
+                      })
+                    );
+                    setEdit(null);
+                  }}
+                  clearForm={() => {
+                    setEdit(null);
+                  }}
+                />
+              ) : (
+                <TwoFieldMasterDetailForm
+                  key="add"
+                  twoFieldMasterId={id}
+                  onSuccess={(twoFieldMasterDetail) => {
+                    setTwoFieldMasters((prev) =>
+                      prev.map((cat) =>
+                        cat.id === id
+                          ? {
+                              ...cat,
+                              twoFieldMasterDetails: [
+                                ...(cat.twoFieldMasterDetails || []),
+                                twoFieldMasterDetail,
+                              ],
+                            }
+                          : cat
+                      )
+                    );
+                  }}
+                />
+              )}
+            </td>
+          </tr>
+          {(twoFieldMasterDetails || []).map((twoFieldMaster, i) => (
+            <tr key={i}>
+              <td>{twoFieldMaster.name}</td>
+              <TableActions
+                actions={[
+                  {
+                    icon: <BsPencilFill />,
+                    label: "Edit",
+                    callBack: () => setEdit(twoFieldMaster),
+                  },
+                  {
+                    icon: <FaRegTrashAlt />,
+                    label: "Delete",
+                    callBack: () =>
+                      Prompt({
+                        type: "confirmation",
+                        message: `Are you sure you want to remove ${twoFieldMaster.name}?`,
+                        callback: () => {
+                          fetch(
+                            `${process.env.REACT_APP_HOST}/twoFieldMasterDetail/${twoFieldMaster.id}`,
+                            { method: "DELETE" }
+                          ).then((res) => {
+                            if (res.status === 204) {
+                              setTwoFieldMasters((prev) =>
+                                prev.map((cat) =>
+                                  cat.id === id
+                                    ? {
+                                        ...cat,
+                                        twoFieldMasterDetails: cat.twoFieldMasterDetails.filter(
+                                          (c) => c.id !== twoFieldMaster.id
+                                        ),
+                                      }
+                                    : cat
+                                )
+                              );
+                            }
+                          });
+                        },
+                      }),
+                  },
+                ]}
+              />
+            </tr>
+          ))}
+        </Table>
+      </div>
+    </Box>
+  );
+};
+const TwoFieldMasterDetailForm = ({
+  edit,
+  twoFieldMasterId,
+  onSuccess,
+  clearForm,
+}) => {
+  const { handleSubmit, register, reset } = useForm({ ...edit });
+  useEffect(() => {
+    reset({ ...edit });
+  }, [edit]);
+  return (
+    <form
+      onSubmit={handleSubmit((data) => {
+        fetch(`${process.env.REACT_APP_HOST}/twoFieldMasterDetails`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...data,
+            twoFieldMaster: { id: twoFieldMasterId },
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.name) {
+              onSuccess(data);
+              reset();
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })}
+    >
       <Input
+        register={register}
         required={true}
-        defaultValue={""}
+        name="name"
         placeholder="Enter"
-        onChange={(e) => {}}
       />
-      <Toggle defaultValue={false} />
-      <button className="btn secondary">
-        <TiTick />
-      </button>
+      <div className={s.btns}>
+        <button className="btn secondary">
+          {edit ? <FaCheck /> : <FaPlus />}
+        </button>
+        {edit && (
+          <button
+            type="button"
+            onClick={() => {
+              reset();
+              clearForm();
+            }}
+            className="btn secondary"
+          >
+            <IoClose />
+          </button>
+        )}
+      </div>
     </form>
   );
 };

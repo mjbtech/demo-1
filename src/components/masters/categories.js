@@ -254,7 +254,10 @@ const SubCategories = ({
                         cat.id === id
                           ? {
                               ...cat,
-                              subCategorys: [...cat.subCategorys, subCategory],
+                              subCategorys: [
+                                ...(cat.subCategorys || []),
+                                subCategory,
+                              ],
                             }
                           : cat
                       )
