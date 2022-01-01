@@ -35,21 +35,23 @@
       }
       form,
       tr {
-        grid-template-columns: 1fr 1fr 5rem 6rem 3rem 3.3rem;
+        grid-template-columns: 1fr 1fr 5rem 6rem 3rem 4rem;
+      }
+      .head {
+        .categoryName {
+          padding: 0.25rem 0;
+        }
       }
     }
     .category {
       table {
         tbody {
           tr {
-            color: #3450a3;
             form {
               grid-template-columns: 1fr max-content;
-              .btns {
-                grid-column: 2/3;
-              }
             }
             .catName {
+              color: #3450a3;
               text-decoration: underline;
               cursor: pointer;
             }
@@ -97,7 +99,15 @@
           section {
             flex: 1;
           }
+          .btns {
+            grid-column: -1/-2;
+          }
         }
+      }
+      .conName {
+        color: #3450a3;
+        text-decoration: underline;
+        cursor: pointer;
       }
     }
     .personAffected {
@@ -120,6 +130,7 @@
         td {
           &:last-child {
             text-align: left;
+            margin-left: 0;
           }
         }
       }
@@ -177,7 +188,7 @@
         }
       }
       .inlineForm form {
-        grid-template-columns: 1fr max-content;
+        grid-template-columns: clamp(5rem, 50%, 20rem) max-content;
       }
     }
   }

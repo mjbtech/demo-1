@@ -1,48 +1,33 @@
 import { useState, useEffect } from "react";
-import { FaInfoCircle, FaPlus, FaRegTrashAlt } from "react-icons/fa";
+import { FaInfoCircle, FaPlus, FaCheck, FaRegTrashAlt } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
+import { RiCloseLine } from "react-icons/ri";
+import { IoClose } from "react-icons/io5";
 import { Box } from "../incidentReport";
-import { TiTick } from "react-icons/ti";
-import { IoIosClose } from "react-icons/io";
-import { Input, Table, TableActions, Toggle } from "../elements";
-import { Modal } from "../modal";
+import {
+  Form,
+  Input,
+  Checkbox,
+  Table,
+  TableActions,
+  Toggle,
+} from "../elements";
+import { useForm } from "react-hook-form";
+import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
-export default function Categories() {
-  const [category, setCategory] = useState("one");
-  const [categories, setCategories] = useState([
-    { name: "Patient", status: true },
-    { name: "Staff", status: true },
-    { name: "Visitor", status: false },
-    { name: "Contractor", status: true },
-  ]);
-  const [subCategories, setSubCategories] = useState([
-    {
-      name: "Sub Category One",
-      status: true,
-    },
-    {
-      name: "Sub Category Two",
-      status: true,
-    },
-    {
-      name: "Sub Category Three",
-      status: false,
-    },
-    {
-      name: "Sub Category Four",
-      status: true,
-    },
-  ]);
+export default function ContributingFactor() {
+  const [contributingFactor, setContributingFactor] = useState(null);
+  const [contributingFactors, setContributingFactors] = useState([]);
+  const [edit, setEdit] = useState(null);
   useEffect(() => {
     fetch(`${process.env.REACT_APP_HOST}/contributingFactors`)
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
-        // if (data._embedded?.category) {
-        //   setCategories(data._embedded.category);
-        // }
+        if (data._embedded?.contributingFactors) {
+          setContributingFactors(data._embedded.contributingFactors);
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -51,111 +36,324 @@ export default function Categories() {
   return (
     <div className={s.container}>
       <header>
-        <h3>CONTRIBUTING FACTOR</h3>
+        <h3>CONTRIBUTING FACTORS</h3>
       </header>
       <div className={s.content}>
-        <Box label="CONTRIBUTING FACTOR">
+        <Box label="CONTRIBUTING FACTORS">
           <div className={s.contributingFactor}>
             <div className={s.head}>
               <Input placeholder="Quick Search" icon={<BiSearch />} />
             </div>
-            <Table columns={[{ label: "Master Name" }, { label: "Action" }]}>
-              <tr>
+            <Table columns={[{ label: "Master name" }, { label: "Action" }]}>
+              <tr className={s.filterForm}>
                 <td className={s.inlineForm}>
-                  <CategoryForm />
+                  {edit ? (
+                    <ContributingFactorForm
+                      key="edit"
+                      edit={edit}
+                      onSuccess={(newCon) => {
+                        setContributingFactors((prev) => {
+                          return prev.find((con) => con.cf_id === newCon.cf_id)
+                            ? prev.map((con) =>
+                                con.cf_id === newCon.cf_id ? newCon : con
+                              )
+                            : [...prev, newCon];
+                        });
+                        setEdit(null);
+                      }}
+                      clearForm={() => {
+                        setEdit(null);
+                      }}
+                    />
+                  ) : (
+                    <ContributingFactorForm
+                      key="add"
+                      onSuccess={(newCon) => {
+                        console.log(newCon);
+                        setContributingFactors((prev) => {
+                          return prev.find((c) => c.cf_id === newCon.cf_id)
+                            ? prev.map((c) =>
+                                c.cf_id === newCon.cf_id ? newCon : c
+                              )
+                            : [...prev, newCon];
+                        });
+                        setEdit(null);
+                      }}
+                    />
+                  )}
                 </td>
               </tr>
-              {categories.map((category, i) => (
+              {contributingFactors.map((contributingFactor, i) => (
                 <tr key={i}>
-                  <td>{category.name}</td>
                   <td>
-                    <Toggle defaultValue={category.status} />
+                    <span
+                      className={s.conName}
+                      onClick={() =>
+                        setContributingFactor(contributingFactor.cf_id)
+                      }
+                    >
+                      {contributingFactor.name}
+                    </span>
                   </td>
+                  <TableActions
+                    actions={[
+                      {
+                        icon: <BsPencilFill />,
+                        label: "Edit",
+                        callBack: () => setEdit(contributingFactor),
+                      },
+                      {
+                        icon: <FaRegTrashAlt />,
+                        label: "Delete",
+                        callBack: () =>
+                          Prompt({
+                            type: "confirmation",
+                            message: `Are you sure you want to remove ${contributingFactor.name}?`,
+                            callback: () => {
+                              fetch(
+                                `${process.env.REACT_APP_HOST}/contributingFactors/${contributingFactor.cf_id}`,
+                                { method: "DELETE" }
+                              ).then((res) => {
+                                if (res.status === 204) {
+                                  setContributingFactors((prev) =>
+                                    prev.filter(
+                                      (con) =>
+                                        con.cf_id !== contributingFactor.cf_id
+                                    )
+                                  );
+                                }
+                              });
+                            },
+                          }),
+                      },
+                    ]}
+                  />
                 </tr>
               ))}
             </Table>
           </div>
         </Box>
-        {
-          //   category && (
-          //   <Box label="CATEGORY DETAILS">
-          //     <div className={s.contributingFactorDetail}>
-          //       <div className={s.head}>
-          //         <Input label="Category Name" />
-          //       </div>
-          //       <Table columns={[{ label: "Description" }, { label: "Action" }]}>
-          //         <tr className={s.filterForm}>
-          //           <td>
-          //             <Input
-          //               required={true}
-          //               defaultValue={""}
-          //               placeholder="Enter"
-          //               onChange={(e) => {}}
-          //             />
-          //           </td>
-          //           <td>
-          //             <button className="btn secondary">
-          //               <TiTick />
-          //             </button>
-          //           </td>
-          //         </tr>
-          //         {subCategories.map((category, i) => (
-          //           <tr key={i}>
-          //             <td>{category.name}</td>
-          //             <TableActions
-          //               actions={[
-          //                 {
-          //                   icon: <BsPencilFill />,
-          //                   label: "Edit",
-          //                   callBack: () => console.log("edit", category.code),
-          //                 },
-          //                 {
-          //                   icon: <FaRegTrashAlt />,
-          //                   label: "Delete",
-          //                   callBack: () => console.log("delete", category.code),
-          //                 },
-          //               ]}
-          //             />
-          //           </tr>
-          //         ))}
-          //       </Table>
-          //     </div>
-          //   </Box>
-          // )
-        }
-        <InjuryAnnotation />
+        {contributingFactors.find(
+          (cat) => cat.cf_id === contributingFactor
+        ) && (
+          <ContributingFactorDetail
+            contributingFactor={contributingFactors.find(
+              (cat) => cat.cf_id === contributingFactor
+            )}
+            setContributingFactors={setContributingFactors}
+          />
+        )}
       </div>
     </div>
   );
 }
-const CategoryForm = ({ edit, onChange }) => {
-  const [categoryName, setCategoryName] = useState(edit?.name || "");
+const ContributingFactorForm = ({ edit, onSuccess, clearForm }) => {
+  const { handleSubmit, register, reset } = useForm({ ...edit });
+  useEffect(() => {
+    reset({ ...edit });
+  }, [edit]);
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-      }}
+      onSubmit={handleSubmit((data) => {
+        const url = `${process.env.REACT_APP_HOST}/contributingFactors${
+          edit ? `/${edit.cf_id}` : ""
+        }`;
+        fetch(url, {
+          method: edit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.name) {
+              onSuccess(data);
+              reset();
+            }
+          });
+      })}
     >
-      <Input
-        required={true}
-        defaultValue={categoryName}
-        placeholder="Enter"
-        onChange={(e) => setCategoryName(e.target.value)}
-      />
-      <button className="btn secondary">
-        <TiTick />
-      </button>
+      <Input name="name" register={register} required={true} />
+      <div className={s.btns}>
+        <button className="btn secondary">
+          {edit ? <FaCheck /> : <FaPlus />}
+        </button>
+        {edit && (
+          <button
+            type="button"
+            onClick={() => {
+              clearForm();
+            }}
+            className="btn secondary"
+          >
+            <IoClose />
+          </button>
+        )}
+      </div>
     </form>
   );
 };
-const InjuryAnnotation = () => {
-  const [templates, setTemplates] = useState([
-    { name: "Legs" },
-    { name: "Front and back" },
-  ]);
+
+const ContributingFactorDetail = ({
+  contributingFactor: { id, name, contributingFactorDetails },
+  setContributingFactors,
+}) => {
+  const [edit, setEdit] = useState(null);
   return (
-    <div className={s.annotationTemplate}>
-      <button className={`btn w-100 ${s.save}`}>Save</button>
-    </div>
+    <Box label="CONTRIBUTING FACTOR DETAILS">
+      <div className={s.contributingFactorDetail}>
+        <div className={s.head}>
+          <span className={s.contributingFactorName}>
+            Master name: <strong>{name}</strong>
+          </span>
+          {
+            //   <Form defaultValues={{ name: name }}>
+            //   <Input
+            //     className={s.input}
+            //     name="name"
+            //     label="Master name"
+            //     readOnly={true}
+            //   />
+            // </Form>
+          }
+        </div>
+        <Table columns={[{ label: "Description" }, { label: "Action" }]}>
+          <tr>
+            <td className={s.inlineForm}>
+              <ContributingFactorDetailForm
+                edit={edit}
+                contributingFactorId={id}
+                onSuccess={(contributingFactorDetail) => {
+                  setContributingFactors((prev) =>
+                    prev.map((con) =>
+                      con.id === id
+                        ? {
+                            ...con,
+                            contributingFactorDetails: [
+                              ...con.contributingFactorDetails,
+                              contributingFactorDetail,
+                            ],
+                          }
+                        : con
+                    )
+                  );
+                }}
+                clearForm={() => {
+                  setEdit(null);
+                }}
+              />
+            </td>
+          </tr>
+          {(contributingFactorDetails || []).map((contributingFactor, i) => (
+            <tr key={i}>
+              <td>{contributingFactor.name}</td>
+              <TableActions
+                actions={[
+                  {
+                    icon: <BsPencilFill />,
+                    label: "Edit",
+                    callBack: () => setEdit(contributingFactor),
+                  },
+                  {
+                    icon: <FaRegTrashAlt />,
+                    label: "Delete",
+                    callBack: () =>
+                      Prompt({
+                        type: "confirmation",
+                        message: `Are you sure you want to remove ${contributingFactor.name}?`,
+                        callback: () => {
+                          fetch(
+                            `${process.env.REACT_APP_HOST}/contributingFactorDetails/${contributingFactor.id}`,
+                            { method: "DELETE" }
+                          ).then((res) => {
+                            if (res.status === 204) {
+                              setContributingFactors((prev) =>
+                                prev.map((con) =>
+                                  con.cf_id === id
+                                    ? {
+                                        ...con,
+                                        contributingFactorDetail: con.contributingFactorDetail.filter(
+                                          (c) =>
+                                            c.cf_id !== contributingFactor.cf_id
+                                        ),
+                                      }
+                                    : con
+                                )
+                              );
+                            }
+                          });
+                        },
+                      }),
+                  },
+                ]}
+              />
+            </tr>
+          ))}
+        </Table>
+      </div>
+    </Box>
+  );
+};
+const ContributingFactorDetailForm = ({
+  edit,
+  contributingFactorId,
+  onSuccess,
+  clearForm,
+}) => {
+  const { handleSubmit, register, reset } = useForm({ ...edit });
+  useEffect(() => {
+    reset({ ...edit });
+  }, [edit]);
+  return (
+    <form
+      onSubmit={handleSubmit((data) => {
+        fetch(
+          `${process.env.REACT_APP_HOST}/contributingFactorDetails${
+            edit ? `/${edit.id}` : ""
+          }`,
+          {
+            method: edit ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...data,
+              contributingFactors: { cf_id: contributingFactorId },
+            }),
+          }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.name) {
+              onSuccess(data);
+              reset();
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })}
+    >
+      <Input
+        register={register}
+        required={true}
+        name="name"
+        placeholder="Enter"
+      />
+      <div className={s.btns}>
+        <button className="btn secondary">
+          {edit ? <FaCheck /> : <FaPlus />}
+        </button>
+        {edit && (
+          <button
+            type="button"
+            onClick={() => {
+              reset();
+              clearForm();
+            }}
+            className="btn secondary"
+          >
+            <IoClose />
+          </button>
+        )}
+      </div>
+    </form>
   );
 };

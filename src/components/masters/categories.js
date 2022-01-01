@@ -20,15 +20,11 @@ import s from "./masters.module.scss";
 export default function Categories() {
   const [category, setCategory] = useState(null);
   const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
-  const [addCategory, setAddCategory] = useState(false);
-  const [addSubCategory, setAddSubCategory] = useState(false);
   const [edit, setEdit] = useState(null);
   useEffect(() => {
     fetch(`${process.env.REACT_APP_HOST}/category`)
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         if (data._embedded?.category) {
           setCategories(data._embedded.category);
         }
@@ -51,20 +47,34 @@ export default function Categories() {
             <Table columns={[{ label: "Category Name" }, { label: "Action" }]}>
               <tr className={s.filterForm}>
                 <td className={s.inlineForm}>
-                  <CategoryForm
-                    edit={edit}
-                    onSuccess={(newCat) => {
-                      setCategories((prev) => {
-                        return prev.find((c) => c.id === newCat.id)
-                          ? prev.map((c) => (c.id === newCat.id ? newCat : c))
-                          : [...prev, newCat];
-                      });
-                      setEdit(null);
-                    }}
-                    clearForm={() => {
-                      setEdit(null);
-                    }}
-                  />
+                  {edit ? (
+                    <CategoryForm
+                      key="edit"
+                      edit={edit}
+                      onSuccess={(newCat) => {
+                        setCategories((prev) => {
+                          return prev.find((c) => c.id === newCat.id)
+                            ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                            : [...prev, newCat];
+                        });
+                        setEdit(null);
+                      }}
+                      clearForm={() => {
+                        setEdit(null);
+                      }}
+                    />
+                  ) : (
+                    <CategoryForm
+                      key="add"
+                      onSuccess={(newCat) => {
+                        setCategories((prev) => {
+                          return prev.find((c) => c.id === newCat.id)
+                            ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                            : [...prev, newCat];
+                        });
+                      }}
+                    />
+                  )}
                 </td>
               </tr>
               {categories.map((category, i) => (
@@ -72,7 +82,7 @@ export default function Categories() {
                   <td>
                     <span
                       className={s.catName}
-                      onClick={() => setCategory(category)}
+                      onClick={() => setCategory(category.id)}
                     >
                       {category.name}
                     </span>
@@ -114,79 +124,20 @@ export default function Categories() {
             </Table>
           </div>
         </Box>
-        {category && <SubCategories category={category} />}
+        {categories.find((cat) => cat.id === category) && (
+          <SubCategories
+            category={categories.find((cat) => cat.id === category)}
+            setCategories={setCategories}
+          />
+        )}
       </div>
     </div>
   );
 }
-const SubCategories = ({ category }) => {
-  return (
-    <Box label="SUB CATEGORY DETAILS">
-      <div className={s.subCategory}>
-        <div className={s.head}>
-          <Form defaultValues={{ name: category.name }}>
-            <Input
-              className={s.input}
-              name="name"
-              label="Category Name"
-              readOnly={true}
-            />
-          </Form>
-        </div>
-        <Table
-          columns={[
-            { label: "Sub Category" },
-            { label: "Template" },
-            { label: "Sentinel" },
-            { label: "Reportable" },
-            { label: "Status" },
-            { label: "Action" },
-          ]}
-        >
-          <tr className={s.filterForm}>
-            <SubCategoryForm
-              category={category}
-              onSuccess={(subCategory) => {
-                // setSubCategories((prev) => [...prev, subCategory])
-              }}
-            />
-          </tr>
-          {(category.subCategory || []).map((category, i) => (
-            <tr key={i}>
-              <td>{category.name}</td>
-              <td>{category.template}</td>
-              <td>{category.sentinel ? "Sentinel" : ""}</td>
-              <td>{category.reportable ? "Reportable" : ""}</td>
-              <td>
-                <Toggle defaultValue={category.status} />
-              </td>
-              <TableActions
-                actions={[
-                  {
-                    icon: <BsPencilFill />,
-                    label: "Edit",
-                    callBack: () => console.log("edit", category.code),
-                  },
-                  {
-                    icon: <FaRegTrashAlt />,
-                    label: "Delete",
-                    callBack: () => console.log("delete", category.code),
-                  },
-                ]}
-              />
-            </tr>
-          ))}
-        </Table>
-      </div>
-    </Box>
-  );
-};
 const CategoryForm = ({ edit, onSuccess, clearForm }) => {
-  const { handleSubmit, register, reset } = useForm(edit || {});
+  const { handleSubmit, register, reset } = useForm({ ...edit });
   useEffect(() => {
-    if (edit) {
-      reset(edit);
-    }
+    reset({ ...edit });
   }, [edit]);
   return (
     <form
@@ -217,7 +168,6 @@ const CategoryForm = ({ edit, onSuccess, clearForm }) => {
           <button
             type="button"
             onClick={() => {
-              reset();
               clearForm();
             }}
             className="btn secondary"
@@ -229,47 +179,205 @@ const CategoryForm = ({ edit, onSuccess, clearForm }) => {
     </form>
   );
 };
-const SubCategoryForm = ({ edit, category, onSuccess }) => {
-  const { handleSubmit, register, reset, watch } = useForm(edit);
-  useEffect(() => {}, [watch]);
+
+const SubCategories = ({
+  category: { id, name, subCategorys },
+  setCategories,
+}) => {
+  const [edit, setEdit] = useState(null);
   return (
-    <td className={s.inlineForm}>
-      <form
-        onSubmit={handleSubmit((data) => {
-          fetch(`${process.env.REACT_APP_HOST}/subCategory`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...data,
-              category: category._links.self.href,
-            }),
+    <Box label="SUB CATEGORY DETAILS">
+      <div className={s.subCategory}>
+        <div className={s.head}>
+          <span className={s.categoryName}>
+            Category name: <strong>{name}</strong>
+          </span>
+          {
+            //   <Form defaultValues={{ name: name }}>
+            //   <Input
+            //     className={s.input}
+            //     name="name"
+            //     label="Category Name"
+            //     readOnly={true}
+            //   />
+            // </Form>
+          }
+        </div>
+        <Table
+          columns={[
+            { label: "Sub Category" },
+            { label: "Template" },
+            { label: "Sentinel" },
+            { label: "Reportable" },
+            { label: "Status" },
+            { label: "Action" },
+          ]}
+        >
+          <tr className={s.filterForm}>
+            <td className={s.inlineForm}>
+              {edit ? (
+                <SubCategoryForm
+                  key="edit"
+                  edit={edit}
+                  categoryId={id}
+                  onSuccess={(subCategory) => {
+                    setCategories((prev) =>
+                      prev.map((cat) => {
+                        const newSubCategories = cat.subCategorys?.find(
+                          (sc) => sc.id === subCategory.id
+                        )
+                          ? cat.subCategorys?.map((sc) =>
+                              sc.id === subCategory.id ? subCategory : sc
+                            )
+                          : [...(cat.subCategorys || []), subCategory];
+                        return cat.id === id
+                          ? {
+                              ...cat,
+                              subCategorys: newSubCategories,
+                            }
+                          : cat;
+                      })
+                    );
+                    setEdit(null);
+                  }}
+                  clearForm={() => {
+                    setEdit(null);
+                  }}
+                />
+              ) : (
+                <SubCategoryForm
+                  key="add"
+                  categoryId={id}
+                  onSuccess={(subCategory) => {
+                    setCategories((prev) =>
+                      prev.map((cat) =>
+                        cat.id === id
+                          ? {
+                              ...cat,
+                              subCategorys: [...cat.subCategorys, subCategory],
+                            }
+                          : cat
+                      )
+                    );
+                  }}
+                />
+              )}
+            </td>
+          </tr>
+          {(subCategorys || []).map((category, i) => (
+            <tr key={i}>
+              <td>{category.name}</td>
+              <td>{category.template}</td>
+              <td>{category.sentinel ? "Sentinel" : ""}</td>
+              <td>{category.reportable ? "Reportable" : ""}</td>
+              <td>
+                <Toggle defaultValue={category.status} />
+              </td>
+              <TableActions
+                actions={[
+                  {
+                    icon: <BsPencilFill />,
+                    label: "Edit",
+                    callBack: () => setEdit(category),
+                  },
+                  {
+                    icon: <FaRegTrashAlt />,
+                    label: "Delete",
+                    callBack: () =>
+                      Prompt({
+                        type: "confirmation",
+                        message: `Are you sure you want to remove ${category.name}?`,
+                        callback: () => {
+                          fetch(
+                            `${process.env.REACT_APP_HOST}/subCategory/${category.id}`,
+                            { method: "DELETE" }
+                          ).then((res) => {
+                            if (res.status === 204) {
+                              setCategories((prev) =>
+                                prev.map((cat) =>
+                                  cat.id === id
+                                    ? {
+                                        ...cat,
+                                        subCategorys: cat.subCategorys.filter(
+                                          (c) => c.id !== category.id
+                                        ),
+                                      }
+                                    : cat
+                                )
+                              );
+                            }
+                          });
+                        },
+                      }),
+                  },
+                ]}
+              />
+            </tr>
+          ))}
+        </Table>
+      </div>
+    </Box>
+  );
+};
+const SubCategoryForm = ({ edit, categoryId, onSuccess, clearForm }) => {
+  const { handleSubmit, register, reset } = useForm({ ...edit });
+  useEffect(() => {
+    reset({ ...edit });
+  }, [edit]);
+  return (
+    <form
+      onSubmit={handleSubmit((data) => {
+        fetch(`${process.env.REACT_APP_HOST}/subCategory`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...data, category: { id: categoryId } }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.name) {
+              onSuccess(data);
+              reset();
+            }
           })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.name) {
-                onSuccess(data);
-                reset();
-              }
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        })}
-      >
-        <Input register={register} name="name" placeholder="Enter" />
-        <Input
-          register={register}
-          name="template"
-          placeholder="Enter"
-          icon={<BiSearch />}
-        />
-        <Checkbox register={register} name="sentinel" />
-        <Checkbox register={register} name="reportable" />
-        <Toggle register={register} name="status" />
+          .catch((err) => {
+            console.log(err);
+          });
+      })}
+    >
+      <Input
+        register={register}
+        required={true}
+        name="name"
+        placeholder="Enter"
+      />
+      <Input
+        register={register}
+        type="number"
+        required={true}
+        name="template"
+        placeholder="Enter"
+        // icon={<BiSearch />}
+      />
+      <Checkbox register={register} name="sentinel" />
+      <Checkbox register={register} name="reportable" />
+      <Toggle register={register} name="status" />
+      <div className={s.btns}>
         <button className="btn secondary">
-          <FaPlus />
+          {edit ? <FaCheck /> : <FaPlus />}
         </button>
-      </form>
-    </td>
+        {edit && (
+          <button
+            type="button"
+            onClick={() => {
+              reset();
+              clearForm();
+            }}
+            className="btn secondary"
+          >
+            <IoClose />
+          </button>
+        )}
+      </div>
+    </form>
   );
 };
