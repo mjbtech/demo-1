@@ -284,7 +284,7 @@ const TwoFieldMasterDetails = ({
                         message: `Are you sure you want to remove ${twoFieldMaster.name}?`,
                         callback: () => {
                           fetch(
-                            `${process.env.REACT_APP_HOST}/twoFieldMasterDetail/${twoFieldMaster.id}`,
+                            `${process.env.REACT_APP_HOST}/twoFieldMasterDetails/${twoFieldMaster.id}`,
                             { method: "DELETE" }
                           ).then((res) => {
                             if (res.status === 204) {
