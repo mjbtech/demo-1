@@ -98,6 +98,12 @@ export default function PersonAffected() {
                                     (p) => p.pa_id !== personAffected.pa_id
                                   )
                                 );
+                              } else if (res.status === 409) {
+                                Prompt({
+                                  type: "error",
+                                  message:
+                                    "Remove children to delete this master.",
+                                });
                               }
                             });
                           },

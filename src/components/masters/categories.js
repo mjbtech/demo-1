@@ -39,91 +39,95 @@ export default function Categories() {
         <h3>CATEGORY & SUB CATEGORY MASTER</h3>
       </header>
       <div className={s.content}>
-        <Box label="CATEGORY DETAILS">
-          <div className={s.category}>
-            <div className={s.head}>
-              <Input placeholder="Quick Search" icon={<BiSearch />} />
-            </div>
-            <Table columns={[{ label: "Category Name" }, { label: "Action" }]}>
-              <tr className={s.filterForm}>
-                <td className={s.inlineForm}>
-                  {edit ? (
-                    <CategoryForm
-                      key="edit"
-                      edit={edit}
-                      onSuccess={(newCat) => {
-                        setCategories((prev) => {
-                          return prev.find((c) => c.id === newCat.id)
-                            ? prev.map((c) => (c.id === newCat.id ? newCat : c))
-                            : [...prev, newCat];
-                        });
-                        setEdit(null);
-                      }}
-                      clearForm={() => {
-                        setEdit(null);
-                      }}
-                    />
-                  ) : (
-                    <CategoryForm
-                      key="add"
-                      onSuccess={(newCat) => {
-                        setCategories((prev) => {
-                          return prev.find((c) => c.id === newCat.id)
-                            ? prev.map((c) => (c.id === newCat.id ? newCat : c))
-                            : [...prev, newCat];
-                        });
-                      }}
-                    />
-                  )}
-                </td>
-              </tr>
-              {categories.map((category, i) => (
-                <tr key={i}>
-                  <td>
-                    <span
-                      className={s.catName}
-                      onClick={() => setCategory(category.id)}
-                    >
-                      {category.name}
-                    </span>
-                  </td>
-                  <TableActions
-                    actions={[
-                      {
-                        icon: <BsPencilFill />,
-                        label: "Edit",
-                        callBack: () => setEdit(category),
-                      },
-                      {
-                        icon: <FaRegTrashAlt />,
-                        label: "Delete",
-                        callBack: () =>
-                          Prompt({
-                            type: "confirmation",
-                            message: `Are you sure you want to remove ${category.name}?`,
-                            callback: () => {
-                              fetch(
-                                `${process.env.REACT_APP_HOST}/category/${category.id}`,
-                                {
-                                  method: "DELETE",
-                                }
-                              ).then((res) => {
-                                if (res.status === 204) {
-                                  setCategories((prev) =>
-                                    prev.filter((c) => c.id !== category.id)
-                                  );
-                                }
-                              });
-                            },
-                          }),
-                      },
-                    ]}
+        {
+          //   <Box label="CATEGORY DETAILS">
+          // </Box>
+        }
+        <div className={s.category}>
+          {
+            //   <div className={s.head}>
+            //   <Input placeholder="Quick Search" icon={<BiSearch />} />
+            // </div>
+          }
+          <Table columns={[{ label: "Category Name" }, { label: "Action" }]}>
+            <tr className={s.filterForm}>
+              <td className={s.inlineForm}>
+                {edit ? (
+                  <CategoryForm
+                    key="edit"
+                    edit={edit}
+                    onSuccess={(newCat) => {
+                      setCategories((prev) => {
+                        return prev.find((c) => c.id === newCat.id)
+                          ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                          : [...prev, newCat];
+                      });
+                      setEdit(null);
+                    }}
+                    clearForm={() => {
+                      setEdit(null);
+                    }}
                   />
-                </tr>
-              ))}
-            </Table>
-          </div>
-        </Box>
+                ) : (
+                  <CategoryForm
+                    key="add"
+                    onSuccess={(newCat) => {
+                      setCategories((prev) => {
+                        return prev.find((c) => c.id === newCat.id)
+                          ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                          : [...prev, newCat];
+                      });
+                    }}
+                  />
+                )}
+              </td>
+            </tr>
+            {categories.map((category, i) => (
+              <tr key={i}>
+                <td>
+                  <span
+                    className={s.catName}
+                    onClick={() => setCategory(category.id)}
+                  >
+                    {category.name}
+                  </span>
+                </td>
+                <TableActions
+                  actions={[
+                    {
+                      icon: <BsPencilFill />,
+                      label: "Edit",
+                      callBack: () => setEdit(category),
+                    },
+                    {
+                      icon: <FaRegTrashAlt />,
+                      label: "Delete",
+                      callBack: () =>
+                        Prompt({
+                          type: "confirmation",
+                          message: `Are you sure you want to remove ${category.name}?`,
+                          callback: () => {
+                            fetch(
+                              `${process.env.REACT_APP_HOST}/category/${category.id}`,
+                              {
+                                method: "DELETE",
+                              }
+                            ).then((res) => {
+                              if (res.status === 204) {
+                                setCategories((prev) =>
+                                  prev.filter((c) => c.id !== category.id)
+                                );
+                              }
+                            });
+                          },
+                        }),
+                    },
+                  ]}
+                />
+              </tr>
+            ))}
+          </Table>
+        </div>
         {categories.find((cat) => cat.id === category) && (
           <SubCategories
             category={categories.find((cat) => cat.id === category)}
@@ -185,141 +189,146 @@ const SubCategories = ({
   setCategories,
 }) => {
   const [edit, setEdit] = useState(null);
+  // <Box label="SUB CATEGORY DETAILS">
+  // </Box>
   return (
-    <Box label="SUB CATEGORY DETAILS">
-      <div className={s.subCategory}>
-        <div className={s.head}>
-          <span className={s.categoryName}>
-            Category name: <strong>{name}</strong>
-          </span>
-          {
-            //   <Form defaultValues={{ name: name }}>
-            //   <Input
-            //     className={s.input}
-            //     name="name"
-            //     label="Category Name"
-            //     readOnly={true}
-            //   />
-            // </Form>
-          }
-        </div>
-        <Table
-          columns={[
-            { label: "Sub Category" },
-            { label: "Template" },
-            { label: "Sentinel" },
-            { label: "Reportable" },
-            { label: "Status" },
-            { label: "Action" },
-          ]}
-        >
-          <tr className={s.filterForm}>
-            <td className={s.inlineForm}>
-              {edit ? (
-                <SubCategoryForm
-                  key="edit"
-                  edit={edit}
-                  categoryId={id}
-                  onSuccess={(subCategory) => {
-                    setCategories((prev) =>
-                      prev.map((cat) => {
-                        const newSubCategories = cat.subCategorys?.find(
-                          (sc) => sc.id === subCategory.id
-                        )
-                          ? cat.subCategorys?.map((sc) =>
-                              sc.id === subCategory.id ? subCategory : sc
-                            )
-                          : [...(cat.subCategorys || []), subCategory];
-                        return cat.id === id
-                          ? {
-                              ...cat,
-                              subCategorys: newSubCategories,
-                            }
-                          : cat;
-                      })
-                    );
-                    setEdit(null);
-                  }}
-                  clearForm={() => {
-                    setEdit(null);
-                  }}
-                />
-              ) : (
-                <SubCategoryForm
-                  key="add"
-                  categoryId={id}
-                  onSuccess={(subCategory) => {
-                    setCategories((prev) =>
-                      prev.map((cat) =>
-                        cat.id === id
-                          ? {
-                              ...cat,
-                              subCategorys: [
-                                ...(cat.subCategorys || []),
-                                subCategory,
-                              ],
-                            }
-                          : cat
-                      )
-                    );
-                  }}
-                />
-              )}
-            </td>
-          </tr>
-          {(subCategorys || []).map((category, i) => (
-            <tr key={i}>
-              <td>{category.name}</td>
-              <td>{category.template}</td>
-              <td>{category.sentinel ? "Sentinel" : ""}</td>
-              <td>{category.reportable ? "Reportable" : ""}</td>
-              <td>
-                <Toggle defaultValue={category.status} />
-              </td>
-              <TableActions
-                actions={[
-                  {
-                    icon: <BsPencilFill />,
-                    label: "Edit",
-                    callBack: () => setEdit(category),
-                  },
-                  {
-                    icon: <FaRegTrashAlt />,
-                    label: "Delete",
-                    callBack: () =>
-                      Prompt({
-                        type: "confirmation",
-                        message: `Are you sure you want to remove ${category.name}?`,
-                        callback: () => {
-                          fetch(
-                            `${process.env.REACT_APP_HOST}/subCategory/${category.id}`,
-                            { method: "DELETE" }
-                          ).then((res) => {
-                            if (res.status === 204) {
-                              setCategories((prev) =>
-                                prev.map((cat) =>
-                                  cat.id === id
-                                    ? {
-                                        ...cat,
-                                        subCategorys: cat.subCategorys.filter(
-                                          (c) => c.id !== category.id
-                                        ),
-                                      }
-                                    : cat
-                                )
-                              );
-                            }
-                          });
-                        },
-                      }),
-                  },
-                ]}
-              />
-            </tr>
-          ))}
-        </Table>
+    <div className={s.subCategory}>
+      <div className={s.head}>
+        <span className={s.categoryName}>
+          Category name: <strong>{name}</strong>
+        </span>
+        {
+          //   <Form defaultValues={{ name: name }}>
+          //   <Input
+          //     className={s.input}
+          //     name="name"
+          //     label="Category Name"
+          //     readOnly={true}
+          //   />
+          // </Form>
+        }
       </div>
-    </Box>
+      <Table
+        columns={[
+          { label: "Sub Category" },
+          { label: "Template" },
+          { label: "Sentinel" },
+          { label: "Reportable" },
+          { label: "Status" },
+          { label: "Action" },
+        ]}
+      >
+        <tr className={s.filterForm}>
+          <td className={s.inlineForm}>
+            {edit ? (
+              <SubCategoryForm
+                key="edit"
+                edit={edit}
+                categoryId={id}
+                onSuccess={(subCategory) => {
+                  setCategories((prev) =>
+                    prev.map((cat) => {
+                      const newSubCategories = cat.subCategorys?.find(
+                        (sc) => sc.id === subCategory.id
+                      )
+                        ? cat.subCategorys?.map((sc) =>
+                            sc.id === subCategory.id ? subCategory : sc
+                          )
+                        : [...(cat.subCategorys || []), subCategory];
+                      return cat.id === id
+                        ? {
+                            ...cat,
+                            subCategorys: newSubCategories,
+                          }
+                        : cat;
+                    })
+                  );
+                  setEdit(null);
+                }}
+                clearForm={() => {
+                  setEdit(null);
+                }}
+              />
+            ) : (
+              <SubCategoryForm
+                key="add"
+                categoryId={id}
+                onSuccess={(subCategory) => {
+                  setCategories((prev) =>
+                    prev.map((cat) =>
+                      cat.id === id
+                        ? {
+                            ...cat,
+                            subCategorys: [
+                              ...(cat.subCategorys || []),
+                              subCategory,
+                            ],
+                          }
+                        : cat
+                    )
+                  );
+                }}
+              />
+            )}
+          </td>
+        </tr>
+        {(subCategorys || []).map((category, i) => (
+          <tr key={i}>
+            <td>{category.name}</td>
+            <td>{category.template}</td>
+            <td>{category.sentinel ? "Sentinel" : ""}</td>
+            <td>{category.reportable ? "Reportable" : ""}</td>
+            <td>
+              <Toggle defaultValue={category.status} />
+            </td>
+            <TableActions
+              actions={[
+                {
+                  icon: <BsPencilFill />,
+                  label: "Edit",
+                  callBack: () => setEdit(category),
+                },
+                {
+                  icon: <FaRegTrashAlt />,
+                  label: "Delete",
+                  callBack: () =>
+                    Prompt({
+                      type: "confirmation",
+                      message: `Are you sure you want to remove ${category.name}?`,
+                      callback: () => {
+                        fetch(
+                          `${process.env.REACT_APP_HOST}/subCategory/${category.id}`,
+                          { method: "DELETE" }
+                        ).then((res) => {
+                          if (res.status === 204) {
+                            setCategories((prev) =>
+                              prev.map((cat) =>
+                                cat.id === id
+                                  ? {
+                                      ...cat,
+                                      subCategorys: cat.subCategorys.filter(
+                                        (c) => c.id !== category.id
+                                      ),
+                                    }
+                                  : cat
+                              )
+                            );
+                          } else if (res.status === 409) {
+                            Prompt({
+                              type: "error",
+                              message: "Remove children to delete this master.",
+                            });
+                          }
+                        });
+                      },
+                    }),
+                },
+              ]}
+            />
+          </tr>
+        ))}
+      </Table>
+    </div>
   );
 };
 const SubCategoryForm = ({ edit, categoryId, onSuccess, clearForm }) => {

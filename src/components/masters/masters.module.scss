@@ -38,9 +38,9 @@
         grid-template-columns: 1fr 1fr 5rem 6rem 3rem 4rem;
       }
       .head {
-        .categoryName {
-          padding: 0.25rem 0;
-        }
+        // .categoryName {
+        //   padding: 0.25rem 0;
+        // }
       }
     }
     .category {
@@ -106,11 +106,11 @@
           }
         }
       }
-      .conName {
-        color: #3450a3;
-        text-decoration: underline;
-        cursor: pointer;
-      }
+      // .conName {
+      //   color: #3450a3;
+      //   text-decoration: underline;
+      //   cursor: pointer;
+      // }
     }
     .personAffected {
       tr {

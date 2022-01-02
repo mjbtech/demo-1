@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Link, Routes, Route, useLocation } from "react-router-dom";
-import { BiChevronLeft } from "react-icons/bi";
+import { BiChevronLeft, BiPowerOff } from "react-icons/bi";
 import { BsChevronRight } from "react-icons/bs";
+import { IoKeyOutline } from "react-icons/io5";
+import { FaRegBell } from "react-icons/fa";
+import { Combobox } from "./elements";
 import IncidentReport from "./incidentReport";
 import OtherPages from "./otherPages";
 import Masters from "./masters/index";
@@ -44,6 +47,29 @@ function Dashboard() {
   const [collaped, setCollapsed] = useState(false);
   return (
     <div className={s.container}>
+      <div className={s.navbar}>
+        <Link className={s.logo} to="/">
+          <img src="/asset/logo.jpg" />
+        </Link>
+        <div className={s.content}>
+          <Combobox
+            label="Service location"
+            className={s.locationSelector}
+            options={["Front Desk", "Front Desk 2", "Front Desk 3"]}
+          />
+          <div className={s.actions}>
+            <button>
+              <IoKeyOutline />
+            </button>
+            <button>
+              <FaRegBell />
+            </button>
+            <button>
+              <BiPowerOff />
+            </button>
+          </div>
+        </div>
+      </div>
       <div className={`${s.sidebar} ${collaped ? s.collaped : ""}`}>
         <button
           className={`clear ${s.collapseBtn}`}
