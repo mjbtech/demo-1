@@ -11,13 +11,62 @@
     display: grid;
     grid-gap: 1.5rem;
     grid-template-columns: clamp(20rem, 25rem, 25rem) minmax(50rem, 1fr);
-    .category,
-    .subCategory {
-      .head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
+    &.parent_child {
+      .inlineForm {
+        grid-column: 1/-1;
+        form {
+          display: grid;
+          align-items: center;
+          grid-gap: 0.5rem;
+          .btns {
+            grid-column: -1/-2;
+            justify-content: flex-end;
+          }
+          .addBtn {
+            color: #3450a3;
+            align-items: center;
+            grid-gap: 4px;
+            font-weight: 600;
+            text-decoration: underline;
+          }
+        }
+      }
+      .parent {
+        table {
+          tr {
+            .inlineForm {
+              form {
+                grid-template-columns: 1fr max-content;
+              }
+            }
+            td:not(.inlineForm) {
+              color: #3450a3;
+              text-decoration: underline;
+              span {
+                cursor: pointer;
+              }
+            }
+            &.selected {
+              background: rgb(210, 210, 210) !important;
+            }
+          }
+        }
+      }
+      .child {
+        .head {
+          span {
+            display: block;
+            padding-bottom: 0.5rem;
+          }
+        }
+        table {
+          tr {
+            grid-template-columns: clamp(5rem, 50%, 20rem) 4rem;
+            form {
+              grid-template-columns: 1fr max-content;
+            }
+          }
+        }
       }
     }
     .subCategory {
@@ -25,60 +74,21 @@
         tbody,
         thead {
           tr {
-            grid-gap: 1rem;
             input[type="checkbox"] {
               min-width: 20px;
               min-height: 20px;
             }
           }
-        }
-      }
-      form,
-      tr {
-        grid-template-columns: 1fr 1fr 5rem 6rem 3rem 4rem;
-      }
-      .head {
-        // .categoryName {
-        //   padding: 0.25rem 0;
-        // }
-      }
-    }
-    .category {
-      table {
-        tbody {
-          tr {
-            form {
-              grid-template-columns: 1fr max-content;
-            }
-            .catName {
-              color: #3450a3;
-              text-decoration: underline;
-              cursor: pointer;
-            }
+          tr,
+          .inlineForm form {
+            grid-template-columns: 1fr 1fr 5rem 6rem 3rem 4rem !important;
           }
         }
       }
     }
-    .addBtn {
-      color: #3450a3;
-      align-items: center;
-      grid-gap: 4px;
-      font-weight: 600;
-      text-decoration: underline;
-    }
-    .category,
-    .subCategory,
     .masters,
     .mastersDetails,
-    .locations,
-    .personAffected,
-    .contributingFactor,
-    .personAffectedDetail,
-    .twoFieldMaster,
-    .rca,
-    .rcaCauses,
-    .twoFieldMasterDetail,
-    .contributingFactorDetail {
+    .locations {
       .head {
         max-width: 25rem;
         section {
@@ -106,42 +116,6 @@
           }
         }
       }
-      // .conName {
-      //   color: #3450a3;
-      //   text-decoration: underline;
-      //   cursor: pointer;
-      // }
-    }
-    .personAffected {
-      tr {
-        td:last-child {
-          margin: auto;
-          margin-right: 0;
-        }
-      }
-      .inlineForm {
-        form {
-          grid-template-columns: 1fr max-content;
-        }
-      }
-    }
-    .personAffectedDetail {
-      tr {
-        grid-template-columns: clamp(5rem, 50%, 20rem) 1fr !important;
-        th,
-        td {
-          &:last-child {
-            text-align: left;
-            margin-left: 0;
-          }
-        }
-      }
-      .inlineForm {
-        max-width: 23rem;
-        form {
-          grid-template-columns: 1fr max-content;
-        }
-      }
     }
     .mastersDetails {
       tr {
@@ -156,83 +130,21 @@
         }
       }
     }
-    .twoFieldMaster {
-      .inlineForm {
-        form {
-          grid-template-columns: 1fr max-content;
-        }
-      }
-      .twoFieldMasterName {
-        color: #3450a3;
-        text-decoration: underline;
-        cursor: pointer;
-      }
-    }
-    .twoFieldMasterDetail {
-      .head {
-        .twoFieldMasterName {
-          display: inline-block;
-          padding: 0.25rem 0;
-        }
-      }
-      tr {
-        grid-template-columns: clamp(10rem, 72%, 20rem) 4rem !important;
-      }
-      .inlineForm form {
-        grid-template-columns: 1fr max-content !important;
-      }
-    }
-    .contributingFactor {
-      tr {
-        grid-template-columns: 1fr max-content;
-      }
-      .inlineForm form {
-        grid-template-columns: 1fr max-content;
-      }
-    }
-    .contributingFactorDetail {
-      tr {
-        grid-template-columns: clamp(5rem, 50%, 20rem) 4rem 1fr !important;
-        th,
-        td {
-          &:last-child {
-            text-align: left;
-            margin: auto;
-            margin-left: 0;
-          }
-        }
-      }
-      .inlineForm form {
-        grid-template-columns: clamp(5rem, 50%, 20rem) max-content;
-      }
-    }
+
+    .personAffected,
+    .contributingFactors,
     .rca {
       tr,
       .inlineForm form {
-        grid-template-columns: 1fr max-content;
-        .rcaName {
-          color: #3450a3;
-          text-decoration: underline;
-          cursor: pointer;
-        }
+        grid-template-columns: 1fr 3rem max-content !important;
       }
     }
-    .rcaCauses {
-      tr {
-        grid-template-columns: clamp(5rem, 50%, 20rem) 1fr !important;
-        th,
-        td {
-          &:last-child {
-            text-align: left;
-            margin-left: 0;
-          }
-        }
+    .twoFieldMasterDetail {
+      .inlineForm form {
+        grid-template-columns: 1fr 3rem 4rem !important;
       }
-      .inlineForm {
-        max-width: 23rem;
-        form {
-          grid-template-columns: 1fr max-content;
-        }
+      tr {
+        grid-template-columns: clamp(5rem, 50%, 20rem) 3rem 4rem !important;
       }
     }
   }

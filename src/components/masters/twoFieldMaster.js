@@ -18,7 +18,7 @@ import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
 export default function TwoFieldMasters() {
-  const [twoFieldMaster, setTwoFieldMaster] = useState(null);
+  const [selected, setSelected] = useState(null);
   const [twoFieldMasters, setTwoFieldMasters] = useState([]);
   const [edit, setEdit] = useState(null);
   useEffect(() => {
@@ -27,6 +27,7 @@ export default function TwoFieldMasters() {
       .then((data) => {
         if (data._embedded?.twoFieldMaster) {
           setTwoFieldMasters(data._embedded.twoFieldMaster);
+          setSelected(data._embedded.twoFieldMaster[0]?.id);
         }
       })
       .catch((err) => {
@@ -38,12 +39,12 @@ export default function TwoFieldMasters() {
       <header>
         <h3>TWO FIELD MASTER</h3>
       </header>
-      <div className={s.content}>
+      <div className={`${s.content} ${s.parent_child}`}>
         {
           //   <Box label="MASTERS LIST">
           // </Box>
         }
-        <div className={s.twoFieldMaster}>
+        <div className={s.parent}>
           {
             //   <div className={s.head}>
             // <Input placeholder="Quick Search" icon={<BiSearch />} />
@@ -83,11 +84,14 @@ export default function TwoFieldMasters() {
               </td>
             </tr>
             {twoFieldMasters.map((twoFieldMaster, i) => (
-              <tr key={i}>
+              <tr
+                key={i}
+                className={twoFieldMaster.id === selected ? s.selected : ""}
+              >
                 <td>
                   <span
                     className={s.twoFieldMasterName}
-                    onClick={() => setTwoFieldMaster(twoFieldMaster.id)}
+                    onClick={() => setSelected(twoFieldMaster.id)}
                   >
                     {twoFieldMaster.name}
                   </span>
@@ -134,11 +138,9 @@ export default function TwoFieldMasters() {
             ))}
           </Table>
         </div>
-        {twoFieldMasters.find((cat) => cat.id === twoFieldMaster) && (
+        {twoFieldMasters.find((cat) => cat.id === selected) && (
           <TwoFieldMasterDetails
-            twoFieldMaster={twoFieldMasters.find(
-              (cat) => cat.id === twoFieldMaster
-            )}
+            twoFieldMaster={twoFieldMasters.find((cat) => cat.id === selected)}
             setTwoFieldMasters={setTwoFieldMasters}
           />
         )}
@@ -200,13 +202,19 @@ const TwoFieldMasterDetails = ({
   // <Box label="MASTER DETAILS">
   // </Box>
   return (
-    <div className={s.twoFieldMasterDetail}>
+    <div className={`${s.child} ${s.twoFieldMasterDetail}`}>
       <div className={s.head}>
         <span className={s.twoFieldMasterName}>
           Master name: <strong>{name}</strong>
         </span>
       </div>
-      <Table columns={[{ label: "Description" }, { label: "Action" }]}>
+      <Table
+        columns={[
+          { label: "Description" },
+          { label: "Status" },
+          { label: "Action" },
+        ]}
+      >
         <tr>
           <td className={s.inlineForm}>
             {edit ? (
@@ -269,6 +277,9 @@ const TwoFieldMasterDetails = ({
         {(twoFieldMasterDetails || []).map((twoFieldMaster, i) => (
           <tr key={i}>
             <td>{twoFieldMaster.name}</td>
+            <td>
+              <Toggle />
+            </td>
             <TableActions
               actions={[
                 {
@@ -353,6 +364,7 @@ const TwoFieldMasterDetailForm = ({
         name="name"
         placeholder="Enter"
       />
+      <Toggle />
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}

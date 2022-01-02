@@ -18,7 +18,7 @@ import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
 export default function Categories() {
-  const [category, setCategory] = useState(null);
+  const [selected, setSelected] = useState(null);
   const [categories, setCategories] = useState([]);
   const [edit, setEdit] = useState(null);
   useEffect(() => {
@@ -27,6 +27,7 @@ export default function Categories() {
       .then((data) => {
         if (data._embedded?.category) {
           setCategories(data._embedded.category);
+          setSelected(data._embedded.category[0]?.id);
         }
       })
       .catch((err) => {
@@ -38,19 +39,19 @@ export default function Categories() {
       <header>
         <h3>CATEGORY & SUB CATEGORY MASTER</h3>
       </header>
-      <div className={s.content}>
+      <div className={`${s.content} ${s.parent_child}`}>
         {
           //   <Box label="CATEGORY DETAILS">
           // </Box>
         }
-        <div className={s.category}>
+        <div className={s.parent}>
           {
             //   <div className={s.head}>
             //   <Input placeholder="Quick Search" icon={<BiSearch />} />
             // </div>
           }
           <Table columns={[{ label: "Category Name" }, { label: "Action" }]}>
-            <tr className={s.filterForm}>
+            <tr>
               <td className={s.inlineForm}>
                 {edit ? (
                   <CategoryForm
@@ -83,11 +84,14 @@ export default function Categories() {
               </td>
             </tr>
             {categories.map((category, i) => (
-              <tr key={i}>
+              <tr
+                key={i}
+                className={category.id === selected ? s.selected : ""}
+              >
                 <td>
                   <span
                     className={s.catName}
-                    onClick={() => setCategory(category.id)}
+                    onClick={() => setSelected(category.id)}
                   >
                     {category.name}
                   </span>
@@ -117,6 +121,12 @@ export default function Categories() {
                                 setCategories((prev) =>
                                   prev.filter((c) => c.id !== category.id)
                                 );
+                              } else if (res.status === 409) {
+                                Prompt({
+                                  type: "error",
+                                  message:
+                                    "Remove children to delete this master.",
+                                });
                               }
                             });
                           },
@@ -128,9 +138,9 @@ export default function Categories() {
             ))}
           </Table>
         </div>
-        {categories.find((cat) => cat.id === category) && (
+        {categories.find((cat) => cat.id === selected) && (
           <SubCategories
-            category={categories.find((cat) => cat.id === category)}
+            category={categories.find((cat) => cat.id === selected)}
             setCategories={setCategories}
           />
         )}
@@ -192,7 +202,7 @@ const SubCategories = ({
   // <Box label="SUB CATEGORY DETAILS">
   // </Box>
   return (
-    <div className={s.subCategory}>
+    <div className={`${s.subCategory} ${s.child}`}>
       <div className={s.head}>
         <span className={s.categoryName}>
           Category name: <strong>{name}</strong>
@@ -218,7 +228,7 @@ const SubCategories = ({
           { label: "Action" },
         ]}
       >
-        <tr className={s.filterForm}>
+        <tr>
           <td className={s.inlineForm}>
             {edit ? (
               <SubCategoryForm

@@ -18,7 +18,7 @@ import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
 export default function Rcas() {
-  const [rca, setRca] = useState(null);
+  const [selected, setSelected] = useState(null);
   const [rcas, setRcas] = useState([]);
   const [edit, setEdit] = useState(null);
   useEffect(() => {
@@ -27,6 +27,7 @@ export default function Rcas() {
       .then((data) => {
         if (data._embedded?.rca) {
           setRcas(data._embedded.rca);
+          setSelected(data._embedded.rca[0]?.id);
         }
       })
       .catch((err) => {
@@ -38,19 +39,25 @@ export default function Rcas() {
       <header>
         <h3>RCA MASTER</h3>
       </header>
-      <div className={s.content}>
+      <div className={`${s.content} ${s.parent_child}`}>
         {
           //   <Box label="RCA">
           // </Box>
         }
-        <div className={s.rca}>
+        <div className={`${s.parent} ${s.rca}`}>
           {
             //   <div className={s.head}>
             //   <Input placeholder="Quick Search" icon={<BiSearch />} />
             // </div>
           }
-          <Table columns={[{ label: "Master Name" }, { label: "Action" }]}>
-            <tr className={s.filterForm}>
+          <Table
+            columns={[
+              { label: "Master Name" },
+              { label: "Status" },
+              { label: "Action" },
+            ]}
+          >
+            <tr>
               <td className={s.inlineForm}>
                 {edit ? (
                   <RcaForm
@@ -83,11 +90,17 @@ export default function Rcas() {
               </td>
             </tr>
             {rcas.map((rca, i) => (
-              <tr key={i}>
+              <tr key={i} className={rca.id === selected ? s.selected : ""}>
                 <td>
-                  <span className={s.rcaName} onClick={() => setRca(rca.id)}>
+                  <span
+                    className={s.rcaName}
+                    onClick={() => setSelected(rca.id)}
+                  >
                     {rca.name}
                   </span>
+                </td>
+                <td>
+                  <Toggle />
                 </td>
                 <TableActions
                   actions={[
@@ -129,9 +142,9 @@ export default function Rcas() {
             ))}
           </Table>
         </div>
-        {rcas.find((cat) => cat.id === rca) && (
+        {rcas.find((cat) => cat.id === selected) && (
           <RcaCauses
-            rca={rcas.find((cat) => cat.id === rca)}
+            rca={rcas.find((cat) => cat.id === selected)}
             setRcas={setRcas}
           />
         )}
@@ -165,6 +178,8 @@ const RcaForm = ({ edit, onSuccess, clearForm }) => {
       })}
     >
       <Input name="name" register={register} required={true} />
+
+      <Toggle />
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}
@@ -190,7 +205,7 @@ const RcaCauses = ({ rca: { id, name, rcaCauses }, setRcas }) => {
   // <Box label="RCA CAUSES">
   // </Box>
   return (
-    <div className={s.rcaCauses}>
+    <div className={s.child}>
       <div className={s.head}>
         <span className={s.rcaName}>
           Rca name: <strong>{name}</strong>

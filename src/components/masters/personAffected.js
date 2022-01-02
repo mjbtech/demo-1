@@ -18,7 +18,7 @@ import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
 export default function PersonAffected() {
-  const [personAffected, setPersonAffected] = useState(null);
+  const [selected, setSelected] = useState(null);
   const [personAffecteds, setPersonAffecteds] = useState([]);
   const [edit, setEdit] = useState(null);
   useEffect(() => {
@@ -27,6 +27,7 @@ export default function PersonAffected() {
       .then((data) => {
         if (data._embedded?.personAffected) {
           setPersonAffecteds(data._embedded.personAffected);
+          setSelected(data._embedded.personAffected[0]?.pa_id);
         }
       })
       .catch((err) => {
@@ -38,10 +39,16 @@ export default function PersonAffected() {
       <header>
         <h3>PERSON AFFECTED</h3>
       </header>
-      <div className={s.content}>
-        <div className={s.personAffected}>
-          <Table columns={[{ label: "Master name" }, { label: "Action" }]}>
-            <tr className={s.filterForm}>
+      <div className={`${s.content} ${s.parent_child}`}>
+        <div className={`${s.personAffected} ${s.parent}`}>
+          <Table
+            columns={[
+              { label: "Master name" },
+              { label: "Status" },
+              { label: "Action" },
+            ]}
+          >
+            <tr>
               <td className={s.inlineForm}>
                 <PersonAffectedForm
                   edit={edit}
@@ -62,14 +69,20 @@ export default function PersonAffected() {
               </td>
             </tr>
             {personAffecteds.map((personAffected, i) => (
-              <tr key={i}>
+              <tr
+                key={i}
+                className={personAffected.pa_id === selected ? s.selected : ""}
+              >
                 <td>
                   <span
                     className={s.conName}
-                    onClick={() => setPersonAffected(personAffected.pa_id)}
+                    onClick={() => setSelected(personAffected.pa_id)}
                   >
                     {personAffected.name}
                   </span>
+                </td>
+                <td>
+                  <Toggle />
                 </td>
                 <TableActions
                   actions={[
@@ -115,10 +128,10 @@ export default function PersonAffected() {
             ))}
           </Table>
         </div>
-        {personAffecteds.find((cat) => cat.pa_id === personAffected) && (
+        {personAffecteds.find((cat) => cat.pa_id === selected) && (
           <PersonAffectedDetail
             personAffected={personAffecteds.find(
-              (cat) => cat.pa_id === personAffected
+              (cat) => cat.pa_id === selected
             )}
             setPersonAffecteds={setPersonAffecteds}
           />
@@ -153,6 +166,7 @@ const PersonAffectedForm = ({ edit, onSuccess, clearForm }) => {
       })}
     >
       <Input name="name" register={register} required={true} />
+      <Toggle />
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}
@@ -179,7 +193,7 @@ const PersonAffectedDetail = ({
 }) => {
   const [edit, setEdit] = useState(null);
   return (
-    <div className={s.personAffectedDetail}>
+    <div className={s.child}>
       <div className={s.head}>
         <span className={s.personAffectedName}>
           Master name: <strong>{name}</strong>

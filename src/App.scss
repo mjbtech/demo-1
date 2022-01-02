@@ -71,6 +71,15 @@ button {
   align-items: center;
 }
 
+.auth-placeholder {
+  height: 100vh;
+  width: 100vw;
+  display: grid;
+  place-items: center;
+  font-size: 5rem;
+  opacity: 0.5;
+}
+
 #portal,
 #prompt {
   position: fixed;

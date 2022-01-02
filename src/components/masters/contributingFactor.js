@@ -18,7 +18,7 @@ import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
 export default function ContributingFactor() {
-  const [contributingFactor, setContributingFactor] = useState(null);
+  const [selected, setSelected] = useState(null);
   const [contributingFactors, setContributingFactors] = useState([]);
   const [edit, setEdit] = useState(null);
   useEffect(() => {
@@ -27,6 +27,7 @@ export default function ContributingFactor() {
       .then((data) => {
         if (data._embedded?.contributingFactors) {
           setContributingFactors(data._embedded.contributingFactors);
+          setSelected(data._embedded.contributingFactors[0]?.cf_id);
         }
       })
       .catch((err) => {
@@ -38,19 +39,25 @@ export default function ContributingFactor() {
       <header>
         <h3>CONTRIBUTING FACTORS</h3>
       </header>
-      <div className={s.content}>
+      <div className={`${s.content} ${s.parent_child}`}>
         {
           //   <Box label="CONTRIBUTING FACTORS">
           // </Box>
         }
-        <div className={s.contributingFactor}>
+        <div className={`${s.parent} ${s.contributingFactors}`}>
           {
             //   <div className={s.head}>
             //   <Input placeholder="Quick Search" icon={<BiSearch />} />
             // </div>
           }
-          <Table columns={[{ label: "Master name" }, { label: "Action" }]}>
-            <tr className={s.filterForm}>
+          <Table
+            columns={[
+              { label: "Master name" },
+              { label: "Status" },
+              { label: "Action" },
+            ]}
+          >
+            <tr>
               <td className={s.inlineForm}>
                 {edit ? (
                   <ContributingFactorForm
@@ -88,16 +95,22 @@ export default function ContributingFactor() {
               </td>
             </tr>
             {contributingFactors.map((contributingFactor, i) => (
-              <tr key={i}>
+              <tr
+                key={i}
+                className={
+                  contributingFactor.cf_id === selected ? s.selected : ""
+                }
+              >
                 <td>
                   <span
                     className={s.conName}
-                    onClick={() =>
-                      setContributingFactor(contributingFactor.cf_id)
-                    }
+                    onClick={() => setSelected(contributingFactor.cf_id)}
                   >
                     {contributingFactor.name}
                   </span>
+                </td>
+                <td>
+                  <Toggle />
                 </td>
                 <TableActions
                   actions={[
@@ -142,12 +155,10 @@ export default function ContributingFactor() {
             ))}
           </Table>
         </div>
-        {contributingFactors.find(
-          (cat) => cat.cf_id === contributingFactor
-        ) && (
+        {contributingFactors.find((cat) => cat.cf_id === selected) && (
           <ContributingFactorDetail
             contributingFactor={contributingFactors.find(
-              (cat) => cat.cf_id === contributingFactor
+              (cat) => cat.cf_id === selected
             )}
             setContributingFactors={setContributingFactors}
           />
@@ -182,6 +193,7 @@ const ContributingFactorForm = ({ edit, onSuccess, clearForm }) => {
       })}
     >
       <Input name="name" register={register} required={true} />
+      <Toggle />
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}
@@ -210,7 +222,7 @@ const ContributingFactorDetail = ({
   // <Box label="CONTRIBUTING FACTOR DETAILS">
   // </Box>
   return (
-    <div className={s.contributingFactorDetail}>
+    <div className={s.child}>
       <div className={s.head}>
         <span className={s.contributingFactorName}>
           Master name: <strong>{name}</strong>
@@ -219,28 +231,55 @@ const ContributingFactorDetail = ({
       <Table columns={[{ label: "Description" }, { label: "Action" }]}>
         <tr>
           <td className={s.inlineForm}>
-            <ContributingFactorDetailForm
-              edit={edit}
-              contributingFactorId={cf_id}
-              onSuccess={(contributingFactorDetail) => {
-                setContributingFactors((prev) =>
-                  prev.map((con) =>
-                    con.cf_id === cf_id
-                      ? {
-                          ...con,
-                          contributingFactorDetails: [
-                            ...con.contributingFactorDetails,
-                            contributingFactorDetail,
-                          ],
-                        }
-                      : con
-                  )
-                );
-              }}
-              clearForm={() => {
-                setEdit(null);
-              }}
-            />
+            {edit ? (
+              <ContributingFactorDetailForm
+                key="edit"
+                edit={edit}
+                contributingFactorId={cf_id}
+                onSuccess={(newCfd) => {
+                  setContributingFactors((prev) =>
+                    prev.map((con) => {
+                      if (con.cf_id !== cf_id) return con;
+                      const newCfds = con.contributingFactorDetails?.find(
+                        (cfd) => cfd.id === newCfd.id
+                      )
+                        ? con.contributingFactorDetails?.map((cfd) =>
+                            cfd.id === newCfd.id ? newCfd : cfd
+                          )
+                        : [...(con.contributingFactorDetails || []), newCfd];
+                      return {
+                        ...con,
+                        contributingFactorDetails: newCfds,
+                      };
+                    })
+                  );
+                  setEdit(null);
+                }}
+                clearForm={() => {
+                  setEdit(null);
+                }}
+              />
+            ) : (
+              <ContributingFactorDetailForm
+                key="add"
+                contributingFactorId={cf_id}
+                onSuccess={(cfd) => {
+                  setContributingFactors((prev) =>
+                    prev.map((con) =>
+                      con.cf_id === cf_id
+                        ? {
+                            ...con,
+                            contributingFactorDetails: [
+                              ...(con.contributingFactorDetails || []),
+                              cfd,
+                            ],
+                          }
+                        : con
+                    )
+                  );
+                }}
+              />
+            )}
           </td>
         </tr>
         {(contributingFactorDetails || []).map((contributingFactor, i) => (
@@ -305,7 +344,7 @@ const ContributingFactorDetailForm = ({
       onSubmit={handleSubmit((data) => {
         fetch(
           `${process.env.REACT_APP_HOST}/contributingFactorDetails${
-            edit ? `/${edit.cf_id}` : ""
+            edit ? `/${edit.id}` : ""
           }`,
           {
             method: edit ? "PUT" : "POST",

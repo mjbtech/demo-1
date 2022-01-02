@@ -1,6 +1,13 @@
-import React, { useState } from "react";
-import { Link, Routes, Route, useLocation } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import {
+  Link,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { BiChevronLeft, BiPowerOff } from "react-icons/bi";
+import { SiteContext } from "../SiteContext";
 import { BsChevronRight } from "react-icons/bs";
 import { IoKeyOutline } from "react-icons/io5";
 import { FaRegBell } from "react-icons/fa";
@@ -43,7 +50,9 @@ const Accordion = ({ label, basePath, items, className }) => {
 };
 
 function Dashboard() {
+  const { setUser } = useContext(SiteContext);
   const location = useLocation();
+  const navigate = useNavigate();
   const [collaped, setCollapsed] = useState(false);
   return (
     <div className={s.container}>
@@ -64,7 +73,12 @@ function Dashboard() {
             <button>
               <FaRegBell />
             </button>
-            <button>
+            <button
+              onClick={() => {
+                setUser(null);
+                navigate("/login");
+              }}
+            >
               <BiPowerOff />
             </button>
           </div>
