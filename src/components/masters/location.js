@@ -14,6 +14,7 @@ import {
   Toggle,
 } from "../elements";
 import { Modal } from "../modal";
+import { useForm } from "react-hook-form";
 import s from "./masters.module.scss";
 
 export default function Categories() {
@@ -92,10 +93,11 @@ export default function Categories() {
   );
 }
 const LocationForm = ({ edit, onChange }) => {
-  const [type, setType] = useState(edit?.type || "");
+  const { handleSubmit, register, reset, setValue, watch } = useForm({
+    ...edit,
+  });
   return (
-    <Form
-      defaultValues={edit}
+    <form
       onSubmit={(data) => {
         console.log(data);
       }}
@@ -112,23 +114,27 @@ const LocationForm = ({ edit, onChange }) => {
         placeholder="Enter"
         icon={<BiSearch />}
       />
-      <Combobox
-        name="locationType"
-        required={true}
-        placeholder="Enter"
-        multiple={true}
-        options={[
-          "Location type one",
-          "Location type two",
-          "Location type three",
-          "Location type four",
-        ]}
-        onChange={(e) => setType(e.target.value)}
-      />
+      {
+        <Combobox
+          name="locationType"
+          required={true}
+          placeholder="Enter"
+          register={register}
+          setValue={setValue}
+          watch={watch}
+          multiple={true}
+          options={[
+            { value: 1, label: "Location type one" },
+            { value: 2, label: "Location type two" },
+            { value: 3, label: "Location type three" },
+            { value: 4, label: "Location type four" },
+          ]}
+        />
+      }
       <Toggle name="status" />
       <button className="btn secondary">
         <FaPlus />
       </button>
-    </Form>
+    </form>
   );
 };

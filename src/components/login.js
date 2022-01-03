@@ -17,7 +17,7 @@ export default function Login({}) {
   return (
     <div className={s.login}>
       <form
-        onClick={handleSubmit((data) => {
+        onSubmit={handleSubmit((data) => {
           setUser({
             _id: Math.random().toString(36).substr(-8),
             email: data.email,

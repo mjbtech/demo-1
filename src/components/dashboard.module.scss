@@ -51,6 +51,7 @@
     background: #2f3545;
     color: white;
     position: relative;
+    height: calc(100vh - 50px);
     &.collaped {
       ul {
         overflow: hidden;
@@ -63,7 +64,7 @@
       }
     }
     .links {
-      max-height: 100vh;
+      max-height: calc(100vh - 50px);
       overflow-y: auto;
       &::-webkit-scrollbar {
         width: 7px;

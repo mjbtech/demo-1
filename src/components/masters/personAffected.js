@@ -44,28 +44,45 @@ export default function PersonAffected() {
           <Table
             columns={[
               { label: "Master name" },
-              { label: "Status" },
+              { label: "Show" },
               { label: "Action" },
             ]}
           >
             <tr>
               <td className={s.inlineForm}>
-                <PersonAffectedForm
-                  edit={edit}
-                  onSuccess={(newPerson) => {
-                    setPersonAffecteds((prev) => {
-                      return prev.find((p) => p.pa_id === newPerson.pa_id)
-                        ? prev.map((p) =>
-                            p.pa_id === newPerson.pa_id ? newPerson : p
-                          )
-                        : [...prev, newPerson];
-                    });
-                    setEdit(null);
-                  }}
-                  clearForm={() => {
-                    setEdit(null);
-                  }}
-                />
+                {edit ? (
+                  <PersonAffectedForm
+                    key="edit"
+                    edit={edit}
+                    onSuccess={(newPerson) => {
+                      setPersonAffecteds((prev) => {
+                        return prev.find((p) => p.pa_id === newPerson.pa_id)
+                          ? prev.map((p) =>
+                              p.pa_id === newPerson.pa_id ? newPerson : p
+                            )
+                          : [...prev, newPerson];
+                      });
+                      setEdit(null);
+                    }}
+                    clearForm={() => {
+                      setEdit(null);
+                    }}
+                  />
+                ) : (
+                  <PersonAffectedForm
+                    key="add"
+                    onSuccess={(newPerson) => {
+                      setPersonAffecteds((prev) => {
+                        return prev.find((p) => p.pa_id === newPerson.pa_id)
+                          ? prev.map((p) =>
+                              p.pa_id === newPerson.pa_id ? newPerson : p
+                            )
+                          : [...prev, newPerson];
+                      });
+                      setEdit(null);
+                    }}
+                  />
+                )}
               </td>
             </tr>
             {personAffecteds.map((personAffected, i) => (
@@ -82,7 +99,7 @@ export default function PersonAffected() {
                   </span>
                 </td>
                 <td>
-                  <Toggle />
+                  <Toggle readOnly={true} defaultValue={personAffected.show} />
                 </td>
                 <TableActions
                   actions={[
@@ -141,7 +158,7 @@ export default function PersonAffected() {
   );
 }
 const PersonAffectedForm = ({ edit, onSuccess, clearForm }) => {
-  const { handleSubmit, register, reset } = useForm({ ...edit });
+  const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
   }, [edit]);
@@ -166,7 +183,7 @@ const PersonAffectedForm = ({ edit, onSuccess, clearForm }) => {
       })}
     >
       <Input name="name" register={register} required={true} />
-      <Toggle />
+      <Toggle name="show" register={register} required={true} watch={watch} />
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}
@@ -193,7 +210,7 @@ const PersonAffectedDetail = ({
 }) => {
   const [edit, setEdit] = useState(null);
   return (
-    <div className={s.child}>
+    <div className={`${s.child} ${s.personAffectedDetails}`}>
       <div className={s.head}>
         <span className={s.personAffectedName}>
           Master name: <strong>{name}</strong>
@@ -257,52 +274,119 @@ const PersonAffectedDetail = ({
             )}
           </td>
         </tr>
-        {(personAffectedDetails || []).map((personAffected, i) => (
-          <tr key={i}>
-            <td>{personAffected.name}</td>
-            <TableActions
-              actions={[
-                {
-                  icon: <BsPencilFill />,
-                  label: "Edit",
-                  callBack: () => setEdit(personAffected),
-                },
-                {
-                  icon: <FaRegTrashAlt />,
-                  label: "Delete",
-                  callBack: () =>
-                    Prompt({
-                      type: "confirmation",
-                      message: `Are you sure you want to remove ${personAffected.name}?`,
-                      callback: () => {
-                        fetch(
-                          `${process.env.REACT_APP_HOST}/personAffectedDetails/${personAffected.id}`,
-                          { method: "DELETE" }
-                        ).then((res) => {
-                          if (res.status === 204) {
-                            setPersonAffecteds((prev) =>
-                              prev.map((pa) =>
-                                pa.pa_id === pa_id
-                                  ? {
-                                      ...pa,
-                                      personAffectedDetails: pa.personAffectedDetails.filter(
-                                        (pad) => pad.id !== personAffected.id
-                                      ),
-                                    }
-                                  : pa
-                              )
-                            );
-                          }
-                        });
-                      },
-                    }),
-                },
-              ]}
-            />
-          </tr>
+        {(personAffectedDetails || []).map((personAffected) => (
+          <SinglePersonEffectedDetail
+            key={personAffected.id}
+            pa_id={pa_id}
+            personAffected={personAffected}
+            setPersonAffecteds={setPersonAffecteds}
+            setEdit={setEdit}
+          />
         ))}
       </Table>
     </div>
+  );
+};
+const SinglePersonEffectedDetail = ({
+  personAffected,
+  setPersonAffecteds,
+  pa_id,
+  setEdit,
+}) => {
+  const [loading, setLoading] = useState(false);
+  return (
+    <tr className={loading ? s.loading : ""}>
+      <td>
+        <input
+          type="checkbox"
+          checked={personAffected.show}
+          onChange={(e) => {
+            setLoading(true);
+            fetch(
+              `${process.env.REACT_APP_HOST}/personAffectedDetails/${personAffected.id}`,
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  ...personAffected,
+                  show: !personAffected.show,
+                  personAffected: { pa_id },
+                }),
+              }
+            )
+              .then((res) => res.json())
+              .then((personAffectedDetail) => {
+                setLoading(false);
+                setPersonAffecteds((prev) =>
+                  prev.map((pa) => {
+                    if (pa.pa_id !== pa_id) return pa;
+                    const newDetails = pa.personAffectedDetails?.find(
+                      (pad) => pad.id === personAffectedDetail.id
+                    )
+                      ? pa.personAffectedDetails?.map((pad) =>
+                          pad.id === personAffectedDetail.id
+                            ? personAffectedDetail
+                            : pad
+                        )
+                      : [
+                          ...(pa.personAffectedDetails || []),
+                          personAffectedDetail,
+                        ];
+                    return {
+                      ...pa,
+                      personAffectedDetails: newDetails,
+                    };
+                  })
+                );
+              })
+              .catch((err) => {
+                setLoading(false);
+                console.log(err);
+              });
+          }}
+        />{" "}
+        {personAffected.name}
+      </td>
+      <TableActions
+        actions={[
+          {
+            icon: <BsPencilFill />,
+            label: "Edit",
+            callBack: () => setEdit(personAffected),
+          },
+          {
+            icon: <FaRegTrashAlt />,
+            label: "Delete",
+            callBack: () =>
+              Prompt({
+                type: "confirmation",
+                message: `Are you sure you want to remove ${personAffected.name}?`,
+                callback: () => {
+                  fetch(
+                    `${process.env.REACT_APP_HOST}/personAffectedDetails/${personAffected.id}`,
+                    { method: "DELETE" }
+                  ).then((res) => {
+                    if (res.status === 204) {
+                      setPersonAffecteds((prev) =>
+                        prev.map((pa) =>
+                          pa.pa_id === pa_id
+                            ? {
+                                ...pa,
+                                personAffectedDetails: pa.personAffectedDetails.filter(
+                                  (pad) => pad.id !== personAffected.id
+                                ),
+                              }
+                            : pa
+                        )
+                      );
+                    }
+                  });
+                },
+              }),
+          },
+        ]}
+      />
+    </tr>
   );
 };
 const PersonAffectedDetailForm = ({

@@ -114,10 +114,10 @@ const DepartmentForm = ({ edit, onChange }) => {
         placeholder="Enter"
         multiple={true}
         options={[
-          "Location type one",
-          "Location type two",
-          "Location type three",
-          "Location type four",
+          { value: 1, label: "Location type one" },
+          { value: 2, label: "Location type two" },
+          { value: 3, label: "Location type three" },
+          { value: 4, label: "Location type four" },
         ]}
       />
       <Toggle name="status" />

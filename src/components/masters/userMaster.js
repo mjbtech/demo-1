@@ -144,7 +144,11 @@ const UserForm = ({ edit, onChange }) => {
       <Combobox
         required={true}
         name="gender"
-        options={["Male", "Female", "Other"]}
+        options={[
+          { value: "male", label: "Male" },
+          { value: "female", label: "Female" },
+          { value: "other", label: "Other" },
+        ]}
       />
       <Input required={true} name="dob" placeholder="Enter" />
       <Input required={true} name="employeeId" placeholder="Enter" />
@@ -153,13 +157,20 @@ const UserForm = ({ edit, onChange }) => {
       <Combobox
         required={true}
         name="department"
-        options={["Department 1", "Department 2", "Department 3"]}
+        options={[
+          { value: 1, label: "Department 1" },
+          { value: 2, label: "Department 2" },
+          { label: 3, value: "Department 3" },
+        ]}
       />
       <Combobox
         required={true}
         placeholder="Select"
         name="role"
-        options={["IR Reporter", "IR Investigative"]}
+        options={[
+          { value: 1, label: "IR Reporter" },
+          { value: 2, label: "IR Investigative" },
+        ]}
       />
       <button className="btn secondary">
         <FaPlus />

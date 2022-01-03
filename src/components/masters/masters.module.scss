@@ -47,7 +47,7 @@
               }
             }
             &.selected {
-              background: rgb(210, 210, 210) !important;
+              background: rgb(191, 216, 226) !important;
             }
           }
         }
@@ -147,6 +147,13 @@
         grid-template-columns: clamp(5rem, 50%, 20rem) 3rem 4rem !important;
       }
     }
+
+    .personAffectedDetails {
+      .loading {
+        background: rgb(191, 216, 226) !important;
+        pointer-events: none;
+      }
+    }
   }
   .locations {
     form {
@@ -223,6 +230,9 @@
     tr,
     form {
       grid-template-columns: 12rem 8rem 10rem 8rem 10rem 6rem 3rem;
+      .btns {
+        grid-column: -1/-2;
+      }
     }
   }
   .btns {

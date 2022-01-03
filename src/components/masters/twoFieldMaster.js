@@ -278,7 +278,10 @@ const TwoFieldMasterDetails = ({
           <tr key={i}>
             <td>{twoFieldMaster.name}</td>
             <td>
-              <Toggle />
+              <Toggle
+                readOnly={true}
+                defaultValue={twoFieldMaster.showToggle}
+              />
             </td>
             <TableActions
               actions={[
@@ -331,7 +334,7 @@ const TwoFieldMasterDetailForm = ({
   onSuccess,
   clearForm,
 }) => {
-  const { handleSubmit, register, reset } = useForm({ ...edit });
+  const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
   }, [edit]);
@@ -364,7 +367,12 @@ const TwoFieldMasterDetailForm = ({
         name="name"
         placeholder="Enter"
       />
-      <Toggle />
+      <Toggle
+        name="showToggle"
+        register={register}
+        required={true}
+        watch={watch}
+      />
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}

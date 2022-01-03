@@ -64,7 +64,11 @@ function Dashboard() {
           <Combobox
             label="Service location"
             className={s.locationSelector}
-            options={["Front Desk", "Front Desk 2", "Front Desk 3"]}
+            options={[
+              { value: 1, label: "Front Desk" },
+              { value: 1, label: "Front Desk 2" },
+              { value: 1, label: "Front Desk 3" },
+            ]}
           />
           <div className={s.actions}>
             <button>

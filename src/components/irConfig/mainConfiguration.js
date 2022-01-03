@@ -651,9 +651,9 @@ export default function MainConfig() {
                 className={s.duration}
                 label="Duration"
                 options={[
-                  "Last one year",
-                  "Last two years",
-                  "Last three years",
+                  { value: 1, label: "Last one year" },
+                  { value: 2, label: "Last two years" },
+                  { value: 3, label: "Last three years" },
                 ]}
               />
             </div>

@@ -214,14 +214,17 @@ function Lookup() {
               <Combobox
                 label="Incident Category"
                 placeholder="Select"
-                options={["Medical error", "Technical error"]}
+                options={[
+                  { value: 1, label: "Medical error" },
+                  { value: 2, label: "Technical error" },
+                ]}
               />
               <Combobox
                 label="Incident Sub-category"
                 placeholder="Select"
                 options={[
-                  "Wrong Medication administered",
-                  "Incident Sub-category 2",
+                  { value: 1, label: "Wrong Medication administered" },
+                  { value: 2, label: "Incident Sub-category 2" },
                 ]}
               />
               <button className="btn secondary">

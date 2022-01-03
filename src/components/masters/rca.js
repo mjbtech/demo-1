@@ -53,7 +53,7 @@ export default function Rcas() {
           <Table
             columns={[
               { label: "Master Name" },
-              { label: "Status" },
+              { label: "Show" },
               { label: "Action" },
             ]}
           >
@@ -100,7 +100,7 @@ export default function Rcas() {
                   </span>
                 </td>
                 <td>
-                  <Toggle />
+                  <Toggle readOnly={true} defaultValue={rca.show} />
                 </td>
                 <TableActions
                   actions={[
@@ -153,7 +153,7 @@ export default function Rcas() {
   );
 }
 const RcaForm = ({ edit, onSuccess, clearForm }) => {
-  const { handleSubmit, register, reset } = useForm({ ...edit });
+  const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
   }, [edit]);
@@ -178,8 +178,7 @@ const RcaForm = ({ edit, onSuccess, clearForm }) => {
       })}
     >
       <Input name="name" register={register} required={true} />
-
-      <Toggle />
+      <Toggle name="show" register={register} required={true} watch={watch} />
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}

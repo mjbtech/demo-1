@@ -53,7 +53,7 @@ export default function ContributingFactor() {
           <Table
             columns={[
               { label: "Master name" },
-              { label: "Status" },
+              { label: "Show" },
               { label: "Action" },
             ]}
           >
@@ -110,7 +110,10 @@ export default function ContributingFactor() {
                   </span>
                 </td>
                 <td>
-                  <Toggle />
+                  <Toggle
+                    readOnly={true}
+                    defaultValue={contributingFactor.show}
+                  />
                 </td>
                 <TableActions
                   actions={[
@@ -168,7 +171,7 @@ export default function ContributingFactor() {
   );
 }
 const ContributingFactorForm = ({ edit, onSuccess, clearForm }) => {
-  const { handleSubmit, register, reset } = useForm({ ...edit });
+  const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
   }, [edit]);
@@ -193,7 +196,7 @@ const ContributingFactorForm = ({ edit, onSuccess, clearForm }) => {
       })}
     >
       <Input name="name" register={register} required={true} />
-      <Toggle />
+      <Toggle name="show" watch={watch} register={register} required={true} />
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}

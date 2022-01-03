@@ -229,11 +229,33 @@ export const Toggle = ({
   register = () => {},
   getValues,
   watch,
+  defaultValue,
+  readOnly,
   name,
   onChange,
 }) => {
   const id = useRef(Math.random().toString(36).substr(-8));
   const watching = watch?.([name]);
+  if (readOnly) {
+    return (
+      <section
+        className={`${s.toggle} ${defaultValue ? s.on : ""} ${
+          readOnly ? s.readOnly : ""
+        }`}
+        title="Read only"
+      >
+        <input
+          type="checkbox"
+          style={{ display: "none" }}
+          checked={defaultValue}
+          onChange={(e) => {}}
+          id={id.current}
+          readOnly={true}
+        />
+        <label className={s.ball} htmlFor={id.current} />
+      </section>
+    );
+  }
   return (
     <section
       className={`${s.toggle} ${watching && watching[0] ? s.on : ""}`}
@@ -253,9 +275,9 @@ export const Toggle = ({
   );
 };
 export const Combobox = ({
+  register = () => {},
   label,
   name,
-  register,
   watch,
   setValue,
   placeholder,
@@ -265,11 +287,8 @@ export const Combobox = ({
   className,
 }) => {
   const container = useRef();
-  const [selected, setSelected] = useState(watch?.(name) || []);
+  const selected = watch?.(name);
   const [open, setOpen] = useState(false);
-  useEffect(() => {
-    setValue?.(name, selected);
-  }, [selected]);
   useEffect(() => {
     const handler = (e) => {
       if (e.path && !e.path.includes(container.current)) {
@@ -282,27 +301,44 @@ export const Combobox = ({
   return (
     <section
       data-testid="combobox-container"
-      className={`${s.combobox} ${className || ""} ${open ? s.open : ""}`}
+      className={`${s.combobox} ${className || ""} ${open ? s.open : ""} ${
+        !(Array.isArray(options) && options.length > 1) ? s.noOptions : ""
+      }`}
     >
       {label && <label data-testid="combobox-label">{label}</label>}
-      <div className={s.field} onClick={() => setOpen(true)} ref={container}>
-        <p
-          className={`${s.displayValue} ${
-            !selected.join("") ? s.placeholder : ""
-          }`}
-        >
-          {(selected.length > 3
-            ? `${selected.length} items selected`
-            : selected?.reduce(
-                (p, a, i, arr) => `${p} ${a}${i < arr.length - 1 ? ", " : ""}`,
-                ""
-              )) ||
-            placeholder ||
-            "Select one"}
+      <div
+        className={s.field}
+        onClick={() => {
+          if (Array.isArray(options) && options.length > 1) {
+            setOpen(true);
+          }
+        }}
+        ref={container}
+      >
+        <p className={`${s.displayValue} ${!selected ? s.placeholder : ""}`}>
+          {!(Array.isArray(options) && options.length > 1) &&
+            "No options provided"}
+          {selected &&
+            ["string", "number"].includes(typeof selected) &&
+            options.find(({ value }) => value === selected)?.label}
+          {Array.isArray(selected) &&
+            (selected.length > 3
+              ? `${selected.length} items selected`
+              : selected.reduce(
+                  (p, a, i, arr) =>
+                    `${p} ${options.find(({ value }) => value === a)?.label}${
+                      i < arr.length - 1 ? ", " : ""
+                    }`,
+                  ""
+                ))}
+          {Array.isArray(options) &&
+            options.length > 1 &&
+            !selected &&
+            (placeholder || "Select one")}
         </p>
         <input
           data-testid="combobox-input"
-          {...register?.(name)}
+          {...register(name)}
           required={required}
         />
         <span data-testid="combobox-btn" className={s.btn}>
@@ -310,44 +346,51 @@ export const Combobox = ({
         </span>
         {open && (
           <ul className={s.options} data-testid="combobox-options">
-            {options.map((option, i) => (
+            {options.map(({ label, value }, i) => (
               <li
                 key={i}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelected((prev) => {
-                    const _selected = selected.find((item) => item === option);
-                    if (_selected) {
-                      return prev.filter((item) => item !== option);
-                    }
+                  const _selectedItem = selected?.find?.(
+                    (item) => item === value
+                  );
+                  if (_selectedItem) {
+                    setValue(
+                      name,
+                      selected.filter((item) => item !== value)
+                    );
+                  } else {
                     if (multiple) {
-                      return [
-                        ...prev.filter((item) => item !== option),
-                        option,
-                      ];
+                      setValue(name, [
+                        ...(selected.filter?.((item) => item !== value) || []),
+                        value,
+                      ]);
                     } else {
-                      return [option];
+                      setValue(name, value);
                     }
-                  });
+                  }
+
                   if (!multiple) {
                     setOpen(false);
                   }
                 }}
                 className={
-                  selected.find((item) => item === option) || false
+                  selected?.find?.((item) => item === value) || false
                     ? s.selected
                     : ""
                 }
-                data-testid={`combobox-${option}`}
+                data-testid={`combobox-${label}`}
               >
                 {multiple && (
                   <input
                     type="checkbox"
-                    checked={selected.find((item) => item === option) || false}
+                    checked={
+                      selected?.find?.((item) => item === value) || false
+                    }
                     readOnly={true}
                   />
                 )}{" "}
-                {option}
+                {label}
               </li>
             ))}
           </ul>

@@ -206,6 +206,15 @@
       margin-right: 0 !important;
     }
   }
+  &.readOnly {
+    cursor: default;
+    .ball {
+      cursor: default;
+    }
+    &.on {
+      background: rgb(119, 119, 119);
+    }
+  }
 }
 .combobox {
   cursor: pointer;
@@ -235,7 +244,7 @@
     .displayValue {
       z-index: 10;
       background-color: white;
-      cursor: pointer;
+      // cursor: pointer;
       text-align: left;
       white-space: nowrap;
       width: 100%;
@@ -301,6 +310,17 @@
         &.selected {
           background: #e8e8e8;
         }
+      }
+    }
+  }
+  &.noOptions {
+    cursor: default;
+    .field {
+      .displayValue {
+        background: rgb(235, 235, 235);
+      }
+      .btn {
+        background: rgb(235, 235, 235);
       }
     }
   }
