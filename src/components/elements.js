@@ -102,46 +102,46 @@ export const FileInput = ({ label, required, multiple, onChange }) => {
   );
 };
 export const Textarea = ({
+  register = () => {},
+  name,
   label,
   placeholder,
-  defaultValue,
-  onChange,
   type,
   icon,
   className,
   required,
 }) => {
-  const [value, setValue] = useState(defaultValue || "");
   return (
     <section className={`${s.input} ${s.textinput} ${className || ""}`}>
       {label && <label>{label}</label>}
       <textarea
+        {...register(name)}
         placeholder={placeholder || "Enter"}
-        value={defaultValue}
         required={required}
-        onChange={(e) => {
-          setValue(e.target.value);
-          onChange?.(e);
-        }}
       />
       {icon && icon}
     </section>
   );
 };
-export const Radio = ({ options, onChange }) => {
-  const [value, setValue] = useState("");
+export const Radio = ({
+  register = () => {},
+  name,
+  options,
+  onChange,
+  required,
+}) => {
   return (
     <section className={s.radio}>
       {options.map(({ label, value: v, hint, disabled }) => (
-        <label key={v} className={disabled ? s.disabled : ""}>
+        <label key={v} htmlFor={v} className={disabled ? s.disabled : ""}>
           <input
-            className="label"
+            required={required}
+            {...register(name)}
             type="radio"
-            checked={v === value}
-            onChange={() => {
-              setValue(v);
-              onChange?.(v);
-            }}
+            name={name}
+            id={v}
+            className="label"
+            value={v}
           />
           {label}
           {hint && <span className={s.hint}>{hint}</span>}
@@ -198,26 +198,37 @@ export const CustomRadio = ({
   );
 };
 export const SwitchInput = ({
+  register = () => {},
+  name,
+  setValue,
+  watch,
   label,
+  readOnly,
   defaultValue,
   onChange,
   onLabel,
   offLabel,
 }) => {
-  const [value, setValue] = useState(defaultValue || false);
+  const watching = watch(name);
   return (
     <div data-testid="switchInput" className={s.switchInput}>
       <label>{label}</label>
+      <input
+        type="checkbox"
+        {...register(name)}
+        style={{ display: "none" }}
+        name={name}
+      />
       <div className={s.btns}>
         <span
-          className={`${value ? s.active : ""} ${s.on}`}
-          onClick={() => setValue(true)}
+          className={`${watching ? s.active : ""} ${s.on}`}
+          onClick={() => setValue(name, true)}
         >
           {onLabel || "Yes"}
         </span>
         <span
-          className={`${!value ? s.active : ""} ${s.off}`}
-          onClick={() => setValue(false)}
+          className={`${!watching ? s.active : ""} ${s.off}`}
+          onClick={() => setValue(name, false)}
         >
           {offLabel || "No"}
         </span>
@@ -227,7 +238,6 @@ export const SwitchInput = ({
 };
 export const Toggle = ({
   register = () => {},
-  getValues,
   watch,
   defaultValue,
   readOnly,
@@ -279,12 +289,13 @@ export const Combobox = ({
   label,
   name,
   watch,
-  setValue,
+  setValue = () => {},
   placeholder,
   required,
   options,
   multiple,
   className,
+  onChange,
 }) => {
   const container = useRef();
   const selected = watch?.(name);
@@ -373,9 +384,11 @@ export const Combobox = ({
                   if (!multiple) {
                     setOpen(false);
                   }
+                  onChange?.({ label, value });
                 }}
                 className={
-                  selected?.find?.((item) => item === value) || false
+                  selected?.find?.((item) => item === value) ||
+                  value === selected
                     ? s.selected
                     : ""
                 }

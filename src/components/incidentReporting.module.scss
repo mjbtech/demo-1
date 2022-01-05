@@ -175,7 +175,7 @@ main {
     .notified {
       .inlineForm {
         grid-column: 1/-1;
-        form {
+        & > div {
           grid-gap: 0.5rem;
           align-items: flex-start;
           display: grid;
@@ -184,7 +184,7 @@ main {
     }
     .actionTaken {
       tr,
-      form {
+      div {
         grid-template-columns: 0.6fr 0.25fr 0.25fr min-content;
       }
       .inlineForm {
@@ -195,13 +195,13 @@ main {
     }
     .witnesses {
       tr,
-      form {
+      div {
         grid-template-columns: 0.5fr 0.5fr min-content;
       }
     }
     .notified {
       tr,
-      form {
+      div {
         grid-template-columns: 1fr 1fr 1fr min-content;
       }
     }

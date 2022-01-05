@@ -16,25 +16,29 @@ export default function Login({}) {
   }, []);
   return (
     <div className={s.login}>
-      <form
-        onSubmit={handleSubmit((data) => {
-          setUser({
-            _id: Math.random().toString(36).substr(-8),
-            email: data.email,
-          });
-          navigate("/");
-        })}
-      >
-        <h1>Login</h1>
-        <Input register={register} required={true} label="Email" />
-        <Input
-          register={register}
-          required={true}
-          type="password"
-          label="Password"
-        />
-        <button className="btn w-100">Sign in</button>
-      </form>
+      <img src="/asset/new_login_img.jpg" />
+      <div className={s.formWrapper}>
+        <img src="/asset/logo.jpg" />
+        <form
+          onSubmit={handleSubmit((data) => {
+            setUser({
+              _id: Math.random().toString(36).substr(-8),
+              email: data.email,
+            });
+            navigate("/");
+          })}
+        >
+          <h1>Sign In</h1>
+          <Input register={register} required={true} label="Email" />
+          <Input
+            register={register}
+            required={true}
+            type="password"
+            label="Password"
+          />
+          <button className="btn w-100">Sign in</button>
+        </form>
+      </div>
     </div>
   );
 }

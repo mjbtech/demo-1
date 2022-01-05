@@ -2,17 +2,28 @@
   height: 100vh;
   width: 100vw;
   display: grid;
-  place-items: center;
-  form {
-    width: 20rem;
-    padding: 1.5rem;
-    padding-bottom: 2rem;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.22);
-    display: grid;
-    grid-gap: 1rem;
-    button {
-      margin: auto;
-      margin-right: 0;
+  grid-template-columns: 1fr clamp(30rem, 40%, 40rem);
+  img {
+    max-height: 100vh;
+    width: 100%;
+  }
+  .formWrapper {
+    padding: 3.5rem;
+    padding-top: 7.25rem;
+    img {
+      height: 3.5rem;
+      width: auto;
+    }
+    form {
+      margin-top: 0.5rem;
+      display: grid;
+      grid-gap: 1rem;
+      h1 {
+        color: #2d4d8e;
+      }
+      button {
+        margin: auto;
+      }
     }
   }
 }

@@ -59,34 +59,22 @@ export default function Rcas() {
           >
             <tr>
               <td className={s.inlineForm}>
-                {edit ? (
-                  <RcaForm
-                    key="edit"
-                    edit={edit}
-                    onSuccess={(newCat) => {
-                      setRcas((prev) => {
-                        return prev.find((c) => c.id === newCat.id)
-                          ? prev.map((c) => (c.id === newCat.id ? newCat : c))
-                          : [...prev, newCat];
-                      });
-                      setEdit(null);
-                    }}
-                    clearForm={() => {
-                      setEdit(null);
-                    }}
-                  />
-                ) : (
-                  <RcaForm
-                    key="add"
-                    onSuccess={(newCat) => {
-                      setRcas((prev) => {
-                        return prev.find((c) => c.id === newCat.id)
-                          ? prev.map((c) => (c.id === newCat.id ? newCat : c))
-                          : [...prev, newCat];
-                      });
-                    }}
-                  />
-                )}
+                <RcaForm
+                  {...(edit && { edit })}
+                  key={edit ? "edit" : "add"}
+                  onSuccess={(newCat) => {
+                    setRcas((prev) => {
+                      return prev.find((c) => c.id === newCat.id)
+                        ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                        : [...prev, newCat];
+                    });
+                    setEdit(null);
+                  }}
+                  clearForm={() => {
+                    setEdit(null);
+                  }}
+                  rcas={rcas}
+                />
               </td>
             </tr>
             {rcas.map((rca, i) => (
@@ -152,7 +140,7 @@ export default function Rcas() {
     </div>
   );
 }
-const RcaForm = ({ edit, onSuccess, clearForm }) => {
+const RcaForm = ({ edit, onSuccess, clearForm, rcas }) => {
   const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
@@ -163,6 +151,19 @@ const RcaForm = ({ edit, onSuccess, clearForm }) => {
         const url = `${process.env.REACT_APP_HOST}/rca${
           edit ? `/${edit.id}` : ""
         }`;
+        if (
+          !edit &&
+          rcas?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
         fetch(url, {
           method: edit ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
@@ -207,18 +208,18 @@ const RcaCauses = ({ rca: { id, name, rcaCauses }, setRcas }) => {
     <div className={s.child}>
       <div className={s.head}>
         <span className={s.rcaName}>
-          Rca name: <strong>{name}</strong>
+          Master name: <strong>{name}</strong>
         </span>
       </div>
       <Table columns={[{ label: "Description" }, { label: "Action" }]}>
         <tr>
           <td className={s.inlineForm}>
-            {edit ? (
-              <RcaCauseForm
-                key="edit"
-                edit={edit}
-                rcaId={id}
-                onSuccess={(rcaCause) => {
+            <RcaCauseForm
+              {...(edit && { edit })}
+              key={edit ? "edit" : "add"}
+              rcaId={id}
+              onSuccess={(rcaCause) => {
+                if (edit) {
                   setRcas((prev) =>
                     prev.map((cat) => {
                       const newRcaCauses = cat.rcaCauses?.find(
@@ -236,17 +237,7 @@ const RcaCauses = ({ rca: { id, name, rcaCauses }, setRcas }) => {
                         : cat;
                     })
                   );
-                  setEdit(null);
-                }}
-                clearForm={() => {
-                  setEdit(null);
-                }}
-              />
-            ) : (
-              <RcaCauseForm
-                key="add"
-                rcaId={id}
-                onSuccess={(rcaCause) => {
+                } else {
                   setRcas((prev) =>
                     prev.map((cat) =>
                       cat.id === id
@@ -257,9 +248,14 @@ const RcaCauses = ({ rca: { id, name, rcaCauses }, setRcas }) => {
                         : cat
                     )
                   );
-                }}
-              />
-            )}
+                }
+                setEdit(null);
+              }}
+              clearForm={() => {
+                setEdit(null);
+              }}
+              rcaCauses={rcaCauses}
+            />
           </td>
         </tr>
         {(rcaCauses || []).map((rca, i) => (
@@ -315,7 +311,7 @@ const RcaCauses = ({ rca: { id, name, rcaCauses }, setRcas }) => {
     </div>
   );
 };
-const RcaCauseForm = ({ edit, rcaId, onSuccess, clearForm }) => {
+const RcaCauseForm = ({ edit, rcaId, onSuccess, clearForm, rcaCauses }) => {
   const { handleSubmit, register, reset } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
@@ -323,6 +319,19 @@ const RcaCauseForm = ({ edit, rcaId, onSuccess, clearForm }) => {
   return (
     <form
       onSubmit={handleSubmit((data) => {
+        if (
+          !edit &&
+          rcaCauses?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
         fetch(`${process.env.REACT_APP_HOST}/rcaCauses`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -59,39 +59,24 @@ export default function ContributingFactor() {
           >
             <tr>
               <td className={s.inlineForm}>
-                {edit ? (
-                  <ContributingFactorForm
-                    key="edit"
-                    edit={edit}
-                    onSuccess={(newCon) => {
-                      setContributingFactors((prev) => {
-                        return prev.find((con) => con.cf_id === newCon.cf_id)
-                          ? prev.map((con) =>
-                              con.cf_id === newCon.cf_id ? newCon : con
-                            )
-                          : [...prev, newCon];
-                      });
-                      setEdit(null);
-                    }}
-                    clearForm={() => {
-                      setEdit(null);
-                    }}
-                  />
-                ) : (
-                  <ContributingFactorForm
-                    key="add"
-                    onSuccess={(newCon) => {
-                      setContributingFactors((prev) => {
-                        return prev.find((c) => c.cf_id === newCon.cf_id)
-                          ? prev.map((c) =>
-                              c.cf_id === newCon.cf_id ? newCon : c
-                            )
-                          : [...prev, newCon];
-                      });
-                      setEdit(null);
-                    }}
-                  />
-                )}
+                <ContributingFactorForm
+                  {...(edit && { edit })}
+                  key={edit ? "edit" : "add"}
+                  onSuccess={(newCon) => {
+                    setContributingFactors((prev) => {
+                      return prev.find((con) => con.cf_id === newCon.cf_id)
+                        ? prev.map((con) =>
+                            con.cf_id === newCon.cf_id ? newCon : con
+                          )
+                        : [...prev, newCon];
+                    });
+                    setEdit(null);
+                  }}
+                  clearForm={() => {
+                    setEdit(null);
+                  }}
+                  contributingFactors={contributingFactors}
+                />
               </td>
             </tr>
             {contributingFactors.map((contributingFactor, i) => (
@@ -170,7 +155,12 @@ export default function ContributingFactor() {
     </div>
   );
 }
-const ContributingFactorForm = ({ edit, onSuccess, clearForm }) => {
+const ContributingFactorForm = ({
+  edit,
+  onSuccess,
+  clearForm,
+  contributingFactors,
+}) => {
   const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
@@ -181,6 +171,19 @@ const ContributingFactorForm = ({ edit, onSuccess, clearForm }) => {
         const url = `${process.env.REACT_APP_HOST}/contributingFactors${
           edit ? `/${edit.cf_id}` : ""
         }`;
+        if (
+          !edit &&
+          contributingFactors?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
         fetch(url, {
           method: edit ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
@@ -234,12 +237,12 @@ const ContributingFactorDetail = ({
       <Table columns={[{ label: "Description" }, { label: "Action" }]}>
         <tr>
           <td className={s.inlineForm}>
-            {edit ? (
-              <ContributingFactorDetailForm
-                key="edit"
-                edit={edit}
-                contributingFactorId={cf_id}
-                onSuccess={(newCfd) => {
+            <ContributingFactorDetailForm
+              {...(edit && { edit })}
+              key={edit ? "edit" : "add"}
+              contributingFactorId={cf_id}
+              onSuccess={(newCfd) => {
+                if (edit) {
                   setContributingFactors((prev) =>
                     prev.map((con) => {
                       if (con.cf_id !== cf_id) return con;
@@ -256,17 +259,7 @@ const ContributingFactorDetail = ({
                       };
                     })
                   );
-                  setEdit(null);
-                }}
-                clearForm={() => {
-                  setEdit(null);
-                }}
-              />
-            ) : (
-              <ContributingFactorDetailForm
-                key="add"
-                contributingFactorId={cf_id}
-                onSuccess={(cfd) => {
+                } else {
                   setContributingFactors((prev) =>
                     prev.map((con) =>
                       con.cf_id === cf_id
@@ -274,15 +267,20 @@ const ContributingFactorDetail = ({
                             ...con,
                             contributingFactorDetails: [
                               ...(con.contributingFactorDetails || []),
-                              cfd,
+                              newCfd,
                             ],
                           }
                         : con
                     )
                   );
-                }}
-              />
-            )}
+                }
+                setEdit(null);
+              }}
+              clearForm={() => {
+                setEdit(null);
+              }}
+              contributingFactorDetails={contributingFactorDetails}
+            />
           </td>
         </tr>
         {(contributingFactorDetails || []).map((contributingFactor, i) => (
@@ -337,6 +335,7 @@ const ContributingFactorDetailForm = ({
   contributingFactorId,
   onSuccess,
   clearForm,
+  contributingFactorDetails,
 }) => {
   const { handleSubmit, register, reset } = useForm({ ...edit });
   useEffect(() => {
@@ -345,6 +344,19 @@ const ContributingFactorDetailForm = ({
   return (
     <form
       onSubmit={handleSubmit((data) => {
+        if (
+          !edit &&
+          contributingFactorDetails?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
         fetch(
           `${process.env.REACT_APP_HOST}/contributingFactorDetails${
             edit ? `/${edit.id}` : ""

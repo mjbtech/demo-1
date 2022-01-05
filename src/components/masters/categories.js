@@ -53,34 +53,22 @@ export default function Categories() {
           <Table columns={[{ label: "Category Name" }, { label: "Action" }]}>
             <tr>
               <td className={s.inlineForm}>
-                {edit ? (
-                  <CategoryForm
-                    key="edit"
-                    edit={edit}
-                    onSuccess={(newCat) => {
-                      setCategories((prev) => {
-                        return prev.find((c) => c.id === newCat.id)
-                          ? prev.map((c) => (c.id === newCat.id ? newCat : c))
-                          : [...prev, newCat];
-                      });
-                      setEdit(null);
-                    }}
-                    clearForm={() => {
-                      setEdit(null);
-                    }}
-                  />
-                ) : (
-                  <CategoryForm
-                    key="add"
-                    onSuccess={(newCat) => {
-                      setCategories((prev) => {
-                        return prev.find((c) => c.id === newCat.id)
-                          ? prev.map((c) => (c.id === newCat.id ? newCat : c))
-                          : [...prev, newCat];
-                      });
-                    }}
-                  />
-                )}
+                <CategoryForm
+                  {...(edit && { edit })}
+                  key={edit ? "edit" : "add"}
+                  onSuccess={(newCat) => {
+                    setCategories((prev) => {
+                      return prev.find((c) => c.id === newCat.id)
+                        ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                        : [...prev, newCat];
+                    });
+                    setEdit(null);
+                  }}
+                  clearForm={() => {
+                    setEdit(null);
+                  }}
+                  categories={categories}
+                />
               </td>
             </tr>
             {categories.map((category, i) => (
@@ -148,7 +136,7 @@ export default function Categories() {
     </div>
   );
 }
-const CategoryForm = ({ edit, onSuccess, clearForm }) => {
+const CategoryForm = ({ edit, onSuccess, clearForm, categories }) => {
   const { handleSubmit, register, reset } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
@@ -159,6 +147,19 @@ const CategoryForm = ({ edit, onSuccess, clearForm }) => {
         const url = `${process.env.REACT_APP_HOST}/category${
           edit ? `/${edit.id}` : ""
         }`;
+        if (
+          !edit &&
+          categories?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
         fetch(url, {
           method: edit ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
@@ -205,7 +206,7 @@ const SubCategories = ({
     <div className={`${s.subCategory} ${s.child}`}>
       <div className={s.head}>
         <span className={s.categoryName}>
-          Category name: <strong>{name}</strong>
+          Master name: <strong>{name}</strong>
         </span>
         {
           //   <Form defaultValues={{ name: name }}>
@@ -230,12 +231,12 @@ const SubCategories = ({
       >
         <tr>
           <td className={s.inlineForm}>
-            {edit ? (
-              <SubCategoryForm
-                key="edit"
-                edit={edit}
-                categoryId={id}
-                onSuccess={(subCategory) => {
+            <SubCategoryForm
+              {...(edit && { edit })}
+              key={edit ? "edit" : "add"}
+              categoryId={id}
+              onSuccess={(subCategory) => {
+                if (edit) {
                   setCategories((prev) =>
                     prev.map((cat) => {
                       const newSubCategories = cat.subCategorys?.find(
@@ -253,17 +254,7 @@ const SubCategories = ({
                         : cat;
                     })
                   );
-                  setEdit(null);
-                }}
-                clearForm={() => {
-                  setEdit(null);
-                }}
-              />
-            ) : (
-              <SubCategoryForm
-                key="add"
-                categoryId={id}
-                onSuccess={(subCategory) => {
+                } else {
                   setCategories((prev) =>
                     prev.map((cat) =>
                       cat.id === id
@@ -277,9 +268,14 @@ const SubCategories = ({
                         : cat
                     )
                   );
-                }}
-              />
-            )}
+                }
+                setEdit(null);
+              }}
+              clearForm={() => {
+                setEdit(null);
+              }}
+              subCategorys={subCategorys}
+            />
           </td>
         </tr>
         {(subCategorys || []).map((category, i) => (
@@ -289,7 +285,7 @@ const SubCategories = ({
             <td>{category.sentinel ? "Sentinel" : ""}</td>
             <td>{category.reportable ? "Reportable" : ""}</td>
             <td>
-              <Toggle defaultValue={category.status} />
+              <Toggle defaultValue={category.status} readOnly={true} />
             </td>
             <TableActions
               actions={[
@@ -341,14 +337,33 @@ const SubCategories = ({
     </div>
   );
 };
-const SubCategoryForm = ({ edit, categoryId, onSuccess, clearForm }) => {
-  const { handleSubmit, register, reset } = useForm({ ...edit });
+const SubCategoryForm = ({
+  edit,
+  categoryId,
+  onSuccess,
+  clearForm,
+  subCategorys,
+}) => {
+  const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
   }, [edit]);
   return (
     <form
       onSubmit={handleSubmit((data) => {
+        if (
+          !edit &&
+          subCategorys?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
         fetch(`${process.env.REACT_APP_HOST}/subCategory`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -382,7 +397,7 @@ const SubCategoryForm = ({ edit, categoryId, onSuccess, clearForm }) => {
       />
       <Checkbox register={register} name="sentinel" />
       <Checkbox register={register} name="reportable" />
-      <Toggle register={register} name="status" />
+      <Toggle register={register} name="status" required={true} watch={watch} />
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}

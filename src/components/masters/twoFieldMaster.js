@@ -53,34 +53,22 @@ export default function TwoFieldMasters() {
           <Table columns={[{ label: "Master Name" }, { label: "Action" }]}>
             <tr className={s.filterForm}>
               <td className={s.inlineForm}>
-                {edit ? (
-                  <TwoFieldMasterForm
-                    key="edit"
-                    edit={edit}
-                    onSuccess={(newCat) => {
-                      setTwoFieldMasters((prev) => {
-                        return prev.find((c) => c.id === newCat.id)
-                          ? prev.map((c) => (c.id === newCat.id ? newCat : c))
-                          : [...prev, newCat];
-                      });
-                      setEdit(null);
-                    }}
-                    clearForm={() => {
-                      setEdit(null);
-                    }}
-                  />
-                ) : (
-                  <TwoFieldMasterForm
-                    key="add"
-                    onSuccess={(newCat) => {
-                      setTwoFieldMasters((prev) => {
-                        return prev.find((c) => c.id === newCat.id)
-                          ? prev.map((c) => (c.id === newCat.id ? newCat : c))
-                          : [...prev, newCat];
-                      });
-                    }}
-                  />
-                )}
+                <TwoFieldMasterForm
+                  {...(edit && { edit })}
+                  key={edit ? "edit" : "add"}
+                  onSuccess={(newCat) => {
+                    setTwoFieldMasters((prev) => {
+                      return prev.find((c) => c.id === newCat.id)
+                        ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                        : [...prev, newCat];
+                    });
+                    setEdit(null);
+                  }}
+                  clearForm={() => {
+                    setEdit(null);
+                  }}
+                  twoFieldMasters={twoFieldMasters}
+                />
               </td>
             </tr>
             {twoFieldMasters.map((twoFieldMaster, i) => (
@@ -148,7 +136,12 @@ export default function TwoFieldMasters() {
     </div>
   );
 }
-const TwoFieldMasterForm = ({ edit, onSuccess, clearForm }) => {
+const TwoFieldMasterForm = ({
+  edit,
+  onSuccess,
+  clearForm,
+  twoFieldMasters,
+}) => {
   const { handleSubmit, register, reset } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
@@ -159,10 +152,23 @@ const TwoFieldMasterForm = ({ edit, onSuccess, clearForm }) => {
         const url = `${process.env.REACT_APP_HOST}/twoFieldMaster${
           edit ? `/${edit.id}` : ""
         }`;
+        if (
+          !edit &&
+          twoFieldMasters?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
         fetch(url, {
           method: edit ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ ...data, name: data.name.trim() }),
         })
           .then((res) => res.json())
           .then((data) => {
@@ -217,12 +223,12 @@ const TwoFieldMasterDetails = ({
       >
         <tr>
           <td className={s.inlineForm}>
-            {edit ? (
-              <TwoFieldMasterDetailForm
-                key="edit"
-                edit={edit}
-                twoFieldMasterId={id}
-                onSuccess={(twoFieldMasterDetail) => {
+            <TwoFieldMasterDetailForm
+              {...(edit && { edit })}
+              key={edit ? "edit" : "add"}
+              twoFieldMasterId={id}
+              onSuccess={(twoFieldMasterDetail) => {
+                if (edit) {
                   setTwoFieldMasters((prev) =>
                     prev.map((cat) => {
                       const newTwoFieldMasterDetails = cat.twoFieldMasterDetails?.find(
@@ -245,17 +251,7 @@ const TwoFieldMasterDetails = ({
                         : cat;
                     })
                   );
-                  setEdit(null);
-                }}
-                clearForm={() => {
-                  setEdit(null);
-                }}
-              />
-            ) : (
-              <TwoFieldMasterDetailForm
-                key="add"
-                twoFieldMasterId={id}
-                onSuccess={(twoFieldMasterDetail) => {
+                } else {
                   setTwoFieldMasters((prev) =>
                     prev.map((cat) =>
                       cat.id === id
@@ -269,9 +265,14 @@ const TwoFieldMasterDetails = ({
                         : cat
                     )
                   );
-                }}
-              />
-            )}
+                }
+                setEdit(null);
+              }}
+              clearForm={() => {
+                setEdit(null);
+              }}
+              twoFieldMasterDetails={twoFieldMasterDetails}
+            />
           </td>
         </tr>
         {(twoFieldMasterDetails || []).map((twoFieldMaster, i) => (
@@ -333,6 +334,7 @@ const TwoFieldMasterDetailForm = ({
   twoFieldMasterId,
   onSuccess,
   clearForm,
+  twoFieldMasterDetails,
 }) => {
   const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
@@ -341,6 +343,19 @@ const TwoFieldMasterDetailForm = ({
   return (
     <form
       onSubmit={handleSubmit((data) => {
+        if (
+          !edit &&
+          twoFieldMasterDetails?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
         fetch(`${process.env.REACT_APP_HOST}/twoFieldMasterDetails`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

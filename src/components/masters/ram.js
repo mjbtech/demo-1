@@ -36,6 +36,9 @@ export default function RiskAssessments() {
       fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/6`).then((res) =>
         res.json()
       ),
+      fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/7`).then((res) =>
+        res.json()
+      ),
     ])
       .then((masters) => {
         const _parameters = {};
@@ -54,6 +57,7 @@ export default function RiskAssessments() {
       .then((data) => {
         if (data._embedded?.riskAssement) {
           setRisks(data._embedded.riskAssement);
+          console.log(data._embedded.riskAssement, parameters?.["7"]);
         }
       })
       .catch((err) => {
@@ -116,25 +120,26 @@ export default function RiskAssessments() {
             <tr key={i}>
               <td>
                 {parameters?.["3"].find(
-                  (item) => item.value.toString() === risk.likelihood.toString()
+                  (item) => item.value === risk.likelihood
                 )?.label || risk.likelihood}
               </td>
               <td>
-                {parameters?.["4"].find(
-                  (item) => item.value.toString() === risk.serverity.toString()
-                )?.label || risk.serverity}
+                {parameters?.["4"].find((item) => item.value === risk.serverity)
+                  ?.label || risk.serverity}
               </td>
               <td>
-                {parameters?.["5"].find(
-                  (item) => item.value.toString() === risk.riskscore.toString()
-                )?.label || risk.riskscore}
+                {parameters?.["5"].find((item) => item.value === risk.riskscore)
+                  ?.label || risk.riskscore}
               </td>
               <td>
                 {parameters?.["6"].find(
-                  (item) => item.value.toString() === risk.riskstatus.toString()
+                  (item) => item.value === risk.riskstatus
                 )?.label || risk.riskstatus}
               </td>
-              <td>{risk.color}</td>
+              <td>
+                {parameters?.["7"].find((item) => item.value === +risk.color)
+                  ?.label || risk.color}
+              </td>
               <td>
                 <Toggle readOnly={true} defaultValue={risk.status} />
               </td>
@@ -261,13 +266,7 @@ const RiskAssessmentForm = ({ edit, onSuccess, parameters, clearForm }) => {
         setValue={setValue}
         required={true}
         placeholder="Select"
-        options={[
-          { label: "Red", value: "red" },
-          { label: "Orange", value: "orange" },
-          { label: "Yellow", value: "yellow" },
-          { label: "Green", value: "green" },
-          { label: "Blue", value: "blue" },
-        ]}
+        options={parameters?.["7"]}
       />
       <Toggle name="status" watch={watch} register={register} required={true} />
       <div className={s.btns}>

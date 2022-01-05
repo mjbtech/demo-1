@@ -50,39 +50,24 @@ export default function PersonAffected() {
           >
             <tr>
               <td className={s.inlineForm}>
-                {edit ? (
-                  <PersonAffectedForm
-                    key="edit"
-                    edit={edit}
-                    onSuccess={(newPerson) => {
-                      setPersonAffecteds((prev) => {
-                        return prev.find((p) => p.pa_id === newPerson.pa_id)
-                          ? prev.map((p) =>
-                              p.pa_id === newPerson.pa_id ? newPerson : p
-                            )
-                          : [...prev, newPerson];
-                      });
-                      setEdit(null);
-                    }}
-                    clearForm={() => {
-                      setEdit(null);
-                    }}
-                  />
-                ) : (
-                  <PersonAffectedForm
-                    key="add"
-                    onSuccess={(newPerson) => {
-                      setPersonAffecteds((prev) => {
-                        return prev.find((p) => p.pa_id === newPerson.pa_id)
-                          ? prev.map((p) =>
-                              p.pa_id === newPerson.pa_id ? newPerson : p
-                            )
-                          : [...prev, newPerson];
-                      });
-                      setEdit(null);
-                    }}
-                  />
-                )}
+                <PersonAffectedForm
+                  {...(edit && { edit })}
+                  key={edit ? "edit" : "add"}
+                  onSuccess={(newPerson) => {
+                    setPersonAffecteds((prev) => {
+                      return prev.find((p) => p.pa_id === newPerson.pa_id)
+                        ? prev.map((p) =>
+                            p.pa_id === newPerson.pa_id ? newPerson : p
+                          )
+                        : [...prev, newPerson];
+                    });
+                    setEdit(null);
+                  }}
+                  clearForm={() => {
+                    setEdit(null);
+                  }}
+                  personAffecteds={personAffecteds}
+                />
               </td>
             </tr>
             {personAffecteds.map((personAffected, i) => (
@@ -157,7 +142,12 @@ export default function PersonAffected() {
     </div>
   );
 }
-const PersonAffectedForm = ({ edit, onSuccess, clearForm }) => {
+const PersonAffectedForm = ({
+  edit,
+  onSuccess,
+  clearForm,
+  personAffecteds,
+}) => {
   const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
     reset({ ...edit });
@@ -168,6 +158,19 @@ const PersonAffectedForm = ({ edit, onSuccess, clearForm }) => {
         const url = `${process.env.REACT_APP_HOST}/personAffected${
           edit ? `/${edit.pa_id}` : ""
         }`;
+        if (
+          !edit &&
+          personAffecteds?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
         fetch(url, {
           method: edit ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
@@ -219,12 +222,12 @@ const PersonAffectedDetail = ({
       <Table columns={[{ label: "Description" }, { label: "Action" }]}>
         <tr>
           <td className={s.inlineForm}>
-            {edit ? (
-              <PersonAffectedDetailForm
-                key="edit"
-                edit={edit}
-                personAffectedId={pa_id}
-                onSuccess={(personAffectedDetail) => {
+            <PersonAffectedDetailForm
+              {...(edit && { edit })}
+              key={edit ? "edit" : "add"}
+              personAffectedId={pa_id}
+              onSuccess={(personAffectedDetail) => {
+                if (edit) {
                   setPersonAffecteds((prev) =>
                     prev.map((pa) => {
                       if (pa.pa_id !== pa_id) return pa;
@@ -246,17 +249,7 @@ const PersonAffectedDetail = ({
                       };
                     })
                   );
-                  setEdit(null);
-                }}
-                clearForm={() => {
-                  setEdit(null);
-                }}
-              />
-            ) : (
-              <PersonAffectedDetailForm
-                key="add"
-                personAffectedId={pa_id}
-                onSuccess={(personAffectedDetail) => {
+                } else {
                   setPersonAffecteds((prev) =>
                     prev.map((pa) => {
                       if (pa.pa_id !== pa_id) return pa;
@@ -269,9 +262,14 @@ const PersonAffectedDetail = ({
                       };
                     })
                   );
-                }}
-              />
-            )}
+                }
+                setEdit(null);
+              }}
+              clearForm={() => {
+                setEdit(null);
+              }}
+              personAffectedDetails={personAffectedDetails}
+            />
           </td>
         </tr>
         {(personAffectedDetails || []).map((personAffected) => (
@@ -394,6 +392,7 @@ const PersonAffectedDetailForm = ({
   personAffectedId,
   onSuccess,
   clearForm,
+  personAffectedDetails,
 }) => {
   const { handleSubmit, register, reset } = useForm(edit || {});
   useEffect(() => {
@@ -404,6 +403,19 @@ const PersonAffectedDetailForm = ({
   return (
     <form
       onSubmit={handleSubmit((data) => {
+        if (
+          !edit &&
+          personAffectedDetails?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
         fetch(`${process.env.REACT_APP_HOST}/personAffectedDetails`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
