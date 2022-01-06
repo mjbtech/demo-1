@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { IoIosClose } from "react-icons/io";
 import { FaUpload, FaSortDown } from "react-icons/fa";
+import { BsFillGearFill } from "react-icons/bs";
+import { Link, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { Modal } from "./modal";
 import s from "./elements.module.scss";
 
 export const Form = ({ defaultValues, children, onSubmit }) => {
@@ -345,7 +348,7 @@ export const Combobox = ({
           {Array.isArray(options) &&
             options.length > 1 &&
             !selected &&
-            (placeholder || "Select one")}
+            (placeholder || "Select")}
         </p>
         <input
           data-testid="combobox-input"
@@ -422,6 +425,23 @@ export const Checkbox = ({ register, name, label, required }) => {
   );
 };
 
+export const Tabs = ({ tabs, className }) => {
+  const location = useLocation();
+  return (
+    <div className={`${s.tabs} ${s[className]}`}>
+      {tabs.map(({ path, label }) => (
+        <Link
+          key={path}
+          to={path}
+          className={location?.pathname.endsWith(path) ? s.active : ""}
+        >
+          {label}
+        </Link>
+      ))}
+      <span className={s.fill} />
+    </div>
+  );
+};
 export const Table = ({ columns, className, children }) => {
   return (
     <table
@@ -441,7 +461,26 @@ export const Table = ({ columns, className, children }) => {
   );
 };
 export const TableActions = ({ actions }) => {
+  const btn = useRef();
   const [open, setOpen] = useState(false);
+  const [style, setStyle] = useState({});
+  useLayoutEffect(() => {
+    if (actions.length > 3) {
+      const { width, height, x, y } = btn.current.getBoundingClientRect();
+      const top = window.innerHeight - y;
+      setStyle({
+        position: "absolute",
+        right: window.innerWidth - (x + width),
+        top: Math.max(
+          Math.min(y + height, window.innerHeight - (31 * actions.length + 8)),
+          8
+        ),
+        // width: width,
+        // height: 28 * actions.length,
+        maxHeight: window.innerHeight - 16,
+      });
+    }
+  }, [open]);
   return actions.length < 4 ? (
     <td className={s.tableActions}>
       {actions.map((action) => (
@@ -451,8 +490,76 @@ export const TableActions = ({ actions }) => {
       ))}
     </td>
   ) : (
-    <td className={s.tableActions}></td>
+    <td className={s.tableActions}>
+      <button className={s.btn} ref={btn} onClick={() => setOpen(true)}>
+        <BsFillGearFill className={s.gear} /> <FaSortDown className={s.sort} />
+      </button>
+      <Modal
+        style={style}
+        className={s.actionModal}
+        open={open}
+        onBackdropClick={() => setOpen(false)}
+        backdropClass={s.actionBackdrop}
+      >
+        {actions.map((action) => (
+          <button
+            key={action.label}
+            className="clear"
+            onClick={action.callBack}
+          >
+            {action.icon} {action.label}
+          </button>
+        ))}
+      </Modal>
+    </td>
   );
+};
+
+export const moment = ({ time, format }) => {
+  if (new Date(time).toString() === "Invalid Date") {
+    return time;
+  }
+  const options = {
+    year: format.includes("YYYY") ? "numeric" : "2-digit",
+    month: format.includes("MMMM")
+      ? "long"
+      : format.includes("MMM")
+      ? "short"
+      : format.includes("MM")
+      ? "2-digit"
+      : "numeric"
+      ? "long"
+      : format.includes("ddd")
+      ? "short"
+      : "narrow",
+    weekday: format.includes("dddd")
+      ? "long"
+      : format.includes("ddd")
+      ? "short"
+      : "narrow",
+    day: format.includes("DD") ? "2-digit" : "numeric",
+    hour: format.includes("hh") ? "2-digit" : "numeric",
+    minute: format.includes("mm") ? "2-digit" : "numeric",
+    second: format.includes("ss") ? "2-digit" : "numeric",
+  };
+  const values = {};
+  new Intl.DateTimeFormat("en-IN", options)
+    .formatToParts(new Date(time || new Date()))
+    .map(({ type, value }) => {
+      values[type] = value;
+    });
+  return format
+    .replace(/Y+/g, values.year)
+    .replace(/M+/g, values.month)
+    .replace(/D+/g, values.day)
+    .replace(/h+/g, values.hour)
+    .replace(/m+/g, values.minute)
+    .replace(/s+/g, values.second)
+    .replace(/a+/g, values.dayPeriod)
+    .replace(/d+/g, values.weekday);
+};
+export const Moment = ({ format, children, ...rest }) => {
+  return <time {...rest}>{moment({ time: children, format })}</time>;
 };
 
 export const Chip = ({ label, remove }) => {

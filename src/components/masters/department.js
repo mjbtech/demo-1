@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { FaInfoCircle, FaPlus, FaRegTrashAlt } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaInfoCircle, FaPlus, FaCheck, FaRegTrashAlt } from "react-icons/fa";
+import { IoClose } from "react-icons/io5";
 import { BsPencilFill } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
 import { Box } from "../incidentReport";
@@ -13,66 +14,92 @@ import {
   TableActions,
   Toggle,
 } from "../elements";
-import { Modal } from "../modal";
+import { Modal, Prompt } from "../modal";
+import { useForm } from "react-hook-form";
 import s from "./masters.module.scss";
 
 export default function Department() {
-  const [departments, setDepartments] = useState([
-    { code: "45641520", name: "Location one", type: "Location", status: true },
-    { code: "45641520", name: "Location two", type: "Location", status: true },
-    {
-      code: "45641520",
-      name: "Location three",
-      type: "Location",
-      status: false,
-    },
-    { code: "45641520", name: "Location four", type: "Location", status: true },
-    {
-      code: "45641520",
-      name: "Location five",
-      type: "Location",
-      status: false,
-    },
-  ]);
+  const [departments, setDepartments] = useState([]);
+  const [edit, setEdit] = useState(null);
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_HOST}/department`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data._embedded?.department) {
+          setDepartments(data._embedded.department);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   return (
     <div className={s.container}>
       <header>
         <h3>DEPARTMENT MASTER</h3>
       </header>
-      <div className={s.locations}>
+      <div className={s.departments}>
         <Table
           columns={[
-            { label: "Code" },
-            { label: "Location Name" },
-            { label: "Location Type" },
-            { label: "Status" },
+            // { label: "Code" },
+            { label: "Department Name" },
+            // { label: "Location Type" },
+            // { label: "Status" },
             { label: "Action" },
           ]}
         >
           <tr>
             <td className={s.inlineForm}>
-              <DepartmentForm />
+              <DepartmentForm
+                {...(edit && { edit })}
+                key={edit ? "edit" : "add"}
+                onSuccess={(newCat) => {
+                  setDepartments((prev) => {
+                    return prev.find((c) => c.id === newCat.id)
+                      ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                      : [...prev, newCat];
+                  });
+                  setEdit(null);
+                }}
+                clearForm={() => {
+                  setEdit(null);
+                }}
+                departments={departments}
+              />
             </td>
           </tr>
-          {departments.map((loc, i) => (
+          {departments.map((department, i) => (
             <tr key={i}>
-              <td>{loc.code}</td>
-              <td>{loc.name}</td>
-              <td>{loc.type}</td>
-              <td>
-                <Toggle defaultValue={loc.status} />
-              </td>
+              <td>{department.name}</td>
               <TableActions
                 actions={[
                   {
                     icon: <BsPencilFill />,
                     label: "Edit",
-                    callBack: () => console.log("edit", loc.code),
+                    callBack: () => setEdit(department),
                   },
                   {
                     icon: <FaRegTrashAlt />,
                     label: "Delete",
-                    callBack: () => console.log("delete", loc.code),
+                    callBack: () =>
+                      Prompt({
+                        type: "confirmation",
+                        message: `Are you sure you want to remove ${department.name}?`,
+                        callback: () => {
+                          fetch(
+                            `${process.env.REACT_APP_HOST}/department/${department.id}`,
+                            {
+                              method: "DELETE",
+                            }
+                          ).then((res) => {
+                            if (res.status === 204) {
+                              setDepartments((prev) =>
+                                prev.filter((c) => c.id !== department.id)
+                              );
+                            }
+                          });
+                        },
+                      }),
                   },
                 ]}
               />
@@ -80,50 +107,91 @@ export default function Department() {
           ))}
         </Table>
       </div>
-      <div className={s.btns}>
-        <button className="btn w-100">Save</button>
-      </div>
     </div>
   );
 }
-const DepartmentForm = ({ edit, onChange }) => {
-  const [type, setType] = useState(edit?.type || "");
-  const [status, setStatus] = useState(edit?.status || "");
+const DepartmentForm = ({ edit, onSuccess, clearForm, departments }) => {
+  const { handleSubmit, register, reset } = useForm({ ...edit });
+  useEffect(() => {
+    reset({ ...edit });
+  }, [edit]);
   return (
-    <Form
-      defaultValues={edit}
-      onSubmit={(data) => {
-        console.log(data);
-      }}
+    <form
+      onSubmit={handleSubmit((data) => {
+        const url = `${process.env.REACT_APP_HOST}/department${
+          edit ? `/${edit.id}` : ""
+        }`;
+        if (
+          !edit &&
+          departments?.some(
+            (item) =>
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.name} already exists.`,
+          });
+          return;
+        }
+        fetch(url, {
+          method: edit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.name) {
+              onSuccess(data);
+              reset();
+            }
+          });
+      })}
     >
       <Input
-        name={"code"}
-        required={true}
-        placeholder="Enter"
-        icon={<BiSearch />}
-      />
-      <Input
+        register={register}
         name="name"
         required={true}
         placeholder="Enter"
         icon={<BiSearch />}
       />
-      <Combobox
-        name="type"
-        required={true}
-        placeholder="Enter"
-        multiple={true}
-        options={[
-          { value: 1, label: "Location type one" },
-          { value: 2, label: "Location type two" },
-          { value: 3, label: "Location type three" },
-          { value: 4, label: "Location type four" },
-        ]}
-      />
-      <Toggle name="status" />
-      <button className="btn secondary">
-        <FaPlus />
-      </button>
-    </Form>
+      {
+        //   <Input
+        //   name="name"
+        //   required={true}
+        //   placeholder="Enter"
+        //   icon={<BiSearch />}
+        // />
+        // <Combobox
+        //   name="type"
+        //   required={true}
+        //   placeholder="Enter"
+        //   multiple={true}
+        //   options={[
+        //     { value: 1, label: "Location type one" },
+        //     { value: 2, label: "Location type two" },
+        //     { value: 3, label: "Location type three" },
+        //     { value: 4, label: "Location type four" },
+        //   ]}
+        // />
+        // <Toggle name="status" />
+      }
+      <div className={s.btns}>
+        <button className="btn secondary">
+          {edit ? <FaCheck /> : <FaPlus />}
+        </button>
+        {edit && (
+          <button
+            type="button"
+            onClick={() => {
+              clearForm();
+            }}
+            className="btn secondary"
+          >
+            <IoClose />
+          </button>
+        )}
+      </div>
+    </form>
   );
 };

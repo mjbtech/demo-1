@@ -15,6 +15,7 @@ import {
   Table,
   TableActions,
 } from "./elements";
+import { Prompt } from "./modal";
 import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import s from "./incidentReporting.module.scss";
 
@@ -22,7 +23,7 @@ export const ConnectForm = ({ children }) => {
   const methods = useFormContext();
   return children({ ...methods });
 };
-function Lookup() {
+function IncidentReporting() {
   const methods = useForm();
   const [departments, setDepartments] = useState(["Pharmacy", "Nursing"]);
   const [preventability, setPreventability] = useState("Not assessed");
@@ -60,7 +61,21 @@ function Lookup() {
         <form
           className={s.content}
           onSubmit={methods.handleSubmit((data) => {
-            console.log(data);
+            fetch(`${process.env.REACT_APP_HOST}/IncidentReport`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                if (data.id) {
+                  Prompt({
+                    type: "success",
+                    message: "Incident was successfully reported.",
+                  });
+                  methods.reset();
+                }
+              });
           })}
         >
           <Box label="INCIDENT DETAILS" collapsable={true}>
@@ -75,6 +90,7 @@ function Lookup() {
               <Input
                 name="location"
                 required={true}
+                type="number"
                 register={methods.register}
                 label="Location of incident"
                 icon={<BiSearch />}
@@ -115,31 +131,31 @@ function Lookup() {
                 options={[
                   {
                     label: "Unsafe condition",
-                    value: "unsafeCondtion",
+                    value: "1",
                     hint:
                       "Any potential safety event that did not reach the patient.",
                   },
                   {
                     label: "No Harm",
-                    value: "noHarm",
+                    value: "2",
                     hint:
                       "Any potential safety event that did not reach the patient.",
                   },
                   {
                     label: "Near Miss",
-                    value: "nearMiss",
+                    value: "4",
                     hint:
                       "Any potential safety event that did not reach the patient.",
                   },
                   {
                     label: "Adverse Event",
-                    value: "adverseEvent",
+                    value: "7",
                     hint:
                       "Any potential safety event that did not reach the patient.",
                   },
                   {
                     label: "Sentinel Event",
-                    value: "sentinelEvent",
+                    value: "0",
                     hint:
                       "Any potential safety event that did not reach the patient.",
                   },
@@ -450,7 +466,9 @@ function Lookup() {
                 />
               </div>
               <div className={s.btns}>
-                <button className="btn secondary w-100">Save</button>
+                {
+                  // <button className="btn secondary w-100">Save</button>
+                }
                 <button className="btn w-100">Submit</button>
               </div>
             </div>
@@ -547,4 +565,4 @@ export const Box = ({ label, children, className, collapsable }) => {
   );
 };
 
-export default Lookup;
+export default IncidentReporting;

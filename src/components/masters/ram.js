@@ -24,6 +24,12 @@ export default function RiskAssessments() {
   const [edit, setEdit] = useState(null);
   useEffect(() => {
     Promise.all([
+      fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/1`).then((res) =>
+        res.json()
+      ),
+      fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/2`).then((res) =>
+        res.json()
+      ),
       fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/3`).then((res) =>
         res.json()
       ),
@@ -31,12 +37,6 @@ export default function RiskAssessments() {
         res.json()
       ),
       fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/5`).then((res) =>
-        res.json()
-      ),
-      fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/6`).then((res) =>
-        res.json()
-      ),
-      fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/7`).then((res) =>
         res.json()
       ),
     ])
@@ -57,7 +57,6 @@ export default function RiskAssessments() {
       .then((data) => {
         if (data._embedded?.riskAssement) {
           setRisks(data._embedded.riskAssement);
-          console.log(data._embedded.riskAssement, parameters?.["7"]);
         }
       })
       .catch((err) => {
@@ -119,25 +118,25 @@ export default function RiskAssessments() {
           {risks.map((risk, i) => (
             <tr key={i}>
               <td>
-                {parameters?.["3"].find(
+                {parameters?.["1"].find(
                   (item) => item.value === risk.likelihood
                 )?.label || risk.likelihood}
               </td>
               <td>
-                {parameters?.["4"].find((item) => item.value === risk.serverity)
+                {parameters?.["2"].find((item) => item.value === risk.serverity)
                   ?.label || risk.serverity}
               </td>
               <td>
-                {parameters?.["5"].find((item) => item.value === risk.riskscore)
+                {parameters?.["3"].find((item) => item.value === risk.riskscore)
                   ?.label || risk.riskscore}
               </td>
               <td>
-                {parameters?.["6"].find(
+                {parameters?.["4"].find(
                   (item) => item.value === risk.riskstatus
                 )?.label || risk.riskstatus}
               </td>
               <td>
-                {parameters?.["7"].find((item) => item.value === +risk.color)
+                {parameters?.["5"].find((item) => item.value === +risk.color)
                   ?.label || risk.color}
               </td>
               <td>
@@ -230,7 +229,7 @@ const RiskAssessmentForm = ({ edit, onSuccess, parameters, clearForm }) => {
         setValue={setValue}
         required={true}
         placeholder="Select"
-        options={parameters?.["3"]}
+        options={parameters?.["1"]}
       />
       <Combobox
         name="serverity"
@@ -239,7 +238,7 @@ const RiskAssessmentForm = ({ edit, onSuccess, parameters, clearForm }) => {
         setValue={setValue}
         required={true}
         placeholder="Select"
-        options={parameters?.["4"]}
+        options={parameters?.["2"]}
       />
       <Combobox
         name="riskscore"
@@ -248,7 +247,7 @@ const RiskAssessmentForm = ({ edit, onSuccess, parameters, clearForm }) => {
         setValue={setValue}
         required={true}
         placeholder="Select"
-        options={parameters?.["5"]}
+        options={parameters?.["3"]}
       />
       <Combobox
         name="riskstatus"
@@ -257,7 +256,7 @@ const RiskAssessmentForm = ({ edit, onSuccess, parameters, clearForm }) => {
         setValue={setValue}
         required={true}
         placeholder="Select"
-        options={parameters?.["6"]}
+        options={parameters?.["4"]}
       />
       <Combobox
         name="color"
@@ -266,7 +265,7 @@ const RiskAssessmentForm = ({ edit, onSuccess, parameters, clearForm }) => {
         setValue={setValue}
         required={true}
         placeholder="Select"
-        options={parameters?.["7"]}
+        options={parameters?.["5"]}
       />
       <Toggle name="status" watch={watch} register={register} required={true} />
       <div className={s.btns}>

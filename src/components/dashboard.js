@@ -13,6 +13,7 @@ import { IoKeyOutline } from "react-icons/io5";
 import { FaRegBell } from "react-icons/fa";
 import { Combobox } from "./elements";
 import IncidentReport from "./incidentReport";
+import IncidentReportingDashboard from "./incidentReportingDashboard";
 import OtherPages from "./otherPages";
 import Masters from "./masters/index";
 import IrConfig from "./irConfig/index";
@@ -98,28 +99,32 @@ function Dashboard() {
         <ul className={s.links}>
           <li
             className={`${s.sidebarItem} ${
-              location.pathname === "/incident-report" ? s.active : ""
+              location.pathname.startsWith("/incident-report") ? s.active : ""
             }`}
           >
             <Link to="/incident-report">Incident Reporting</Link>
           </li>
           <li
             className={`${s.sidebarItem} ${
-              location.pathname === "/incident-dashboard" ? s.active : ""
+              location.pathname.startsWith("/incident-dashboard")
+                ? s.active
+                : ""
             }`}
           >
-            <Link to="/incident-dashboard">Incident Dashboard</Link>
+            <Link to="/incident-dashboard/my-dashboard">
+              Incident Dashboard
+            </Link>
           </li>
           <li
             className={`${s.sidebarItem} ${
-              location.pathname === "/capa-dashboard" ? s.active : ""
+              location.pathname.startsWith("/capa-dashboard") ? s.active : ""
             }`}
           >
-            <Link to="/capa-dashboard">CPA Reporting</Link>
+            <Link to="/capa-dashboard">CAPA Reporting</Link>
           </li>
           <li
             className={`${s.sidebarItem} ${
-              location.pathname === "/reports" ? s.active : ""
+              location.pathname.startsWith("/reports") ? s.active : ""
             }`}
           >
             <Link to="/reports">Reports</Link>
@@ -162,6 +167,10 @@ function Dashboard() {
       <main>
         <Routes>
           <Route path="/incident-report" element={<IncidentReport />} />
+          <Route
+            path="/incident-dashboard/*"
+            element={<IncidentReportingDashboard />}
+          />
           <Route path="/irConfiguration/*" element={<IrConfig />} />
           <Route path="/masters/*" index element={<Masters />} />
           <Route path="/:other" element={<OtherPages />} />

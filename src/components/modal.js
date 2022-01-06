@@ -20,7 +20,7 @@ export const Modal = forwardRef(
       return createPortal(
         <>
           <div
-            className={`modalBackdrop ${backdropClass}`}
+            className={`modalBackdrop ${backdropClass || ""}`}
             onClick={(e) => {
               e.stopPropagation();
               onBackdropClick?.();

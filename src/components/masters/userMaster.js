@@ -1,64 +1,51 @@
-import { useState } from "react";
-import { FaInfoCircle, FaPlus, FaRegTrashAlt } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaInfoCircle, FaPlus, FaCheck, FaRegTrashAlt } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
+import { IoClose } from "react-icons/io5";
 import { BiSearch } from "react-icons/bi";
 import { Box } from "../incidentReport";
 import { TiTick } from "react-icons/ti";
 import { IoIosClose } from "react-icons/io";
 import {
-  Form,
   Input,
   Combobox,
   Table,
   TableActions,
   Toggle,
+  Moment,
 } from "../elements";
-import { Modal } from "../modal";
+import { useForm } from "react-hook-form";
+import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
 export default function UserMaster() {
-  const [users, setUsers] = useState([
-    {
-      name: "Location one",
-      gender: "Location",
-      dob: "2021-12-21T15:56:09.153Z",
-      employeeId: "23faaw",
-      contact: "+9044752547",
-      email: "user@gmail.com",
-      department: "Nursing",
-      role: ["IR Reporter"],
-    },
-    {
-      name: "Location one",
-      gender: "Location",
-      dob: "2021-12-21T15:56:09.153Z",
-      employeeId: "23faaw",
-      contact: "+9044752547",
-      email: "user@gmail.com",
-      department: "Nursing",
-      role: ["IR Reporter", "IR Investor"],
-    },
-    {
-      name: "Location one",
-      gender: "Location",
-      dob: "2021-12-21T15:56:09.153Z",
-      employeeId: "23faaw",
-      contact: "+9044752547",
-      email: "user@gmail.com",
-      department: "Nursing",
-      role: ["IR Reporter"],
-    },
-    {
-      name: "Location one",
-      gender: "Location",
-      dob: "2021-12-21T15:56:09.153Z",
-      employeeId: "23faaw",
-      contact: "+9044752547",
-      email: "user@gmail.com",
-      department: "Nursing",
-      role: ["IR Reporter"],
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [edit, setEdit] = useState(null);
+  const [departments, setDepartments] = useState([]);
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_HOST}/department`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data._embedded.department) {
+          setDepartments(
+            data._embedded.department.map((d) => ({
+              value: d.id,
+              label: d.name,
+            }))
+          );
+          return fetch(`${process.env.REACT_APP_HOST}/user`);
+        }
+      })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data._embedded?.user) {
+          setUsers(data._embedded.user);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   return (
     <div className={s.container}>
       <header>
@@ -73,6 +60,7 @@ export default function UserMaster() {
             { label: "Employee ID" },
             { label: "Contact" },
             { label: "Email" },
+            { label: "Password" },
             { label: "Department" },
             { label: "Role" },
             { label: "Action" },
@@ -80,45 +68,70 @@ export default function UserMaster() {
         >
           <tr>
             <td className={s.inlineForm}>
-              <UserForm />
+              <UserForm
+                {...(edit && { edit })}
+                key={edit ? "edit" : "add"}
+                departments={departments}
+                onSuccess={(newUser) => {
+                  setUsers((prev) => {
+                    return prev.find((c) => c.id === newUser.id)
+                      ? prev.map((c) => (c.id === newUser.id ? newUser : c))
+                      : [...prev, newUser];
+                  });
+                  setEdit(null);
+                }}
+                clearForm={() => {
+                  setEdit(null);
+                }}
+                users={users}
+              />
             </td>
           </tr>
           {users.map((user, i) => (
             <tr key={i}>
               <td>{user.name}</td>
               <td>{user.gender}</td>
-              <td>{user.dob}</td>
+              <td>
+                <Moment format="DD/MM/YYYY">{user.dob}</Moment>
+              </td>
               <td>{user.employeeId}</td>
               <td>{user.contact}</td>
               <td>{user.email}</td>
-              <td>{user.department}</td>
+              <td>•••••••</td>
               <td>
-                {user.role[0]}
-                {user.role.length > 1 && (
-                  <>
-                    {" "}
-                    <span className={s.moreRoles}>
-                      +{user.role.length - 1}{" "}
-                      <ul className={s.allRoles}>
-                        {user.role.map((role) => (
-                          <li key={role}>{role}</li>
-                        ))}
-                      </ul>
-                    </span>
-                  </>
-                )}
+                {departments.find((u) => u.value === user.department)?.label ||
+                  user.department}
               </td>
+              <td>{user.role}</td>
               <TableActions
                 actions={[
                   {
                     icon: <BsPencilFill />,
                     label: "Edit",
-                    callBack: () => console.log("edit", user.code),
+                    callBack: () => setEdit(user),
                   },
                   {
                     icon: <FaRegTrashAlt />,
                     label: "Delete",
-                    callBack: () => console.log("delete", user.code),
+                    callBack: () =>
+                      Prompt({
+                        type: "confirmation",
+                        message: `Are you sure you want to remove ${user.name}?`,
+                        callback: () => {
+                          fetch(
+                            `${process.env.REACT_APP_HOST}/user/${user.id}`,
+                            {
+                              method: "DELETE",
+                            }
+                          ).then((res) => {
+                            if (res.status === 204) {
+                              setUsers((prev) =>
+                                prev.filter((c) => c.id !== user.id)
+                              );
+                            }
+                          });
+                        },
+                      }),
                   },
                 ]}
               />
@@ -126,55 +139,137 @@ export default function UserMaster() {
           ))}
         </Table>
       </div>
-      <div className={s.btns}>
-        <button className="btn w-100">Save</button>
-      </div>
     </div>
   );
 }
-const UserForm = ({ edit, onChange }) => {
+const UserForm = ({ edit, onSuccess, clearForm, departments, users }) => {
+  const { handleSubmit, register, reset, watch, setValue } = useForm({
+    ...edit,
+  });
+  useEffect(() => {
+    reset({ ...edit });
+  }, [edit]);
   return (
-    <Form
-      defaultValues={edit}
-      onSubmit={(data) => {
-        console.log(data);
-      }}
+    <form
+      autoComplete="off"
+      onSubmit={handleSubmit((data) => {
+        const url = `${process.env.REACT_APP_HOST}/user${
+          edit ? `/${edit.id}` : ""
+        }`;
+        if (
+          !edit &&
+          users?.some(
+            (item) =>
+              item.email.trim().toLowerCase() ===
+              data.email.trim().toLowerCase()
+          )
+        ) {
+          Prompt({
+            type: "information",
+            message: `${data.email} already exists.`,
+          });
+          return;
+        }
+        fetch(url, {
+          method: edit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.name) {
+              onSuccess(data);
+              reset();
+            }
+          });
+      })}
     >
-      <Input required={true} name="name" placeholder="Enter" />
-      <Combobox
+      <Input
+        name="name"
+        register={register}
         required={true}
+        placeholder="Enter"
+      />
+      <Combobox
         name="gender"
+        register={register}
+        setValue={setValue}
+        watch={watch}
+        required={true}
         options={[
           { value: "male", label: "Male" },
           { value: "female", label: "Female" },
           { value: "other", label: "Other" },
         ]}
       />
-      <Input required={true} name="dob" placeholder="Enter" />
-      <Input required={true} name="employeeId" placeholder="Enter" />
-      <Input required={true} name="contact" placeholder="Enter" />
-      <Input required={true} email="email" placeholder="Enter" />
-      <Combobox
+      <Input
+        name="dob"
+        type="date"
+        register={register}
         required={true}
-        name="department"
-        options={[
-          { value: 1, label: "Department 1" },
-          { value: 2, label: "Department 2" },
-          { label: 3, value: "Department 3" },
-        ]}
+        placeholder="Enter"
+      />
+      <Input
+        register={register}
+        required={true}
+        name="employeeId"
+        placeholder="Enter"
+      />
+      <Input
+        register={register}
+        required={true}
+        name="contact"
+        placeholder="Enter"
+      />
+      <Input
+        register={register}
+        required={true}
+        name="email"
+        placeholder="Enter"
+      />
+      <Input
+        register={register}
+        required={true}
+        type="password"
+        name="password"
+        placeholder="Enter"
       />
       <Combobox
+        register={register}
+        required={true}
+        name="department"
+        setValue={setValue}
+        watch={watch}
+        options={departments}
+      />
+      <Combobox
+        register={register}
         required={true}
         placeholder="Select"
         name="role"
+        setValue={setValue}
+        watch={watch}
         options={[
           { value: 1, label: "IR Reporter" },
           { value: 2, label: "IR Investigative" },
         ]}
       />
-      <button className="btn secondary">
-        <FaPlus />
-      </button>
-    </Form>
+      <div className={s.btns}>
+        <button className="btn secondary">
+          {edit ? <FaCheck /> : <FaPlus />}
+        </button>
+        {edit && (
+          <button
+            type="button"
+            onClick={() => {
+              clearForm();
+            }}
+            className="btn secondary"
+          >
+            <IoClose />
+          </button>
+        )}
+      </div>
+    </form>
   );
 };

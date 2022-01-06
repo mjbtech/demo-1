@@ -160,10 +160,13 @@
       display: grid;
       align-items: center;
       grid-gap: 0.5rem;
+      .btns {
+        grid-column: -1/-2;
+      }
     }
     tr,
     form {
-      grid-template-columns: 10rem 15rem 15rem 3rem 3rem;
+      grid-template-columns: 15rem 15rem 3rem 3rem;
     }
   }
   .users {
@@ -171,10 +174,13 @@
       display: grid;
       align-items: center;
       grid-gap: 0.5rem;
+      .btns {
+        grid-column: -1/-2;
+      }
     }
     tr,
     form {
-      grid-template-columns: 12rem 8rem 10rem 8rem 10rem 15rem 10rem 10rem 3rem;
+      grid-template-columns: 12rem 5rem 8rem 8rem 10rem 15rem 10rem 10rem 10rem 3rem;
     }
     tr {
       .moreRoles {
@@ -240,6 +246,24 @@
     display: flex;
     grid-gap: 0.5rem;
     justify-content: center;
+  }
+  .departments {
+    max-width: 25rem;
+    tr {
+      .inlineForm {
+        grid-column: 1/-1;
+        form {
+          grid-template-columns: 1fr max-content;
+          display: grid;
+          align-items: center;
+          grid-gap: 0.5rem;
+          .btns {
+            grid-column: -1/-2;
+            justify-content: flex-end;
+          }
+        }
+      }
+    }
   }
 }
 
