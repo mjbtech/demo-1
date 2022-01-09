@@ -6,7 +6,7 @@ import { RiCloseLine } from "react-icons/ri";
 import { IoClose } from "react-icons/io5";
 import { Box } from "../incidentReport";
 import {
-  Form,
+  Textarea,
   Input,
   Checkbox,
   Table,
@@ -344,60 +344,202 @@ const SubCategoryForm = ({
   clearForm,
   subCategorys,
 }) => {
-  const { handleSubmit, register, reset, watch } = useForm({ ...edit });
+  const { handleSubmit, register, reset, watch, setValue } = useForm({
+    ...edit,
+  });
+  const [showReportableForm, setShowReportableForm] = useState(false);
+  const reportable = watch("reportable");
+  useEffect(() => {
+    if (reportable) {
+      setShowReportableForm(true);
+    }
+  }, [reportable]);
   useEffect(() => {
     reset({ ...edit });
   }, [edit]);
   return (
-    <form
-      onSubmit={handleSubmit((data) => {
-        if (
-          !edit &&
-          subCategorys?.some(
-            (item) =>
-              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
-          )
-        ) {
-          Prompt({
-            type: "information",
-            message: `${data.name} already exists.`,
-          });
-          return;
-        }
-        fetch(`${process.env.REACT_APP_HOST}/subCategory`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, category: { id: categoryId } }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.name) {
-              onSuccess(data);
-              reset();
-            }
+    <>
+      <form
+        onSubmit={handleSubmit((data) => {
+          if (
+            !edit &&
+            subCategorys?.some(
+              (item) =>
+                item.name.trim().toLowerCase() ===
+                data.name.trim().toLowerCase()
+            )
+          ) {
+            Prompt({
+              type: "information",
+              message: `${data.name} already exists.`,
+            });
+            return;
+          }
+          fetch(`${process.env.REACT_APP_HOST}/subCategory`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...data, category: { id: categoryId } }),
           })
-          .catch((err) => {
-            console.log(err);
-          });
-      })}
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.name) {
+                onSuccess(data);
+                reset();
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        })}
+      >
+        <Input
+          register={register}
+          required={true}
+          name="name"
+          placeholder="Enter"
+        />
+        <Input
+          register={register}
+          type="number"
+          required={true}
+          name="template"
+          placeholder="Enter"
+          // icon={<BiSearch />}
+        />
+        <Checkbox register={register} name="sentinel" />
+        <Checkbox register={register} name="reportable" />
+        <Toggle
+          register={register}
+          name="status"
+          required={true}
+          watch={watch}
+        />
+        <div className={s.btns}>
+          <button className="btn secondary">
+            {edit ? <FaCheck /> : <FaPlus />}
+          </button>
+          {edit && (
+            <button
+              type="button"
+              onClick={() => {
+                reset();
+                clearForm();
+              }}
+              className="btn secondary"
+            >
+              <IoClose />
+            </button>
+          )}
+        </div>
+      </form>
+      <Modal
+        open={showReportableForm}
+        head={true}
+        setOpen={() => {
+          setShowReportableForm(false);
+          setValue("reportable", false);
+        }}
+        label="REPORTABLE EVENT"
+        className={s.reportableForm}
+      >
+        <div className={s.content}>
+          <ReportableForm />
+        </div>
+      </Modal>
+    </>
+  );
+};
+const ReportableForm = ({}) => {
+  const [reportables, setReportabels] = useState([
+    {
+      id: "1",
+      reportTo: "Minitstry of health",
+      instructions: "report within 48 hours",
+    },
+  ]);
+  const [edit, setEdit] = useState(null);
+  useEffect(() => {}, []);
+  return (
+    <Table
+      columns={[
+        { label: "Report to" },
+        { label: "Reporting instructions" },
+        { label: "Action" },
+      ]}
     >
-      <Input
-        register={register}
-        required={true}
-        name="name"
-        placeholder="Enter"
-      />
-      <Input
-        register={register}
-        type="number"
-        required={true}
-        name="template"
-        placeholder="Enter"
-        // icon={<BiSearch />}
-      />
-      <Checkbox register={register} name="sentinel" />
-      <Checkbox register={register} name="reportable" />
-      <Toggle register={register} name="status" required={true} watch={watch} />
+      <tr>
+        <td className={s.inlineForm}>
+          <ReportableInlineForm
+            {...(edit && { edit })}
+            key={edit ? "edit" : "add"}
+            onSuccess={(newCat) => {
+              setReportabels((prev) => {
+                return prev.find((c) => c.id === newCat.id)
+                  ? prev.map((c) => (c.id === newCat.id ? newCat : c))
+                  : [...prev, newCat];
+              });
+              setEdit(null);
+            }}
+            clearForm={() => {
+              setEdit(null);
+            }}
+            reportables={reportables}
+          />
+        </td>
+      </tr>
+      {reportables.map((item) => (
+        <tr key={item.id}>
+          <td>{item.reportTo}</td>
+          <td>{item.instructions}</td>
+          <TableActions
+            actions={[
+              {
+                icon: <BsPencilFill />,
+                label: "Edit",
+                callBack: () => setEdit(item),
+              },
+              {
+                icon: <FaRegTrashAlt />,
+                label: "Delete",
+                callBack: () =>
+                  Prompt({
+                    type: "confirmation",
+                    message: `Are you sure you want to remove ${item.name}?`,
+                    callback: () => {
+                      fetch(
+                        `${process.env.REACT_APP_HOST}/reportable/${item.id}`,
+                        { method: "DELETE" }
+                      ).then((res) => {
+                        if (res.status === 204) {
+                          setReportabels((prev) =>
+                            prev.filter((c) => c.id !== item.id)
+                          );
+                        } else if (res.status === 409) {
+                          Prompt({
+                            type: "error",
+                            message: "Remove children to delete this master.",
+                          });
+                        }
+                      });
+                    },
+                  }),
+              },
+            ]}
+          />
+        </tr>
+      ))}
+    </Table>
+  );
+};
+const ReportableInlineForm = ({ edit, onSuccess, clearForm }) => {
+  const { handleSubmit, register, reset } = useForm({ ...edit });
+  useEffect(() => {
+    reset({ ...edit });
+  }, [edit]);
+  return (
+    <form>
+      <Input name="reportTo" register={register} />
+      <Textarea name="instructions" register={register} />
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}
@@ -406,7 +548,6 @@ const SubCategoryForm = ({
           <button
             type="button"
             onClick={() => {
-              reset();
               clearForm();
             }}
             className="btn secondary"

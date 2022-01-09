@@ -13,6 +13,8 @@ export const Modal = forwardRef(
       onBackdropClick,
       backdropClass,
       style,
+      head,
+      label,
     },
     ref
   ) => {
@@ -20,6 +22,7 @@ export const Modal = forwardRef(
       return createPortal(
         <>
           <div
+            data-testid="modal"
             className={`modalBackdrop ${backdropClass || ""}`}
             onClick={(e) => {
               e.stopPropagation();
@@ -31,10 +34,22 @@ export const Modal = forwardRef(
             ref={ref}
             className={`modal ${className || ""}`}
           >
+            {head && (
+              <div className="head">
+                {label}{" "}
+                <button
+                  className="btn clear"
+                  type="button"
+                  onClick={() => setOpen(false)}
+                >
+                  <IoClose />
+                </button>
+              </div>
+            )}
             {children}
           </div>
         </>,
-        document.querySelector("#portal")
+        document.querySelector("#portal") || document.createElement("div")
       );
     }
     return null;
@@ -52,7 +67,7 @@ export const Prompt = ({ className, type, message, btns, callback }) => {
   ReactDOM.render(
     <>
       <div className={`promptBackdrop`} />
-      <div className={`prompt ${className || ""}`}>
+      <div data-testid="prompt" className={`prompt ${className || ""}`}>
         <div className="content">
           <button className="clear close" onClick={decline}>
             <IoClose />
@@ -115,6 +130,6 @@ export const Prompt = ({ className, type, message, btns, callback }) => {
         </div>
       </div>
     </>,
-    document.querySelector("#prompt")
+    document.querySelector("#prompt") || document.createElement("div")
   );
 };

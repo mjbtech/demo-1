@@ -182,7 +182,6 @@ const LocationForm = ({
         name="name"
         register={register}
         placeholder="Enter"
-        icon={<BiSearch />}
       />
       <Combobox
         name="locationType"

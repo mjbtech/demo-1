@@ -13,28 +13,40 @@ import {
   TableActions,
   Toggle,
   Moment,
+  moment,
 } from "../elements";
 import { useForm } from "react-hook-form";
 import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
 export default function UserMaster() {
+  const [parameters, setParameters] = useState(null);
   const [users, setUsers] = useState([]);
   const [edit, setEdit] = useState(null);
-  const [departments, setDepartments] = useState([]);
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_HOST}/department`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data._embedded.department) {
-          setDepartments(
-            data._embedded.department.map((d) => ({
-              value: d.id,
-              label: d.name,
-            }))
-          );
-          return fetch(`${process.env.REACT_APP_HOST}/user`);
-        }
+    Promise.all([
+      fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/7`).then((res) =>
+        res.json()
+      ),
+      fetch(`${process.env.REACT_APP_HOST}/department`).then((res) =>
+        res.json()
+      ),
+    ])
+      .then(([genders, departments]) => {
+        const _parameters = {
+          genders: genders?.twoFieldMasterDetails
+            .filter((i) => i.showToggle)
+            .map(({ id, name }) => ({
+              value: id,
+              label: name,
+            })),
+          departments: departments._embedded.department.map(({ id, name }) => ({
+            value: id,
+            label: name,
+          })),
+        };
+        setParameters(_parameters);
+        return fetch(`${process.env.REACT_APP_HOST}/user`);
       })
       .then((res) => res.json())
       .then((data) => {
@@ -71,7 +83,7 @@ export default function UserMaster() {
               <UserForm
                 {...(edit && { edit })}
                 key={edit ? "edit" : "add"}
-                departments={departments}
+                departments={parameters?.departments}
                 onSuccess={(newUser) => {
                   setUsers((prev) => {
                     return prev.find((c) => c.id === newUser.id)
@@ -90,7 +102,10 @@ export default function UserMaster() {
           {users.map((user, i) => (
             <tr key={i}>
               <td>{user.name}</td>
-              <td>{user.gender}</td>
+              <td>
+                {parameters?.genders.find((u) => u.value === user.gender)
+                  ?.label || user.gender}
+              </td>
               <td>
                 <Moment format="DD/MM/YYYY">{user.dob}</Moment>
               </td>
@@ -99,8 +114,9 @@ export default function UserMaster() {
               <td>{user.email}</td>
               <td>•••••••</td>
               <td>
-                {departments.find((u) => u.value === user.department)?.label ||
-                  user.department}
+                {parameters?.departments.find(
+                  (u) => u.value === user.department
+                )?.label || user.department}
               </td>
               <td>{user.role}</td>
               <TableActions
@@ -145,9 +161,15 @@ export default function UserMaster() {
 const UserForm = ({ edit, onSuccess, clearForm, departments, users }) => {
   const { handleSubmit, register, reset, watch, setValue } = useForm({
     ...edit,
+    ...(edit?.dob && { dob: moment({ time: edit.dob, format: "YYYY-MM-DD" }) }),
   });
   useEffect(() => {
-    reset({ ...edit });
+    reset({
+      ...edit,
+      ...(edit?.dob && {
+        dob: moment({ time: edit.dob, format: "YYYY-MM-DD" }),
+      }),
+    });
   }, [edit]);
   return (
     <form
@@ -161,12 +183,17 @@ const UserForm = ({ edit, onSuccess, clearForm, departments, users }) => {
           users?.some(
             (item) =>
               item.email.trim().toLowerCase() ===
-              data.email.trim().toLowerCase()
+                data.email.trim().toLowerCase() ||
+              item.contact.trim().toLowerCase() ===
+                data.contact.trim().toLowerCase() ||
+              item.employeeId.trim().toLowerCase() ===
+                data.employeeId.trim().toLowerCase() ||
+              item.name.trim().toLowerCase() === data.name.trim().toLowerCase()
           )
         ) {
           Prompt({
             type: "information",
-            message: `${data.email} already exists.`,
+            message: `User already exists. Please use different name, employeeId, contact email.`,
           });
           return;
         }
@@ -225,6 +252,7 @@ const UserForm = ({ edit, onSuccess, clearForm, departments, users }) => {
         register={register}
         required={true}
         name="email"
+        type="email"
         placeholder="Enter"
       />
       <Input

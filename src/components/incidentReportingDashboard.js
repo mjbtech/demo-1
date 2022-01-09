@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
-import { FaInfoCircle, FaRegTrashAlt, FaPlus } from "react-icons/fa";
+import { FaInfoCircle, FaRegTrashAlt, FaPlus, FaRegEye } from "react-icons/fa";
 import { BiSearch } from "react-icons/bi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { WiTime9 } from "react-icons/wi";
@@ -79,6 +79,15 @@ const MyDashboard = ({}) => {
     },
   ]);
   const [filters, setFilters] = useState({});
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_HOST}/IncidentReport`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data._embedded?.IncidentReport) {
+          setIncidents(data._embedded.IncidentReport);
+        }
+      });
+  }, []);
   return (
     <div className={s.myDashboard}>
       <div className={s.reportCounts}>
@@ -112,7 +121,6 @@ const MyDashboard = ({}) => {
       <Filters onSubmit={(values) => setFilters(values)} />
       <Table
         columns={[
-          { label: "IR Code" },
           { label: "Reporting Date & Time" },
           { label: "Incident Date & Time" },
           { label: "Incident Location" },
@@ -128,17 +136,18 @@ const MyDashboard = ({}) => {
       >
         {incidents.map((inc) => (
           <tr key={inc.id}>
-            <td>{inc.code}</td>
             <td>
-              <Moment format="DD/MM/YYYY hh:mm">{inc.reportedAt}</Moment>
+              <Moment format="DD/MM/YYYY hh:mm">{inc.reportingDate}</Moment>
             </td>
             <td>
-              <Moment format="DD/MM/YYYY hh:mm">{inc.incidentTime}</Moment>
+              <Moment format="DD/MM/YYYY hh:mm">
+                {inc.incident_Date_Time}
+              </Moment>
             </td>
             <td>{inc.location}</td>
-            <td>{inc.category}</td>
-            <td>{inc.subCategory}</td>
-            <td>{inc.incidentType}</td>
+            <td>{inc.inciCateg}</td>
+            <td>{inc.inciSubCat}</td>
+            <td>{inc.typeofInci}</td>
             <td>{inc.reportedBy}</td>
             <td>{inc.irInvestigator}</td>
             <td>{inc.status}</td>
@@ -146,48 +155,8 @@ const MyDashboard = ({}) => {
             <TableActions
               actions={[
                 {
-                  icon: <BsPencilFill />,
+                  icon: <FaRegEye />,
                   label: "Review IR",
-                  callBack: () => {},
-                },
-                {
-                  icon: <FaRegTrashAlt />,
-                  label: "Reportable Incident",
-                  callBack: () => {},
-                },
-                {
-                  icon: <FaRegTrashAlt />,
-                  label: "IR Approval",
-                  callBack: () => {},
-                },
-                {
-                  icon: <FaRegTrashAlt />,
-                  label: "IR Combine",
-                  callBack: () => {},
-                },
-                {
-                  icon: <FaRegTrashAlt />,
-                  label: "Assign IR",
-                  callBack: () => {},
-                },
-                {
-                  icon: <FaRegTrashAlt />,
-                  label: "IR Investigation",
-                  callBack: () => {},
-                },
-                {
-                  icon: <FaRegTrashAlt />,
-                  label: "CAPA",
-                  callBack: () => {},
-                },
-                {
-                  icon: <FaRegTrashAlt />,
-                  label: "IR Closure",
-                  callBack: () => {},
-                },
-                {
-                  icon: <FaRegTrashAlt />,
-                  label: "Cancel IR",
                   callBack: () => {},
                 },
               ]}

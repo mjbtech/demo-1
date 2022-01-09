@@ -7,28 +7,6 @@ import { useForm } from "react-hook-form";
 import { Modal } from "./modal";
 import s from "./elements.module.scss";
 
-export const Form = ({ defaultValues, children, onSubmit }) => {
-  const { handleSubmit, register, watch, setValue, getValues } = useForm({
-    defaultValues,
-  });
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      {React.Children.map(children, (child) => {
-        return child.props.name
-          ? React.createElement(child.type, {
-              ...child.props,
-              register: register,
-              watch: watch,
-              key: child.props.name,
-              getValues: getValues,
-              setValue: setValue,
-            })
-          : child;
-      })}
-    </form>
-  );
-};
-
 export const Input = ({
   register = () => {},
   label,
@@ -134,7 +112,7 @@ export const Radio = ({
   required,
 }) => {
   return (
-    <section className={s.radio}>
+    <section className={s.radio} data-testid="radioInput">
       {options.map(({ label, value: v, hint, disabled }) => (
         <label key={v} htmlFor={v} className={disabled ? s.disabled : ""}>
           <input
@@ -169,7 +147,7 @@ export const CustomRadio = ({
     setValue?.(name, selected);
   }, [selected]);
   return (
-    <section className={s.customRadio}>
+    <section className={s.customRadio} data-testid="customRadioInput">
       {label && <label>{label}</label>}
       <input {...register?.(name)} required={required} />
       <div className={s.options}>
@@ -203,8 +181,8 @@ export const CustomRadio = ({
 export const SwitchInput = ({
   register = () => {},
   name,
-  setValue,
-  watch,
+  setValue = () => {},
+  watch = () => {},
   label,
   readOnly,
   defaultValue,
@@ -271,6 +249,7 @@ export const Toggle = ({
   }
   return (
     <section
+      data-testid="toggleInput"
       className={`${s.toggle} ${watching && watching[0] ? s.on : ""}`}
       onClick={(e) => {
         e.target.querySelector("label")?.click();
@@ -354,6 +333,12 @@ export const Combobox = ({
           data-testid="combobox-input"
           {...register(name)}
           required={required}
+          readOnly={true}
+          onKeyPress={(e) => {
+            if (e.charCode === 32) {
+              setOpen(!open);
+            }
+          }}
         />
         <span data-testid="combobox-btn" className={s.btn}>
           <FaSortDown />
@@ -418,7 +403,7 @@ export const Combobox = ({
 export const Checkbox = ({ register, name, label, required }) => {
   const id = useRef(Math.random().toString(36).substr(-8));
   return (
-    <section className={s.checkbox}>
+    <section className={s.checkbox} data-testid="checkbox-input">
       <input {...register(name)} id={id} required={required} type="checkbox" />
       {label && <label htmlFor={label}>{label}</label>}
     </section>
@@ -428,7 +413,7 @@ export const Checkbox = ({ register, name, label, required }) => {
 export const Tabs = ({ tabs, className }) => {
   const location = useLocation();
   return (
-    <div className={`${s.tabs} ${s[className]}`}>
+    <div className={`${s.tabs} ${s[className]}`} data-testid="tabs">
       {tabs.map(({ path, label }) => (
         <Link
           key={path}
@@ -482,7 +467,7 @@ export const TableActions = ({ actions }) => {
     }
   }, [open]);
   return actions.length < 4 ? (
-    <td className={s.tableActions}>
+    <td className={s.tableActions} data-testid="tableActions">
       {actions.map((action) => (
         <button key={action.label} className="clear" onClick={action.callBack}>
           {action.icon}
@@ -559,7 +544,11 @@ export const moment = ({ time, format }) => {
     .replace(/d+/g, values.weekday);
 };
 export const Moment = ({ format, children, ...rest }) => {
-  return <time {...rest}>{moment({ time: children, format })}</time>;
+  return (
+    <time {...rest} data-testid="moment">
+      {moment({ time: children, format })}
+    </time>
+  );
 };
 
 export const Chip = ({ label, remove }) => {
@@ -567,6 +556,7 @@ export const Chip = ({ label, remove }) => {
     <span className={s.chip}>
       {label}{" "}
       <button
+        type="button"
         onClick={() => {
           remove?.();
         }}

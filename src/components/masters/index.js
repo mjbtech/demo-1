@@ -21,6 +21,7 @@ export default function Masters() {
       <Route path="/twoFieldMaster" element={<TwoFieldMaster />} />
       <Route path="/contributingFactor" element={<ContributingFactor />} />
       <Route path="/rca" element={<Rca />} />
+      <Route path="/*" element={<h4 data-testid="masters">404</h4>} />
     </Routes>
   );
 }

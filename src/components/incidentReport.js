@@ -23,7 +23,7 @@ export const ConnectForm = ({ children }) => {
   const methods = useFormContext();
   return children({ ...methods });
 };
-function IncidentReporting() {
+export default function IncidentReporting() {
   const methods = useForm();
   const [departments, setDepartments] = useState(["Pharmacy", "Nursing"]);
   const [preventability, setPreventability] = useState("Not assessed");
@@ -49,7 +49,7 @@ function IncidentReporting() {
     },
   ]);
   return (
-    <div className={s.container}>
+    <div className={s.container} data-testid="incidentReportingForm">
       <header>
         <h3>REPORT AN INCIDENT</h3>
         <span className={s.note}>
@@ -118,8 +118,17 @@ function IncidentReporting() {
                 label="Patient name / UHID"
                 icon={<BiSearch />}
               />
-              <Input label="Complient Date & Time" type="datetime-local" />
-              <Input label="Complient ID" />
+              <Input
+                name="complientDate"
+                register={methods.register}
+                label="Complient Date & Time"
+                type="datetime-local"
+              />
+              <Input
+                name="comlientId"
+                register={methods.register}
+                label="Complient ID"
+              />
             </div>
           </Box>
           <Box label="TYPE OF INCIDENT" collapsable={true}>
@@ -280,8 +289,9 @@ function IncidentReporting() {
               />
               <section className={s.departments}>
                 <Input
+                  name="deptInvolved"
+                  register={methods.register}
                   label="Department Involved"
-                  defaultValue={""}
                   icon={<BiSearch />}
                   className={s.search}
                 />
@@ -478,7 +488,7 @@ function IncidentReporting() {
     </div>
   );
 }
-const IncidentCategory = () => {
+export const IncidentCategory = () => {
   const [categories, setCategories] = useState([]);
   useEffect(() => {
     fetch(`${process.env.REACT_APP_HOST}/category`)
@@ -497,7 +507,10 @@ const IncidentCategory = () => {
       {({ register, setValue, watch }) => {
         const cat = watch("inciCateg");
         return (
-          <div className={s.incidentCategory}>
+          <div
+            className={s.incidentCategory}
+            data-testid="incident-category-form"
+          >
             <div className={s.form}>
               <Combobox
                 required={true}
@@ -546,7 +559,7 @@ const IncidentCategory = () => {
 export const Box = ({ label, children, className, collapsable }) => {
   const [open, setOpen] = useState(true);
   return (
-    <div className={s.box}>
+    <div className={s.box} data-testid="box">
       <div className={s.head}>
         <h4>{label}</h4>
         {collapsable && (
@@ -564,5 +577,3 @@ export const Box = ({ label, children, className, collapsable }) => {
     </div>
   );
 };
-
-export default IncidentReporting;

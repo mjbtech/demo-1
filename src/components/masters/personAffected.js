@@ -3,6 +3,7 @@ import { FaInfoCircle, FaPlus, FaCheck, FaRegTrashAlt } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
 import { RiCloseLine } from "react-icons/ri";
+import { IoIosClose } from "react-icons/io";
 import { IoClose } from "react-icons/io5";
 import { Box } from "../incidentReport";
 import {
@@ -139,9 +140,33 @@ export default function PersonAffected() {
           />
         )}
       </div>
+      <InjuryAnnotation />
     </div>
   );
 }
+const InjuryAnnotation = () => {
+  const [templates, setTemplates] = useState([
+    { name: "Legs" },
+    { name: "Front and back" },
+  ]);
+  return (
+    <div className={s.annotationTemplate}>
+      <h4>Select Injury Annotation Template</h4>
+      <div className={s.form}>
+        <Input placeholder="Search" icon={<BiSearch />} />
+        {templates.map((temp) => (
+          <span className={s.chip}>
+            {temp.name}{" "}
+            <button className="clear">
+              <IoIosClose />
+            </button>
+          </span>
+        ))}
+      </div>
+      <button className={`btn w-100 ${s.save}`}>Save</button>
+    </div>
+  );
+};
 const PersonAffectedForm = ({
   edit,
   onSuccess,

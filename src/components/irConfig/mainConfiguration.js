@@ -13,7 +13,6 @@ import { Box } from "../incidentReport";
 import { TiTick } from "react-icons/ti";
 import { IoIosClose } from "react-icons/io";
 import {
-  Form,
   Input,
   CustomRadio,
   Combobox,
@@ -173,7 +172,7 @@ export default function MainConfig() {
             <tr key={i}>
               <td>{scr.option}</td>
               <td>
-                <Toggle defaultValues={scr.status} />
+                <Toggle readOnly={true} defaultValues={scr.status} />
               </td>
               <td>{scr.rules}</td>
             </tr>
@@ -688,8 +687,7 @@ export default function MainConfig() {
 }
 const NotifyForm = ({ edit, onChange }) => {
   return (
-    <Form
-      defaultValues={edit}
+    <form
       onSubmit={(data) => {
         console.log(data);
       }}
@@ -702,6 +700,6 @@ const NotifyForm = ({ edit, onChange }) => {
       <button className="btn secondary">
         <FaPlus />
       </button>
-    </Form>
+    </form>
   );
 };

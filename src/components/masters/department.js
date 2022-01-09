@@ -153,7 +153,6 @@ const DepartmentForm = ({ edit, onSuccess, clearForm, departments }) => {
         name="name"
         required={true}
         placeholder="Enter"
-        icon={<BiSearch />}
       />
       {
         //   <Input

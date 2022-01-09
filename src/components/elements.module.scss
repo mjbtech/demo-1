@@ -326,6 +326,13 @@
       }
     }
   }
+  &:focus-within {
+    .field {
+      p {
+        border-color: #3450a3;
+      }
+    }
+  }
 }
 .checkbox {
   display: flex;

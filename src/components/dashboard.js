@@ -19,7 +19,7 @@ import Masters from "./masters/index";
 import IrConfig from "./irConfig/index";
 import s from "./dashboard.module.scss";
 
-const Accordion = ({ label, basePath, items, className }) => {
+export const Accordion = ({ label, basePath, items, className }) => {
   const location = useLocation();
   return (
     <li
@@ -56,7 +56,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [collaped, setCollapsed] = useState(false);
   return (
-    <div className={s.container}>
+    <div className={s.container} data-testid="dashboard">
       <div className={s.navbar}>
         <Link className={s.logo} to="/">
           <img src="/asset/logo.jpg" />

@@ -180,7 +180,7 @@
     }
     tr,
     form {
-      grid-template-columns: 12rem 5rem 8rem 8rem 10rem 15rem 10rem 10rem 10rem 3rem;
+      grid-template-columns: 12rem 5rem 10rem 8rem 10rem 15rem 10rem 10rem 10rem 3rem;
     }
     tr {
       .moreRoles {
@@ -266,7 +266,49 @@
     }
   }
 }
+.chip {
+  display: flex;
+  align-items: center;
+  grid-gap: 0.3rem;
+  border: 1px solid rgb(186, 194, 199);
+  background: rgb(246, 246, 246);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 14px;
+  width: max-content;
+  button {
+    font-size: 18px;
+    color: red !important;
+  }
+}
 
+.reportableForm {
+  width: 100%;
+  max-width: 50rem;
+  .content {
+    padding: 10px;
+    tr,
+    .inlineForm form {
+      display: grid;
+      grid-template-columns: 15rem 1fr max-content;
+      grid-gap: 0.5rem;
+    }
+    .inlineForm {
+      grid-column: 1/-1;
+      textarea {
+        min-height: 30px !important;
+        height: min-content !important;
+      }
+      form {
+        align-items: flex-start;
+        .btns {
+          display: flex;
+          grid-gap: 0.5rem;
+        }
+      }
+    }
+  }
+}
 .categoryForm {
   padding: 15px;
   display: grid;
