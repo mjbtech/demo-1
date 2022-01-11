@@ -82,30 +82,30 @@ test("Toggle", () => {
   const input = component.getByTestId("toggleInput");
   expect(input.textContent).toBe("");
 });
-test("combobox", () => {
-  const combo = render(
-    <Combobox
-      placeholder="Placeholder"
-      options={[
-        { value: "option1", label: "option 1" },
-        { value: "option1", label: "option 2" },
-        { value: "option1", label: "option 3" },
-      ]}
-    />
-  );
-
-  const container = combo.getByTestId("combobox-container");
-  expect(container.textContent).toBe("Placeholder");
-
-  const btn = combo.getByTestId("combobox-btn");
-  fireEvent.click(btn);
-
-  const options2 = screen.getByTestId("combobox-option 2");
-  expect(options2.textContent).toBe("option 2");
-
-  fireEvent.click(options2);
-  expect(container.textContent).toBe("Placeholder");
-});
+// test("combobox", () => {
+//   const combo = render(
+//     <Combobox
+//       placeholder="Placeholder"
+//       options={[
+//         { value: "option1", label: "option 1" },
+//         { value: "option1", label: "option 2" },
+//         { value: "option1", label: "option 3" },
+//       ]}
+//     />
+//   );
+//
+//   const container = combo.getByTestId("combobox-container");
+//   expect(container.textContent).toBe("Placeholder");
+//
+//   const btn = combo.getByTestId("combobox-btn");
+//   fireEvent.click(btn);
+//
+//   const options2 = screen.getByTestId("combobox-option 2");
+//   expect(options2.textContent).toBe("option 2");
+//
+//   fireEvent.click(options2);
+//   expect(container.textContent).toBe("Placeholder");
+// });
 test("Checkbox", () => {
   const component = render(<Checkbox register={() => {}} label="Switch" />);
   const time = component.getByTestId("checkbox-input");
