@@ -25,6 +25,7 @@ export const ConnectForm = ({ children }) => {
 };
 export default function IncidentReporting() {
   const methods = useForm();
+  const [parameters, setParameters] = useState(null);
   const [departments, setDepartments] = useState(["Pharmacy", "Nursing"]);
   const [preventability, setPreventability] = useState("Not assessed");
   const [actionsTaken, setActionsTaken] = useState([
@@ -48,6 +49,20 @@ export default function IncidentReporting() {
       date: "2021-12-21T10:17:12.514Z",
     },
   ]);
+  useEffect(() => {
+    Promise.all([
+      fetch(`${process.env.REACT_APP_HOST}/location`).then((res) => res.json()),
+    ]).then(([location]) => {
+      const _parameters = { ...parameters };
+      if (location?._embedded.location) {
+        _parameters.locations = location._embedded.location.map((item) => ({
+          label: item.name,
+          value: item.id,
+        }));
+      }
+      setParameters(_parameters);
+    });
+  }, []);
   return (
     <div className={s.container} data-testid="incidentReportingForm">
       <header>
@@ -87,13 +102,14 @@ export default function IncidentReporting() {
                 label="Incident Date & Time"
                 type="datetime-local"
               />
-              <Input
+              <Combobox
+                label="Location of incident"
                 name="location"
                 required={true}
-                type="number"
                 register={methods.register}
-                label="Location of incident"
-                icon={<BiSearch />}
+                setValue={methods.setValue}
+                watch={methods.watch}
+                options={parameters?.locations}
               />
               <Input
                 name="locationDetailsEntry"
@@ -103,7 +119,6 @@ export default function IncidentReporting() {
                     Location Detail <i>(if any)</i>
                   </>
                 }
-                icon={<BiSearch />}
               />
               <SwitchInput
                 name="patientYesOrNo"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { FaInfoCircle, FaPlus, FaRegTrashAlt } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { BiSearch } from "react-icons/bi";
@@ -9,8 +9,10 @@ import { Modal, Prompt } from "../modal";
 import s from "./config.module.scss";
 
 export default function UserPermission() {
+  const permissionRef = useRef(null);
   const [permissions, setPermissions] = useState([
     {
+      id: 8,
       role: "IR ADMIN",
       permissions: {
         "IR Master": false,
@@ -18,6 +20,7 @@ export default function UserPermission() {
       },
     },
     {
+      id: 9,
       role: "INCIDNET REPORTER",
       permissions: {
         "Incident Reporting": false,
@@ -31,6 +34,7 @@ export default function UserPermission() {
       },
     },
     {
+      id: 10,
       role: "IR INVESTIGATOR",
       permissions: {
         "Access to view IR's": false,
@@ -49,6 +53,7 @@ export default function UserPermission() {
       },
     },
     {
+      id: 11,
       role: "INCIDENT MANAGER",
       permissions: {
         "Approve IRs": false,
@@ -62,6 +67,7 @@ export default function UserPermission() {
       },
     },
     {
+      id: 12,
       role: "HEAD OF THE DEPARTMENT",
       permissions: {
         "Approve IR": false,
@@ -71,15 +77,22 @@ export default function UserPermission() {
     },
   ]);
   const [userPermission, setUserPermission] = useState(null);
-  useEffect(() => {
-    fetch(`${process.env.REACT_APP_HOST}/userPermission/5`)
+  const fetchUserPermissions = useCallback(() => {
+    fetch(`${process.env.REACT_APP_HOST}/userPermission`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.id) {
-          const _permission = data.permission.split(",");
-          setUserPermission({ ...data, permission: _permission });
+        if (data._embedded.userPermission) {
+          const _permissions = data._embedded.userPermission.map((item) => ({
+            ...item,
+            permission: item.permission.split(","),
+          }));
+          setUserPermission(_permissions);
+          permissionRef.current = _permissions;
         }
       });
+  }, []);
+  useEffect(() => {
+    fetchUserPermissions();
   }, []);
   return (
     <div className={s.container}>
@@ -87,35 +100,35 @@ export default function UserPermission() {
         <h3>USER MANAGEMENT</h3>
       </header>
       <div className={s.userPermission}>
-        {permissions.map(({ role, permissions }) => (
+        {permissions.map(({ id, role, permissions }) => (
           <Box label={role} key={role}>
             <Table columns={[{ label: "Permission" }]}>
               {Object.entries(permissions).map(([key, value]) => {
+                const _permission = userPermission?.find(
+                  (item) => item.id === id
+                )?.permission;
                 return (
                   <tr key={key}>
                     <td>
                       <input
+                        id={id + key}
                         type="checkbox"
-                        checked={
-                          userPermission?.permission.includes(key) || false
-                        }
+                        checked={_permission?.includes(key) || false}
                         onChange={() => {
-                          if (userPermission?.permission.includes(key)) {
-                            setUserPermission((prev) => ({
-                              ...prev,
-                              permission: prev.permission.filter(
-                                (item) => item !== key
-                              ),
-                            }));
-                          } else {
-                            setUserPermission((prev) => ({
-                              ...prev,
-                              permission: [...prev.permission, key],
-                            }));
-                          }
+                          setUserPermission((prev) =>
+                            prev.map((item) => {
+                              if (item.id !== id) return item;
+                              return {
+                                ...item,
+                                permission: _permission?.includes(key)
+                                  ? item.permission.filter((p) => p !== key)
+                                  : [...item.permission, key],
+                              };
+                            })
+                          );
                         }}
                       />{" "}
-                      {key}
+                      <label htmlFor={id + key}>{key}</label>
                     </td>
                   </tr>
                 );
@@ -128,23 +141,38 @@ export default function UserPermission() {
         <button
           className="btn w-100"
           onClick={() => {
-            fetch(`${process.env.REACT_APP_HOST}/userPermission/5`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                permission: userPermission.permission.join(","),
-                user: { id: 7 },
-              }),
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                if (data.id) {
+            const updatePending = userPermission.filter(
+              (item) =>
+                !permissionRef.current.find(
+                  (p) => JSON.stringify(p) === JSON.stringify(item)
+                )
+            );
+            if (updatePending.length > 0) {
+              Promise.all(
+                updatePending.map((item) =>
+                  fetch(
+                    `${process.env.REACT_APP_HOST}/userPermission/${item.id}`,
+                    {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        permission: item.permission.join(","),
+                      }),
+                    }
+                  ).then((res) => res.json())
+                )
+              )
+                .then((data) => {
+                  fetchUserPermissions();
                   Prompt({
                     type: "information",
                     message: "Permission has been saved.",
                   });
-                }
-              });
+                })
+                .catch((err) => {
+                  alert(err.message);
+                });
+            }
           }}
         >
           Save

@@ -21,6 +21,7 @@ export default function TwoFieldMasters() {
   const [selected, setSelected] = useState(null);
   const [twoFieldMasters, setTwoFieldMasters] = useState([]);
   const [edit, setEdit] = useState(null);
+  const [filter, setFilter] = useState(null);
   useEffect(() => {
     fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster`)
       .then((res) => res.json())
@@ -45,11 +46,13 @@ export default function TwoFieldMasters() {
           // </Box>
         }
         <div className={s.parent}>
-          {
-            //   <div className={s.head}>
-            // <Input placeholder="Quick Search" icon={<BiSearch />} />
-            // </div>
-          }
+          <div className={s.head}>
+            <Input
+              placeholder="Quick Search"
+              icon={<BiSearch />}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
           <Table columns={[{ label: "Master Name" }, { label: "Action" }]}>
             <tr className={s.filterForm}>
               <td className={s.inlineForm}>
@@ -71,59 +74,65 @@ export default function TwoFieldMasters() {
                 />
               </td>
             </tr>
-            {twoFieldMasters.map((twoFieldMaster, i) => (
-              <tr
-                key={i}
-                className={twoFieldMaster.id === selected ? s.selected : ""}
-              >
-                <td>
-                  <span
-                    className={s.twoFieldMasterName}
-                    onClick={() => setSelected(twoFieldMaster.id)}
-                  >
-                    {twoFieldMaster.name}
-                  </span>
-                </td>
-                <TableActions
-                  actions={[
-                    {
-                      icon: <BsPencilFill />,
-                      label: "Edit",
-                      callBack: () => setEdit(twoFieldMaster),
-                    },
-                    {
-                      icon: <FaRegTrashAlt />,
-                      label: "Delete",
-                      callBack: () =>
-                        Prompt({
-                          type: "confirmation",
-                          message: `Are you sure you want to remove ${twoFieldMaster.name}?`,
-                          callback: () => {
-                            fetch(
-                              `${process.env.REACT_APP_HOST}/twoFieldMaster/${twoFieldMaster.id}`,
-                              {
-                                method: "DELETE",
-                              }
-                            ).then((res) => {
-                              if (res.status === 204) {
-                                setTwoFieldMasters((prev) =>
-                                  prev.filter((c) => c.id !== twoFieldMaster.id)
-                                );
-                              } else if (res.status === 409) {
-                                Prompt({
-                                  type: "error",
-                                  message:
-                                    "Remove children to delete this master.",
-                                });
-                              }
-                            });
-                          },
-                        }),
-                    },
-                  ]}
-                />
-              </tr>
-            ))}
+            {twoFieldMasters
+              .filter((t) =>
+                !filter ? true : new RegExp(filter, "gi").test(t.name)
+              )
+              .map((twoFieldMaster, i) => (
+                <tr
+                  key={i}
+                  className={twoFieldMaster.id === selected ? s.selected : ""}
+                >
+                  <td>
+                    <span
+                      className={s.twoFieldMasterName}
+                      onClick={() => setSelected(twoFieldMaster.id)}
+                    >
+                      {twoFieldMaster.name}
+                    </span>
+                  </td>
+                  <TableActions
+                    actions={[
+                      {
+                        icon: <BsPencilFill />,
+                        label: "Edit",
+                        callBack: () => setEdit(twoFieldMaster),
+                      },
+                      {
+                        icon: <FaRegTrashAlt />,
+                        label: "Delete",
+                        callBack: () =>
+                          Prompt({
+                            type: "confirmation",
+                            message: `Are you sure you want to remove ${twoFieldMaster.name}?`,
+                            callback: () => {
+                              fetch(
+                                `${process.env.REACT_APP_HOST}/twoFieldMaster/${twoFieldMaster.id}`,
+                                {
+                                  method: "DELETE",
+                                }
+                              ).then((res) => {
+                                if (res.status === 204) {
+                                  setTwoFieldMasters((prev) =>
+                                    prev.filter(
+                                      (c) => c.id !== twoFieldMaster.id
+                                    )
+                                  );
+                                } else if (res.status === 409) {
+                                  Prompt({
+                                    type: "error",
+                                    message:
+                                      "Remove children to delete this master.",
+                                  });
+                                }
+                              });
+                            },
+                          }),
+                      },
+                    ]}
+                  />
+                </tr>
+              ))}
           </Table>
         </div>
         {twoFieldMasters.find((cat) => cat.id === selected) && (
@@ -338,7 +347,7 @@ const TwoFieldMasterDetailForm = ({
 }) => {
   const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
-    reset({ ...edit });
+    reset({ showToggle: true, ...edit });
   }, [edit]);
   return (
     <form

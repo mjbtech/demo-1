@@ -20,6 +20,7 @@ import s from "./masters.module.scss";
 export default function ContributingFactor() {
   const [selected, setSelected] = useState(null);
   const [contributingFactors, setContributingFactors] = useState([]);
+  const [filter, setFilter] = useState(null);
   const [edit, setEdit] = useState(null);
   useEffect(() => {
     fetch(`${process.env.REACT_APP_HOST}/contributingFactors`)
@@ -45,14 +46,16 @@ export default function ContributingFactor() {
           // </Box>
         }
         <div className={`${s.parent} ${s.contributingFactors}`}>
-          {
-            //   <div className={s.head}>
-            //   <Input placeholder="Quick Search" icon={<BiSearch />} />
-            // </div>
-          }
+          <div className={s.head}>
+            <Input
+              placeholder="Quick Search"
+              icon={<BiSearch />}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
           <Table
             columns={[
-              { label: "Master name" },
+              { label: "Master Name" },
               { label: "Show" },
               { label: "Action" },
             ]}
@@ -79,68 +82,72 @@ export default function ContributingFactor() {
                 />
               </td>
             </tr>
-            {contributingFactors.map((contributingFactor, i) => (
-              <tr
-                key={i}
-                className={
-                  contributingFactor.cf_id === selected ? s.selected : ""
-                }
-              >
-                <td>
-                  <span
-                    className={s.conName}
-                    onClick={() => setSelected(contributingFactor.cf_id)}
-                  >
-                    {contributingFactor.name}
-                  </span>
-                </td>
-                <td>
-                  <Toggle
-                    readOnly={true}
-                    defaultValue={contributingFactor.show}
+            {contributingFactors
+              .filter((c) =>
+                !filter ? true : new RegExp(filter, "gi").test(c.name)
+              )
+              .map((contributingFactor, i) => (
+                <tr
+                  key={i}
+                  className={
+                    contributingFactor.cf_id === selected ? s.selected : ""
+                  }
+                >
+                  <td>
+                    <span
+                      className={s.conName}
+                      onClick={() => setSelected(contributingFactor.cf_id)}
+                    >
+                      {contributingFactor.name}
+                    </span>
+                  </td>
+                  <td>
+                    <Toggle
+                      readOnly={true}
+                      defaultValue={contributingFactor.show}
+                    />
+                  </td>
+                  <TableActions
+                    actions={[
+                      {
+                        icon: <BsPencilFill />,
+                        label: "Edit",
+                        callBack: () => setEdit(contributingFactor),
+                      },
+                      {
+                        icon: <FaRegTrashAlt />,
+                        label: "Delete",
+                        callBack: () =>
+                          Prompt({
+                            type: "confirmation",
+                            message: `Are you sure you want to remove ${contributingFactor.name}?`,
+                            callback: () => {
+                              fetch(
+                                `${process.env.REACT_APP_HOST}/contributingFactors/${contributingFactor.cf_id}`,
+                                { method: "DELETE" }
+                              ).then((res) => {
+                                if (res.status === 204) {
+                                  setContributingFactors((prev) =>
+                                    prev.filter(
+                                      (con) =>
+                                        con.cf_id !== contributingFactor.cf_id
+                                    )
+                                  );
+                                } else if (res.status === 409) {
+                                  Prompt({
+                                    type: "error",
+                                    message:
+                                      "Remove children to delete this master.",
+                                  });
+                                }
+                              });
+                            },
+                          }),
+                      },
+                    ]}
                   />
-                </td>
-                <TableActions
-                  actions={[
-                    {
-                      icon: <BsPencilFill />,
-                      label: "Edit",
-                      callBack: () => setEdit(contributingFactor),
-                    },
-                    {
-                      icon: <FaRegTrashAlt />,
-                      label: "Delete",
-                      callBack: () =>
-                        Prompt({
-                          type: "confirmation",
-                          message: `Are you sure you want to remove ${contributingFactor.name}?`,
-                          callback: () => {
-                            fetch(
-                              `${process.env.REACT_APP_HOST}/contributingFactors/${contributingFactor.cf_id}`,
-                              { method: "DELETE" }
-                            ).then((res) => {
-                              if (res.status === 204) {
-                                setContributingFactors((prev) =>
-                                  prev.filter(
-                                    (con) =>
-                                      con.cf_id !== contributingFactor.cf_id
-                                  )
-                                );
-                              } else if (res.status === 409) {
-                                Prompt({
-                                  type: "error",
-                                  message:
-                                    "Remove children to delete this master.",
-                                });
-                              }
-                            });
-                          },
-                        }),
-                    },
-                  ]}
-                />
-              </tr>
-            ))}
+                </tr>
+              ))}
           </Table>
         </div>
         {contributingFactors.find((cat) => cat.cf_id === selected) && (
@@ -163,7 +170,7 @@ const ContributingFactorForm = ({
 }) => {
   const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
-    reset({ ...edit });
+    reset({ show: true, ...edit });
   }, [edit]);
   return (
     <form

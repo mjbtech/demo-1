@@ -138,11 +138,9 @@ const LocationForm = ({
   locationTypes,
   onSuccess,
 }) => {
-  const { handleSubmit, register, reset, setValue, watch } = useForm({
-    ...edit,
-  });
+  const { handleSubmit, register, reset, setValue, watch } = useForm();
   useEffect(() => {
-    reset({ ...edit });
+    reset({ status: true, ...edit });
   }, [edit]);
   return (
     <form

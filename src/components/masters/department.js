@@ -42,7 +42,7 @@ export default function Department() {
         <Table
           columns={[
             // { label: "Code" },
-            { label: "Department Name" },
+            { label: "Master Name" },
             // { label: "Location Type" },
             // { label: "Status" },
             { label: "Action" },

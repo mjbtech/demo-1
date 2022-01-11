@@ -34,6 +34,7 @@ function IncidentReportingDashboard() {
   );
 }
 const MyDashboard = ({}) => {
+  const [parameters, setParameters] = useState(null);
   const [incidents, setIncidents] = useState([
     {
       id: 1,
@@ -80,8 +81,23 @@ const MyDashboard = ({}) => {
   ]);
   const [filters, setFilters] = useState({});
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_HOST}/IncidentReport`)
-      .then((res) => res.json())
+    Promise.all([
+      fetch(`${process.env.REACT_APP_HOST}/location`).then((res) => res.json()),
+      fetch(`${process.env.REACT_APP_HOST}/category`).then((res) => res.json()),
+    ])
+      .then(([location, category]) => {
+        const _parameters = { ...parameters };
+        if (location?._embedded.location) {
+          _parameters.locations = location._embedded.location;
+        }
+        if (category?._embedded.category) {
+          _parameters.categories = category._embedded.category;
+        }
+        setParameters(_parameters);
+        return fetch(
+          `${process.env.REACT_APP_HOST}/IncidentReport`
+        ).then((res) => res.json());
+      })
       .then((data) => {
         if (data._embedded?.IncidentReport) {
           setIncidents(data._embedded.IncidentReport);
@@ -144,9 +160,20 @@ const MyDashboard = ({}) => {
                 {inc.incident_Date_Time}
               </Moment>
             </td>
-            <td>{inc.location}</td>
-            <td>{inc.inciCateg}</td>
-            <td>{inc.inciSubCat}</td>
+            <td>
+              {parameters?.locations.find((item) => item.id === inc.location)
+                ?.name || inc.location}
+            </td>
+            <td>
+              {parameters?.categories.find((item) => item.id === inc.inciCateg)
+                ?.name || inc.inciCateg}
+            </td>
+            <td>
+              {parameters?.categories
+                .find((item) => item.id === inc.inciCateg)
+                ?.subCategorys?.find((item) => item.id === inc.inciSubCat)
+                ?.name || inc.inciSubCat}
+            </td>
             <td>{inc.typeofInci}</td>
             <td>{inc.reportedBy}</td>
             <td>{inc.irInvestigator}</td>

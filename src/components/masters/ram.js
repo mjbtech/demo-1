@@ -24,7 +24,7 @@ export default function RiskAssessments() {
   const [edit, setEdit] = useState(null);
   useEffect(() => {
     Promise.all([
-      fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/1`).then((res) =>
+      fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/9`).then((res) =>
         res.json()
       ),
       fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/2`).then((res) =>
@@ -118,7 +118,7 @@ export default function RiskAssessments() {
           {risks.map((risk, i) => (
             <tr key={i}>
               <td>
-                {parameters?.["1"].find(
+                {parameters?.["9"].find(
                   (item) => item.value === risk.likelihood
                 )?.label || risk.likelihood}
               </td>
@@ -195,7 +195,7 @@ const RiskAssessmentForm = ({ edit, onSuccess, parameters, clearForm }) => {
     ...edit,
   });
   useEffect(() => {
-    reset({ ...edit });
+    reset({ status: true, ...edit });
   }, [edit]);
   return (
     <form

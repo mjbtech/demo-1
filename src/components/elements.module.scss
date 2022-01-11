@@ -24,6 +24,9 @@
     &[type="date"] {
       padding: 4px 6px;
     }
+    &:read-only {
+      background: #f5f4f4;
+    }
   }
   textarea {
     resize: vertical;
@@ -213,10 +216,11 @@
       cursor: default;
     }
     &.on {
-      background: rgb(119, 119, 119);
+      // background: rgb(119, 119, 119);
     }
   }
 }
+
 .combobox {
   cursor: pointer;
   & > label {
@@ -281,39 +285,6 @@
       background: white;
       right: 6px;
     }
-    .options {
-      z-index: 9999999999999;
-      border-radius: 0 0 4px 4px;
-      border: 1px solid #b7b7b7;
-      text-align: left;
-      position: absolute;
-      top: 30px;
-      background: white;
-      width: 100%;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
-      li {
-        font-size: 14px;
-        position: relative;
-        input {
-          cursor: pointer;
-        }
-        padding: 8px;
-        &:not(:last-child) {
-          &::after {
-            content: "";
-            display: block;
-            position: absolute;
-            background: #e8e8e8;
-            height: 1px;
-            width: 90%;
-            bottom: 0;
-          }
-        }
-        &.selected {
-          background: #e8e8e8;
-        }
-      }
-    }
   }
   &.noOptions {
     cursor: default;
@@ -334,6 +305,46 @@
     }
   }
 }
+.comboboxModal {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+  .options {
+    cursor: pointer;
+    z-index: 9999999999999;
+    border-radius: 0 0 4px 4px;
+    border: 1px solid #b7b7b7;
+    background: white;
+    width: 100%;
+    li {
+      font-size: 14px;
+      position: relative;
+      input {
+        cursor: pointer;
+      }
+      padding: 8px;
+      &:not(:last-child) {
+        &::after {
+          content: "";
+          display: block;
+          position: absolute;
+          background: #e8e8e8;
+          height: 1px;
+          width: 90%;
+          bottom: 0;
+        }
+      }
+      &.selected {
+        background: #e8e8e8;
+      }
+      &.hover {
+        background: #eeeeee !important;
+      }
+    }
+  }
+}
+.comboboxBackdrop {
+  background: rgba(0, 0, 0, 0) !important;
+}
+
 .checkbox {
   display: flex;
 }

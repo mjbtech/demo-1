@@ -1,18 +1,28 @@
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useState } from "react";
 import { SiteContext } from "../SiteContext";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Input } from "./elements";
+import { Prompt } from "./modal";
 import s from "./login.module.scss";
 
 export default function Login({}) {
   const { user, setUser } = useContext(SiteContext);
+  const [users, setUsers] = useState([]);
   const { handleSubmit, register } = useForm();
   const navigate = useNavigate();
   useEffect(() => {
     if (user) {
       navigate("/");
+      return;
     }
+    fetch(`${process.env.REACT_APP_HOST}/user`)
+      .then((res) => res.json())
+      .then((users) => {
+        if (users._embedded.user) {
+          setUsers(users._embedded.user);
+        }
+      });
   }, []);
   return (
     <div className={s.login}>
@@ -21,16 +31,30 @@ export default function Login({}) {
         <img src="/asset/logo.jpg" />
         <form
           onSubmit={handleSubmit((data) => {
-            setUser({
-              _id: Math.random().toString(36).substr(-8),
-              email: data.email,
-            });
-            navigate("/");
+            const _user = users.find(
+              (u) => u.email === data.email && u.password === data.password
+            );
+            if (_user) {
+              setUser(_user);
+              navigate("/");
+            } else {
+              Prompt({
+                type: "error",
+                message: "Invalid credentials.",
+              });
+            }
           })}
         >
           <h1>Sign In</h1>
-          <Input register={register} required={true} label="Email" />
           <Input
+            name="email"
+            register={register}
+            type="email"
+            required={true}
+            label="Email"
+          />
+          <Input
+            name="password"
             register={register}
             required={true}
             type="password"

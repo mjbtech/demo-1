@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import { IoIosClose } from "react-icons/io";
 import { FaUpload, FaSortDown } from "react-icons/fa";
 import { BsFillGearFill } from "react-icons/bs";
@@ -26,6 +32,7 @@ export const Input = ({
       {label && <label>{label}</label>}
       <input
         {...register(name || label)}
+        {...(onChange && { onChange: onChange })}
         name={name || label}
         placeholder={placeholder || "Enter"}
         type={type || "text"}
@@ -132,7 +139,7 @@ export const Radio = ({
   );
 };
 export const CustomRadio = ({
-  register,
+  register = () => {},
   name,
   watch,
   label,
@@ -149,7 +156,7 @@ export const CustomRadio = ({
   return (
     <section className={s.customRadio} data-testid="customRadioInput">
       {label && <label>{label}</label>}
-      <input {...register?.(name)} required={required} />
+      <input {...register(name)} required={required} />
       <div className={s.options}>
         {options.map(({ label, value: v, disabled }) => (
           <span
@@ -282,15 +289,24 @@ export const Combobox = ({
   const container = useRef();
   const selected = watch?.(name);
   const [open, setOpen] = useState(false);
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.path && !e.path.includes(container.current)) {
-        setOpen(false);
-      }
-    };
-    window.addEventListener("click", handler);
-    return () => window.removeEventListener("click", handler);
-  }, []);
+  const [style, setStyle] = useState({});
+  useLayoutEffect(() => {
+    const { width, height, x, y } = container.current.getBoundingClientRect();
+    const top = window.innerHeight - y;
+    setStyle({
+      position: "absolute",
+      left: x,
+      top: Math.max(
+        Math.min(
+          y + height,
+          window.innerHeight - (35 * (options?.length || 0) + 8)
+        ),
+        8
+      ),
+      width: width,
+      maxHeight: window.innerHeight - 16,
+    });
+  }, [open, options]);
   return (
     <section
       data-testid="combobox-container"
@@ -334,70 +350,165 @@ export const Combobox = ({
           {...register(name)}
           required={required}
           readOnly={true}
-          onKeyPress={(e) => {
-            if (e.charCode === 32) {
-              setOpen(!open);
+          onKeyDown={(e) => {
+            if (!open && e.keyCode === 32) {
+              setOpen(true);
             }
+            // e.preventDefault();
           }}
         />
         <span data-testid="combobox-btn" className={s.btn}>
           <FaSortDown />
         </span>
-        {open && (
-          <ul className={s.options} data-testid="combobox-options">
-            {options.map(({ label, value }, i) => (
-              <li
-                key={i}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const _selectedItem = selected?.find?.(
-                    (item) => item === value
-                  );
-                  if (_selectedItem) {
-                    setValue(
-                      name,
-                      selected.filter((item) => item !== value)
-                    );
-                  } else {
-                    if (multiple) {
-                      setValue(name, [
-                        ...(selected.filter?.((item) => item !== value) || []),
-                        value,
-                      ]);
-                    } else {
-                      setValue(name, value);
-                    }
-                  }
-
-                  if (!multiple) {
-                    setOpen(false);
-                  }
-                  onChange?.({ label, value });
-                }}
-                className={
-                  selected?.find?.((item) => item === value) ||
-                  value === selected
-                    ? s.selected
-                    : ""
-                }
-                data-testid={`combobox-${label}`}
-              >
-                {multiple && (
-                  <input
-                    type="checkbox"
-                    checked={
-                      selected?.find?.((item) => item === value) || false
-                    }
-                    readOnly={true}
-                  />
-                )}{" "}
-                {label}
-              </li>
-            ))}
-          </ul>
-        )}
+        <Modal
+          open={open}
+          className={s.comboboxModal}
+          backdropClass={s.comboboxBackdrop}
+          open={open}
+          setOpen={setOpen}
+          onBackdropClick={() => setOpen(false)}
+          style={style}
+        >
+          <ComboboxList
+            options={options}
+            setValue={setValue}
+            selected={selected}
+            multiple={multiple}
+            name={name}
+            setOpen={setOpen}
+            onChange={onChange}
+          />
+        </Modal>
       </div>
     </section>
+  );
+};
+const ComboboxList = ({
+  options,
+  selected,
+  setValue,
+  multiple,
+  name,
+  setOpen,
+  onChange = () => {},
+}) => {
+  const ul = useRef();
+  const [hover, setHover] = useState(
+    options.findIndex(({ label, value }) => {
+      return (
+        value === selected ||
+        (selected?.some && selected.some((s) => s === value))
+      );
+    })
+  );
+  const select = useCallback(
+    ({ label, value }) => {
+      const _selectedItem = selected?.find?.((item) => item === value);
+      if (_selectedItem) {
+        setValue(
+          name,
+          selected.filter((item) => item !== value)
+        );
+      } else {
+        if (multiple) {
+          setValue(name, [
+            ...(selected.filter?.((item) => item !== value) || []),
+            value,
+          ]);
+        } else {
+          setValue(name, value);
+        }
+      }
+
+      if (!multiple) {
+        setOpen(false);
+      }
+      onChange({ label, value });
+    },
+    [selected]
+  );
+  const keyDownHandler = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (e.keyCode === 27) {
+        setOpen(false);
+        return;
+      }
+      if (e.keyCode === 32 && options[hover]) {
+        select(options[hover]);
+        return;
+      }
+      if (e.keyCode === 38 || e.keyCode === 40) {
+        if (multiple) {
+        } else {
+          const index = options.findIndex(({ label, value }) => {
+            return (
+              value === selected ||
+              (selected?.some && selected.some((s) => s === value))
+            );
+          });
+          const _hover = hover !== undefined ? hover : index;
+          if (e.keyCode === 38) {
+            setHover(Math.max(_hover - 1, 0));
+          } else if (e.keyCode === 40) {
+            setHover(Math.min(_hover + 1, options.length - 1));
+          }
+
+          // if (hover > -1) {
+          //   if (index > 0 && e.keyCode === 38) {
+          //     setHover(index - 1);
+          //   } else if (index < options.length - 1 && e.keyCode === 40) {
+          //     setHover(index + 1);
+          //   }
+          // } else {
+          //   setHover((prev) => {
+          //     console.log(prev);
+          //     if (prev - 1 >= 0 && e.keyCode === 38) {
+          //       return prev - 1;
+          //     } else if (prev + 1 <= options.length - 1 && e.keyCode === 40) {
+          //       return prev + 1;
+          //     }
+          //   });
+          // }
+        }
+      }
+    },
+    [hover]
+  );
+  useEffect(() => {
+    document.addEventListener("keydown", keyDownHandler);
+    return () => {
+      document.removeEventListener("keydown", keyDownHandler);
+    };
+  }, [hover]);
+  return (
+    <ul ref={ul} className={s.options} data-testid="combobox-options">
+      {options.map(({ label, value }, i) => (
+        <li
+          key={i}
+          onClick={(e) => {
+            e.stopPropagation();
+            select({ label, value });
+          }}
+          className={`${
+            (selected?.find && selected.find((item) => item === value)) ||
+            value === selected
+              ? s.selected
+              : ""
+          } ${hover === i && s.hover}`}
+          data-testid={`combobox-${label}`}
+        >
+          {multiple && (
+            <input
+              type="checkbox"
+              checked={selected?.find?.((item) => item === value) || false}
+              readOnly={true}
+            />
+          )}
+          {label}
+        </li>
+      ))}
+    </ul>
   );
 };
 export const Checkbox = ({ register, name, label, required }) => {

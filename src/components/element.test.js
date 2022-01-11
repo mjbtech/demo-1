@@ -101,7 +101,7 @@ test("combobox", () => {
   fireEvent.click(btn);
 
   const options2 = screen.getByTestId("combobox-option 2");
-  expect(options2.textContent).toBe(" option 2");
+  expect(options2.textContent).toBe("option 2");
 
   fireEvent.click(options2);
   expect(container.textContent).toBe("Placeholder");

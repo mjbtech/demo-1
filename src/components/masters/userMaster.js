@@ -20,32 +20,36 @@ import { Modal, Prompt } from "../modal";
 import s from "./masters.module.scss";
 
 export default function UserMaster() {
-  const [parameters, setParameters] = useState(null);
+  const [parameters, setParameters] = useState({
+    genders: [
+      { label: "Male", value: "male" },
+      { label: "Female", value: "female" },
+      { label: "Other", value: "other" },
+    ],
+    role: [
+      { value: 8, label: "IR Admin" },
+      { value: 9, label: "Incident Reporter" },
+      { value: 10, label: "IR Investigative" },
+      { value: 11, label: "Incident Manager" },
+      { value: 12, label: "Head of the Department" },
+    ],
+  });
   const [users, setUsers] = useState([]);
   const [edit, setEdit] = useState(null);
   useEffect(() => {
     Promise.all([
-      fetch(`${process.env.REACT_APP_HOST}/twoFieldMaster/7`).then((res) =>
-        res.json()
-      ),
       fetch(`${process.env.REACT_APP_HOST}/department`).then((res) =>
         res.json()
       ),
     ])
-      .then(([genders, departments]) => {
+      .then(([departments]) => {
         const _parameters = {
-          genders: genders?.twoFieldMasterDetails
-            .filter((i) => i.showToggle)
-            .map(({ id, name }) => ({
-              value: id,
-              label: name,
-            })),
           departments: departments._embedded.department.map(({ id, name }) => ({
             value: id,
             label: name,
           })),
         };
-        setParameters(_parameters);
+        setParameters((prev) => ({ ...prev, ..._parameters }));
         return fetch(`${process.env.REACT_APP_HOST}/user`);
       })
       .then((res) => res.json())
@@ -96,6 +100,7 @@ export default function UserMaster() {
                   setEdit(null);
                 }}
                 users={users}
+                role={parameters.role}
               />
             </td>
           </tr>
@@ -114,11 +119,14 @@ export default function UserMaster() {
               <td>{user.email}</td>
               <td>•••••••</td>
               <td>
-                {parameters?.departments.find(
+                {parameters.departments?.find(
                   (u) => u.value === user.department
                 )?.label || user.department}
               </td>
-              <td>{user.role}</td>
+              <td>
+                {parameters.role?.find((u) => u.value === user.role)?.label ||
+                  user.role}
+              </td>
               <TableActions
                 actions={[
                   {
@@ -158,7 +166,7 @@ export default function UserMaster() {
     </div>
   );
 }
-const UserForm = ({ edit, onSuccess, clearForm, departments, users }) => {
+const UserForm = ({ edit, onSuccess, clearForm, departments, users, role }) => {
   const { handleSubmit, register, reset, watch, setValue } = useForm({
     ...edit,
     ...(edit?.dob && { dob: moment({ time: edit.dob, format: "YYYY-MM-DD" }) }),
@@ -241,12 +249,15 @@ const UserForm = ({ edit, onSuccess, clearForm, departments, users }) => {
         required={true}
         name="employeeId"
         placeholder="Enter"
+        readOnly={edit}
+        tabIndex={edit ? "0" : "1"}
       />
       <Input
         register={register}
         required={true}
         name="contact"
         placeholder="Enter"
+        readOnly={edit}
       />
       <Input
         register={register}
@@ -254,6 +265,7 @@ const UserForm = ({ edit, onSuccess, clearForm, departments, users }) => {
         name="email"
         type="email"
         placeholder="Enter"
+        readOnly={edit}
       />
       <Input
         register={register}
@@ -277,10 +289,7 @@ const UserForm = ({ edit, onSuccess, clearForm, departments, users }) => {
         name="role"
         setValue={setValue}
         watch={watch}
-        options={[
-          { value: 1, label: "IR Reporter" },
-          { value: 2, label: "IR Investigative" },
-        ]}
+        options={role}
       />
       <div className={s.btns}>
         <button className="btn secondary">

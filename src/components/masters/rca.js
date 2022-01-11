@@ -143,7 +143,7 @@ export default function Rcas() {
 const RcaForm = ({ edit, onSuccess, clearForm, rcas }) => {
   const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
-    reset({ ...edit });
+    reset({ show: true, ...edit });
   }, [edit]);
   return (
     <form

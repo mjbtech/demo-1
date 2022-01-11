@@ -21,6 +21,7 @@ import s from "./masters.module.scss";
 export default function PersonAffected() {
   const [selected, setSelected] = useState(null);
   const [personAffecteds, setPersonAffecteds] = useState([]);
+  const [filter, setFilter] = useState(null);
   const [edit, setEdit] = useState(null);
   useEffect(() => {
     fetch(`${process.env.REACT_APP_HOST}/personAffected`)
@@ -42,10 +43,17 @@ export default function PersonAffected() {
       </header>
       <div className={`${s.content} ${s.parent_child}`}>
         <div className={`${s.personAffected} ${s.parent}`}>
+          <div className={s.head}>
+            <Input
+              placeholder="Quick Search"
+              icon={<BiSearch />}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
           <Table
             columns={[
-              { label: "Master name" },
-              { label: "Show" },
+              { label: "Master Name" },
+              // { label: "Show" },
               { label: "Action" },
             ]}
           >
@@ -71,64 +79,72 @@ export default function PersonAffected() {
                 />
               </td>
             </tr>
-            {personAffecteds.map((personAffected, i) => (
-              <tr
-                key={i}
-                className={personAffected.pa_id === selected ? s.selected : ""}
-              >
-                <td>
-                  <span
-                    className={s.conName}
-                    onClick={() => setSelected(personAffected.pa_id)}
-                  >
-                    {personAffected.name}
-                  </span>
-                </td>
-                <td>
-                  <Toggle readOnly={true} defaultValue={personAffected.show} />
-                </td>
-                <TableActions
-                  actions={[
-                    {
-                      icon: <BsPencilFill />,
-                      label: "Edit",
-                      callBack: () => setEdit(personAffected),
-                    },
-                    {
-                      icon: <FaRegTrashAlt />,
-                      label: "Delete",
-                      callBack: () =>
-                        Prompt({
-                          type: "confirmation",
-                          message: `Are you sure you want to remove ${personAffected.name}?`,
-                          callback: () => {
-                            fetch(
-                              `${process.env.REACT_APP_HOST}/personAffected/${personAffected.pa_id}`,
-                              {
-                                method: "DELETE",
-                              }
-                            ).then((res) => {
-                              if (res.status === 204) {
-                                setPersonAffecteds((prev) =>
-                                  prev.filter(
-                                    (p) => p.pa_id !== personAffected.pa_id
-                                  )
-                                );
-                              } else if (res.status === 409) {
-                                Prompt({
-                                  type: "error",
-                                  message:
-                                    "Remove children to delete this master.",
-                                });
-                              }
-                            });
-                          },
-                        }),
-                    },
-                  ]}
-                />
-              </tr>
-            ))}
+            {personAffecteds
+              .filter((p) =>
+                !filter ? true : new RegExp(filter, "gi").test(p.name)
+              )
+              .map((personAffected, i) => (
+                <tr
+                  key={i}
+                  className={
+                    personAffected.pa_id === selected ? s.selected : ""
+                  }
+                >
+                  <td>
+                    <span
+                      className={s.conName}
+                      onClick={() => setSelected(personAffected.pa_id)}
+                    >
+                      {personAffected.name}
+                    </span>
+                  </td>
+                  {
+                    //   <td>
+                    //   <Toggle readOnly={true} defaultValue={personAffected.show} />
+                    // </td>
+                  }
+                  <TableActions
+                    actions={[
+                      {
+                        icon: <BsPencilFill />,
+                        label: "Edit",
+                        callBack: () => setEdit(personAffected),
+                      },
+                      {
+                        icon: <FaRegTrashAlt />,
+                        label: "Delete",
+                        callBack: () =>
+                          Prompt({
+                            type: "confirmation",
+                            message: `Are you sure you want to remove ${personAffected.name}?`,
+                            callback: () => {
+                              fetch(
+                                `${process.env.REACT_APP_HOST}/personAffected/${personAffected.pa_id}`,
+                                {
+                                  method: "DELETE",
+                                }
+                              ).then((res) => {
+                                if (res.status === 204) {
+                                  setPersonAffecteds((prev) =>
+                                    prev.filter(
+                                      (p) => p.pa_id !== personAffected.pa_id
+                                    )
+                                  );
+                                } else if (res.status === 409) {
+                                  Prompt({
+                                    type: "error",
+                                    message:
+                                      "Remove children to delete this master.",
+                                  });
+                                }
+                              });
+                            },
+                          }),
+                      },
+                    ]}
+                  />
+                </tr>
+              ))}
           </Table>
         </div>
         {personAffecteds.find((cat) => cat.pa_id === selected) && (
@@ -155,7 +171,7 @@ const InjuryAnnotation = () => {
       <div className={s.form}>
         <Input placeholder="Search" icon={<BiSearch />} />
         {templates.map((temp) => (
-          <span className={s.chip}>
+          <span key={temp.name} className={s.chip}>
             {temp.name}{" "}
             <button className="clear">
               <IoIosClose />
@@ -175,7 +191,7 @@ const PersonAffectedForm = ({
 }) => {
   const { handleSubmit, register, reset, watch } = useForm({ ...edit });
   useEffect(() => {
-    reset({ ...edit });
+    reset({ show: true, ...edit });
   }, [edit]);
   return (
     <form
@@ -211,7 +227,9 @@ const PersonAffectedForm = ({
       })}
     >
       <Input name="name" register={register} required={true} />
-      <Toggle name="show" register={register} required={true} watch={watch} />
+      {
+        // <Toggle name="show" register={register} required={true} watch={watch} />
+      }
       <div className={s.btns}>
         <button className="btn secondary">
           {edit ? <FaCheck /> : <FaPlus />}
@@ -419,11 +437,9 @@ const PersonAffectedDetailForm = ({
   clearForm,
   personAffectedDetails,
 }) => {
-  const { handleSubmit, register, reset } = useForm(edit || {});
+  const { handleSubmit, register, reset } = useForm({ ...edit });
   useEffect(() => {
-    if (edit) {
-      reset(edit);
-    }
+    reset({ ...edit });
   }, [edit]);
   return (
     <form
