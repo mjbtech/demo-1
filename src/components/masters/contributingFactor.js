@@ -238,7 +238,7 @@ const ContributingFactorDetail = ({
     <div className={s.child}>
       <div className={s.head}>
         <span className={s.contributingFactorName}>
-          Master name: <strong>{name}</strong>
+          Category: <strong>{name}</strong>
         </span>
       </div>
       <Table columns={[{ label: "Description" }, { label: "Action" }]}>

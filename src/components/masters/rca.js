@@ -208,7 +208,7 @@ const RcaCauses = ({ rca: { id, name, rcaCauses }, setRcas }) => {
     <div className={s.child}>
       <div className={s.head}>
         <span className={s.rcaName}>
-          Master name: <strong>{name}</strong>
+          Category: <strong>{name}</strong>
         </span>
       </div>
       <Table columns={[{ label: "Description" }, { label: "Action" }]}>

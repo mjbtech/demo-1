@@ -259,7 +259,7 @@ const PersonAffectedDetail = ({
     <div className={`${s.child} ${s.personAffectedDetails}`}>
       <div className={s.head}>
         <span className={s.personAffectedName}>
-          Master name: <strong>{name}</strong>
+          Category: <strong>{name}</strong>
         </span>
       </div>
       <Table columns={[{ label: "Description" }, { label: "Action" }]}>
